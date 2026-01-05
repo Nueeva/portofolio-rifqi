@@ -49,7 +49,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: "Portfolio Contact <onboarding@resend.dev>",
-        to: ["rifqiariansyah123@gmail.com"], // Must match your Resend account email in test mode
+        to: ["delivered@resend.dev"], // Must match your Resend account email in test mode
         reply_to: email,
         subject: `New Contact Form Submission from ${name}`,
         html: `
