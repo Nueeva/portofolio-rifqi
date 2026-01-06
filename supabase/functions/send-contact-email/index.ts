@@ -13,6 +13,60 @@ interface ContactRequest {
   message: string;
 }
 
+// Rate limiting configuration
+const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MAX_REQUESTS_PER_WINDOW = 5; // Max 5 emails per hour per IP
+
+// In-memory store for rate limiting (resets on cold start)
+const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+function getClientIP(req: Request): string {
+  // Try various headers for client IP
+  const forwardedFor = req.headers.get("x-forwarded-for");
+  if (forwardedFor) {
+    return forwardedFor.split(",")[0].trim();
+  }
+  const realIP = req.headers.get("x-real-ip");
+  if (realIP) {
+    return realIP;
+  }
+  const cfConnectingIP = req.headers.get("cf-connecting-ip");
+  if (cfConnectingIP) {
+    return cfConnectingIP;
+  }
+  return "unknown";
+}
+
+function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
+  const now = Date.now();
+  const record = rateLimitStore.get(ip);
+
+  // Clean up expired entries periodically
+  if (rateLimitStore.size > 1000) {
+    for (const [key, value] of rateLimitStore.entries()) {
+      if (now > value.resetTime) {
+        rateLimitStore.delete(key);
+      }
+    }
+  }
+
+  if (!record || now > record.resetTime) {
+    // First request or window expired
+    rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
+    return { allowed: true };
+  }
+
+  if (record.count >= MAX_REQUESTS_PER_WINDOW) {
+    const retryAfter = Math.ceil((record.resetTime - now) / 1000);
+    return { allowed: false, retryAfter };
+  }
+
+  // Increment count
+  record.count++;
+  rateLimitStore.set(ip, record);
+  return { allowed: true };
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -20,6 +74,28 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Check rate limit
+    const clientIP = getClientIP(req);
+    const { allowed, retryAfter } = checkRateLimit(clientIP);
+    
+    if (!allowed) {
+      console.log(`Rate limit exceeded for IP: ${clientIP}`);
+      return new Response(
+        JSON.stringify({ 
+          error: "Too many requests. Please try again later.",
+          retryAfter 
+        }),
+        {
+          status: 429,
+          headers: { 
+            "Content-Type": "application/json",
+            "Retry-After": String(retryAfter),
+            ...corsHeaders 
+          },
+        }
+      );
+    }
+
     if (!RESEND_API_KEY) {
       console.error("RESEND_API_KEY is not configured");
       return new Response(JSON.stringify({ error: "Email service not configured" }), {
