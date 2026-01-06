@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Mail, Github, Linkedin, Send, CheckCircle } from "lucide-react";
+import { useState, useRef } from "react";
+import { Mail, Github, Linkedin, Send, CheckCircle, Sparkles } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,6 +7,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+
+const contactSchema = z.object({
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
+  email: z.string().trim().email("Invalid email address").max(255, "Email is too long"),
+  message: z.string().trim().min(10, "Message must be at least 10 characters").max(2000, "Message is too long"),
+});
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -16,15 +23,55 @@ const Contact = () => {
     email: "",
     message: "",
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const formStartTime = useRef<number>(Date.now());
   const { toast } = useToast();
+
+  // Honeypot field (hidden from users, bots will fill it)
+  const [honeypot, setHoneypot] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors({});
+
+    // Anti-spam: Check honeypot
+    if (honeypot) {
+      toast({
+        title: "Message sent!",
+        description: "Thank you for reaching out.",
+      });
+      return; // Silently reject spam
+    }
+
+    // Anti-spam: Check submission time (bots submit too fast)
+    const timeTaken = Date.now() - formStartTime.current;
+    if (timeTaken < 3000) {
+      toast({
+        title: "Please slow down",
+        description: "Please take a moment to fill out the form.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate form data
+    const result = contactSchema.safeParse(formData);
+    if (!result.success) {
+      const fieldErrors: Record<string, string> = {};
+      result.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          fieldErrors[err.path[0] as string] = err.message;
+        }
+      });
+      setErrors(fieldErrors);
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const { error } = await supabase.functions.invoke("send-contact-email", {
-        body: formData,
+        body: result.data,
       });
 
       if (error) throw error;
@@ -50,10 +97,15 @@ const Contact = () => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.value,
+      [name]: value,
     }));
+    // Clear error on change
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   return (
@@ -135,21 +187,39 @@ const Contact = () => {
               <h2 className="text-xl font-semibold mb-6">Send a Message</h2>
 
               {isSubmitted ? (
-                <div className="p-8 rounded-lg bg-card border border-primary/50 text-center">
-                  <CheckCircle className="h-12 w-12 text-primary mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">Message Sent!</h3>
-                  <p className="text-muted-foreground mb-4">
+                <div className="p-8 rounded-lg bg-card border border-primary/50 text-center animate-scale-in">
+                  <div className="relative inline-block mb-4">
+                    <CheckCircle className="h-16 w-16 text-primary animate-[pulse_2s_ease-in-out_infinite]" />
+                    <Sparkles className="h-6 w-6 text-primary absolute -top-1 -right-1 animate-[bounce_1s_ease-in-out_infinite]" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2 animate-fade-in">Message Sent Successfully!</h3>
+                  <p className="text-muted-foreground mb-6 animate-fade-in">
                     Thank you for reaching out. I'll respond as soon as possible.
                   </p>
                   <Button
                     variant="outline"
-                    onClick={() => setIsSubmitted(false)}
+                    onClick={() => {
+                      setIsSubmitted(false);
+                      formStartTime.current = Date.now();
+                    }}
+                    className="animate-fade-in"
                   >
                     Send Another Message
                   </Button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* Honeypot field - hidden from users */}
+                  <input
+                    type="text"
+                    name="website"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                    className="absolute opacity-0 pointer-events-none"
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+
                   <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>
                     <Input
@@ -159,7 +229,12 @@ const Contact = () => {
                       onChange={handleChange}
                       placeholder="Your name"
                       required
+                      maxLength={100}
+                      className={errors.name ? "border-destructive" : ""}
                     />
+                    {errors.name && (
+                      <p className="text-sm text-destructive">{errors.name}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -172,7 +247,12 @@ const Contact = () => {
                       onChange={handleChange}
                       placeholder="your@email.com"
                       required
+                      maxLength={255}
+                      className={errors.email ? "border-destructive" : ""}
                     />
+                    {errors.email && (
+                      <p className="text-sm text-destructive">{errors.email}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -185,7 +265,15 @@ const Contact = () => {
                       placeholder="Your message..."
                       rows={5}
                       required
+                      maxLength={2000}
+                      className={errors.message ? "border-destructive" : ""}
                     />
+                    {errors.message && (
+                      <p className="text-sm text-destructive">{errors.message}</p>
+                    )}
+                    <p className="text-xs text-muted-foreground text-right">
+                      {formData.message.length}/2000
+                    </p>
                   </div>
 
                   <Button
@@ -194,7 +282,10 @@ const Contact = () => {
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
-                      "Sending..."
+                      <span className="flex items-center gap-2">
+                        <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        Sending...
+                      </span>
                     ) : (
                       <>
                         Send Message
