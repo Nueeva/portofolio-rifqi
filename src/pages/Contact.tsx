@@ -12,9 +12,22 @@ import { z } from "zod";
 const TURNSTILE_SITE_KEY = "0x4AAAAAACLFADmrVmL9XOiI";
 
 const contactSchema = z.object({
-  name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
-  email: z.string().trim().email("Invalid email address").max(255, "Email is too long"),
-  message: z.string().trim().min(10, "Message must be at least 10 characters").max(2000, "Message is too long"),
+  name: z.string()
+    .trim()
+    .min(2, "Nama minimal 2 karakter")
+    .max(50, "Nama maksimal 50 karakter"),
+  email: z.string()
+    .trim()
+    .min(5, "Email minimal 5 karakter")
+    .max(100, "Email maksimal 100 karakter")
+    .regex(
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      "Format email tidak valid (contoh: nama@domain.com)"
+    ),
+  message: z.string()
+    .trim()
+    .min(10, "Pesan minimal 10 karakter")
+    .max(1000, "Pesan maksimal 1000 karakter"),
 });
 
 declare global {
@@ -186,6 +199,17 @@ const Contact = () => {
     }
   };
 
+  const validateField = (name: string, value: string) => {
+    const fieldSchema = contactSchema.shape[name as keyof typeof contactSchema.shape];
+    if (!fieldSchema) return "";
+    
+    const result = fieldSchema.safeParse(value);
+    if (!result.success) {
+      return result.error.errors[0]?.message || "";
+    }
+    return "";
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -194,10 +218,10 @@ const Contact = () => {
       ...prev,
       [name]: value,
     }));
-    // Clear error on change
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
+    
+    // Real-time validation
+    const error = validateField(name, value);
+    setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
   return (
@@ -319,14 +343,22 @@ const Contact = () => {
                       name="name"
                       value={formData.name}
                       onChange={handleChange}
-                      placeholder="Your name"
+                      placeholder="Nama lengkap (2-50 karakter)"
                       required
-                      maxLength={100}
+                      minLength={2}
+                      maxLength={50}
                       className={errors.name ? "border-destructive" : ""}
                     />
-                    {errors.name && (
-                      <p className="text-sm text-destructive">{errors.name}</p>
-                    )}
+                    <div className="flex justify-between items-center">
+                      {errors.name ? (
+                        <p className="text-sm text-destructive">{errors.name}</p>
+                      ) : (
+                        <span />
+                      )}
+                      <span className={`text-xs ${formData.name.length > 50 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                        {formData.name.length}/50
+                      </span>
+                    </div>
                   </div>
 
                   <div className="space-y-2">
@@ -337,14 +369,48 @@ const Contact = () => {
                       type="email"
                       value={formData.email}
                       onChange={handleChange}
-                      placeholder="your@email.com"
+                      placeholder="nama@domain.com"
                       required
-                      maxLength={255}
+                      minLength={5}
+                      maxLength={100}
                       className={errors.email ? "border-destructive" : ""}
                     />
-                    {errors.email && (
-                      <p className="text-sm text-destructive">{errors.email}</p>
-                    )}
+                    <div className="flex justify-between items-center">
+                      {errors.email ? (
+                        <p className="text-sm text-destructive">{errors.email}</p>
+                      ) : (
+                        <span />
+                      )}
+                      <span className={`text-xs ${formData.email.length > 100 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                        {formData.email.length}/100
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="message">Message</Label>
+                    <Textarea
+                      id="message"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      placeholder="Tulis pesan Anda (10-1000 karakter)"
+                      required
+                      minLength={10}
+                      maxLength={1000}
+                      rows={5}
+                      className={errors.message ? "border-destructive" : ""}
+                    />
+                    <div className="flex justify-between items-center">
+                      {errors.message ? (
+                        <p className="text-sm text-destructive">{errors.message}</p>
+                      ) : (
+                        <span />
+                      )}
+                      <span className={`text-xs ${formData.message.length > 1000 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                        {formData.message.length}/1000
+                      </span>
+                    </div>
                   </div>
 
                   {/* Turnstile CAPTCHA */}
