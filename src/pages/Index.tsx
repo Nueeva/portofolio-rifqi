@@ -20,12 +20,15 @@ const Index = () => {
             </span>
           </div>
 
-          {/* Headline */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            Building{" "}
-            <span className="text-primary">Secure</span>{" "}
-            Digital Solutions
+          {/* Name */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
+            Hi, I'm <span className="text-primary">Rifqi Ariansyah</span>
           </h1>
+          
+          {/* Headline */}
+          <p className="text-2xl sm:text-3xl font-semibold text-muted-foreground mb-6">
+            Building <span className="text-primary">Secure</span> Digital Solutions
+          </p>
 
           {/* Tagline */}
           <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">

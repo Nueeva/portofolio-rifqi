@@ -299,7 +299,7 @@ const Contact = () => {
             </div>
 
             {/* Contact Form */}
-            <div>
+            <div className="p-6 rounded-lg bg-card border border-border">
               <h2 className="text-xl font-semibold mb-6">Send a Message</h2>
 
               {isSubmitted ? (
