@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Mail, Github, Linkedin, Send, CheckCircle, Sparkles } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -9,11 +9,29 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 
+const TURNSTILE_SITE_KEY = "0x4AAAAAACLFADmrVmL9XOiI";
+
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters").max(100, "Name is too long"),
   email: z.string().trim().email("Invalid email address").max(255, "Email is too long"),
   message: z.string().trim().min(10, "Message must be at least 10 characters").max(2000, "Message is too long"),
 });
+
+declare global {
+  interface Window {
+    turnstile: {
+      render: (container: string | HTMLElement, options: {
+        sitekey: string;
+        callback: (token: string) => void;
+        'expired-callback'?: () => void;
+        'error-callback'?: () => void;
+        theme?: 'light' | 'dark' | 'auto';
+      }) => string;
+      reset: (widgetId: string) => void;
+      remove: (widgetId: string) => void;
+    };
+  }
+}
 
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -24,11 +42,74 @@ const Contact = () => {
     message: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileError, setTurnstileError] = useState(false);
+  const turnstileWidgetId = useRef<string | null>(null);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
   const formStartTime = useRef<number>(Date.now());
   const { toast } = useToast();
 
   // Honeypot field (hidden from users, bots will fill it)
   const [honeypot, setHoneypot] = useState("");
+
+  // Load Turnstile script and render widget
+  useEffect(() => {
+    const loadTurnstile = () => {
+      if (document.querySelector('script[src*="turnstile"]')) {
+        renderWidget();
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      script.onload = renderWidget;
+      document.head.appendChild(script);
+    };
+
+    const renderWidget = () => {
+      if (!window.turnstile || !turnstileContainerRef.current) {
+        setTimeout(renderWidget, 100);
+        return;
+      }
+
+      // Clear any existing widget
+      if (turnstileWidgetId.current) {
+        try {
+          window.turnstile.remove(turnstileWidgetId.current);
+        } catch (e) {
+          // Widget might already be removed
+        }
+      }
+
+      turnstileWidgetId.current = window.turnstile.render(turnstileContainerRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token: string) => {
+          setTurnstileToken(token);
+          setTurnstileError(false);
+        },
+        'expired-callback': () => {
+          setTurnstileToken(null);
+        },
+        'error-callback': () => {
+          setTurnstileError(true);
+        },
+        theme: 'dark',
+      });
+    };
+
+    loadTurnstile();
+
+    return () => {
+      if (turnstileWidgetId.current && window.turnstile) {
+        try {
+          window.turnstile.remove(turnstileWidgetId.current);
+        } catch (e) {
+          // Widget might already be removed
+        }
+      }
+    };
+  }, [isSubmitted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,11 +148,22 @@ const Contact = () => {
       return;
     }
 
+    // Verify Turnstile token exists
+    if (!turnstileToken) {
+      setTurnstileError(true);
+      toast({
+        title: "Verification required",
+        description: "Please complete the CAPTCHA verification.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
       const { error } = await supabase.functions.invoke("send-contact-email", {
-        body: result.data,
+        body: { ...result.data, turnstileToken },
       });
 
       if (error) throw error;
@@ -255,31 +347,23 @@ const Contact = () => {
                     )}
                   </div>
 
+                  {/* Turnstile CAPTCHA */}
                   <div className="space-y-2">
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      placeholder="Your message..."
-                      rows={5}
-                      required
-                      maxLength={2000}
-                      className={errors.message ? "border-destructive" : ""}
+                    <div 
+                      ref={turnstileContainerRef} 
+                      className="flex justify-center"
                     />
-                    {errors.message && (
-                      <p className="text-sm text-destructive">{errors.message}</p>
+                    {turnstileError && (
+                      <p className="text-sm text-destructive text-center">
+                        Please complete the verification
+                      </p>
                     )}
-                    <p className="text-xs text-muted-foreground text-right">
-                      {formData.message.length}/2000
-                    </p>
                   </div>
 
                   <Button
                     type="submit"
                     className="w-full glow-primary"
-                    disabled={isSubmitting}
+                    disabled={isSubmitting || !turnstileToken}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center gap-2">

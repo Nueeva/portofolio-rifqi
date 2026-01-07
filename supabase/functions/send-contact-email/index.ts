@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const TURNSTILE_SECRET_KEY = Deno.env.get("TURNSTILE_SECRET_KEY");
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -11,6 +12,12 @@ interface ContactRequest {
   name: string;
   email: string;
   message: string;
+  turnstileToken: string;
+}
+
+interface TurnstileResponse {
+  success: boolean;
+  'error-codes'?: string[];
 }
 
 // Rate limiting configuration
@@ -104,7 +111,7 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    const { name, email, message }: ContactRequest = await req.json();
+    const { name, email, message, turnstileToken }: ContactRequest = await req.json();
 
     console.log(`Received contact form submission from ${name} (${email})`);
 
@@ -114,6 +121,51 @@ const handler = async (req: Request): Promise<Response> => {
         status: 400,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
+    }
+
+    // Verify Turnstile token
+    if (!turnstileToken) {
+      console.error("Missing Turnstile token");
+      return new Response(JSON.stringify({ error: "CAPTCHA verification required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    if (!TURNSTILE_SECRET_KEY) {
+      console.error("TURNSTILE_SECRET_KEY is not configured");
+      return new Response(JSON.stringify({ error: "CAPTCHA service not configured" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    // Verify the Turnstile token with Cloudflare
+    const turnstileVerifyResponse = await fetch(
+      "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          secret: TURNSTILE_SECRET_KEY,
+          response: turnstileToken,
+          remoteip: clientIP,
+        }),
+      }
+    );
+
+    const turnstileResult: TurnstileResponse = await turnstileVerifyResponse.json();
+    console.log("Turnstile verification result:", turnstileResult);
+
+    if (!turnstileResult.success) {
+      console.error("Turnstile verification failed:", turnstileResult['error-codes']);
+      return new Response(
+        JSON.stringify({ error: "CAPTCHA verification failed. Please try again." }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        }
+      );
     }
 
     // Send notification email using Resend REST API
