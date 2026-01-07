@@ -349,13 +349,11 @@ const Contact = () => {
                       maxLength={50}
                       className={errors.name ? "border-destructive" : ""}
                     />
-                    <div className="flex justify-between items-center">
-                      {errors.name ? (
+                    <div className="flex justify-between items-center min-h-[20px]">
+                      <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.name ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
                         <p className="text-sm text-destructive">{errors.name}</p>
-                      ) : (
-                        <span />
-                      )}
-                      <span className={`text-xs ${formData.name.length > 50 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                      </div>
+                      <span className={`text-xs transition-colors duration-200 ${formData.name.length > 50 ? 'text-destructive' : 'text-muted-foreground'}`}>
                         {formData.name.length}/50
                       </span>
                     </div>
@@ -375,13 +373,11 @@ const Contact = () => {
                       maxLength={100}
                       className={errors.email ? "border-destructive" : ""}
                     />
-                    <div className="flex justify-between items-center">
-                      {errors.email ? (
+                    <div className="flex justify-between items-center min-h-[20px]">
+                      <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.email ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
                         <p className="text-sm text-destructive">{errors.email}</p>
-                      ) : (
-                        <span />
-                      )}
-                      <span className={`text-xs ${formData.email.length > 100 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                      </div>
+                      <span className={`text-xs transition-colors duration-200 ${formData.email.length > 100 ? 'text-destructive' : 'text-muted-foreground'}`}>
                         {formData.email.length}/100
                       </span>
                     </div>
@@ -401,13 +397,11 @@ const Contact = () => {
                       rows={5}
                       className={errors.message ? "border-destructive" : ""}
                     />
-                    <div className="flex justify-between items-center">
-                      {errors.message ? (
+                    <div className="flex justify-between items-center min-h-[20px]">
+                      <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.message ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
                         <p className="text-sm text-destructive">{errors.message}</p>
-                      ) : (
-                        <span />
-                      )}
-                      <span className={`text-xs ${formData.message.length > 1000 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                      </div>
+                      <span className={`text-xs transition-colors duration-200 ${formData.message.length > 1000 ? 'text-destructive' : 'text-muted-foreground'}`}>
                         {formData.message.length}/1000
                       </span>
                     </div>
@@ -419,11 +413,11 @@ const Contact = () => {
                       ref={turnstileContainerRef} 
                       className="flex justify-center"
                     />
-                    {turnstileError && (
+                    <div className={`overflow-hidden transition-all duration-300 ease-out ${turnstileError || (!turnstileToken && formData.name && formData.email && formData.message) ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
                       <p className="text-sm text-destructive text-center">
-                        Please complete the verification
+                        {turnstileError ? "Verifikasi gagal, silakan coba lagi" : "Silakan selesaikan verifikasi CAPTCHA"}
                       </p>
-                    )}
+                    </div>
                   </div>
 
                   <Button
