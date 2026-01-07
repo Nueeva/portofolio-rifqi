@@ -10,7 +10,7 @@ export function Footer() {
           <Link to="/" className="flex items-center gap-2 text-primary">
             <Shield className="h-5 w-5" />
             <span className="font-mono font-semibold text-foreground">
-              sec<span className="text-primary">dev</span>
+              Rifqi<span className="text-primary">A</span>
             </span>
           </Link>
 
