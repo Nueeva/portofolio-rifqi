@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { ArrowRight, Shield, Lock, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 const Index = () => {
   return (
@@ -13,41 +14,51 @@ const Index = () => {
         
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border mb-8">
-            <Shield className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-muted-foreground">
-              Cybersecurity Developer
-            </span>
-          </div>
+          <ScrollReveal delay={0}>
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border mb-8">
+              <Shield className="h-4 w-4 text-primary" />
+              <span className="text-sm font-medium text-muted-foreground">
+                Cybersecurity Developer
+              </span>
+            </div>
+          </ScrollReveal>
 
           {/* Name */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
-            Hi, I'm <span className="text-primary">Rifqi Ariansyah</span>
-          </h1>
+          <ScrollReveal delay={100}>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
+              Hi, I'm <span className="text-primary">Rifqi Ariansyah</span>
+            </h1>
+          </ScrollReveal>
           
           {/* Headline */}
-          <p className="text-2xl sm:text-3xl font-semibold text-muted-foreground mb-6">
-            Building <span className="text-primary">Secure</span> Digital Solutions
-          </p>
+          <ScrollReveal delay={200}>
+            <p className="text-2xl sm:text-3xl font-semibold text-muted-foreground mb-6">
+              Building <span className="text-primary">Secure</span> Digital Solutions
+            </p>
+          </ScrollReveal>
 
           {/* Tagline */}
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-            Specializing in penetration testing, security tools development, and 
-            web application security. Identifying vulnerabilities before they become threats.
-          </p>
+          <ScrollReveal delay={300}>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
+              Specializing in penetration testing, security tools development, and 
+              web application security. Identifying vulnerabilities before they become threats.
+            </p>
+          </ScrollReveal>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button asChild size="lg" className="glow-primary">
-              <Link to="/projects">
-                View Projects
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link to="/contact">Get in Touch</Link>
-            </Button>
-          </div>
+          <ScrollReveal delay={400}>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Button asChild size="lg" className="glow-primary">
+                <Link to="/projects">
+                  View Projects
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link to="/contact">Get in Touch</Link>
+              </Button>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
@@ -56,37 +67,43 @@ const Index = () => {
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
             {/* Card 1 */}
-            <div className="relative p-6 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group">
-              <div className="line-accent" />
-              <Lock className="h-8 w-8 text-primary mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Penetration Testing</h3>
-              <p className="text-sm text-muted-foreground">
-                Identifying security weaknesses through authorized simulated attacks 
-                and comprehensive vulnerability assessments.
-              </p>
-            </div>
+            <ScrollReveal delay={0}>
+              <div className="relative p-6 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full">
+                <div className="line-accent" />
+                <Lock className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Penetration Testing</h3>
+                <p className="text-sm text-muted-foreground">
+                  Identifying security weaknesses through authorized simulated attacks 
+                  and comprehensive vulnerability assessments.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* Card 2 */}
-            <div className="relative p-6 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group">
-              <div className="line-accent" />
-              <Code className="h-8 w-8 text-primary mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Security Tools</h3>
-              <p className="text-sm text-muted-foreground">
-                Developing custom security utilities and automation scripts 
-                to streamline testing workflows and enhance detection capabilities.
-              </p>
-            </div>
+            <ScrollReveal delay={100}>
+              <div className="relative p-6 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full">
+                <div className="line-accent" />
+                <Code className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Security Tools</h3>
+                <p className="text-sm text-muted-foreground">
+                  Developing custom security utilities and automation scripts 
+                  to streamline testing workflows and enhance detection capabilities.
+                </p>
+              </div>
+            </ScrollReveal>
 
             {/* Card 3 */}
-            <div className="relative p-6 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group">
-              <div className="line-accent" />
-              <Shield className="h-8 w-8 text-primary mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Web Security</h3>
-              <p className="text-sm text-muted-foreground">
-                Securing web applications against OWASP Top 10 vulnerabilities 
-                with secure coding practices and thorough code review.
-              </p>
-            </div>
+            <ScrollReveal delay={200}>
+              <div className="relative p-6 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full">
+                <div className="line-accent" />
+                <Shield className="h-8 w-8 text-primary mb-4" />
+                <h3 className="text-lg font-semibold mb-2">Web Security</h3>
+                <p className="text-sm text-muted-foreground">
+                  Securing web applications against OWASP Top 10 vulnerabilities 
+                  with secure coding practices and thorough code review.
+                </p>
+              </div>
+            </ScrollReveal>
           </div>
         </div>
       </section>
