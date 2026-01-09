@@ -21,9 +21,17 @@ const contactSchema = z.object({
     .trim()
     .min(5, "Email minimal 5 karakter")
     .max(100, "Email maksimal 100 karakter")
-    .regex(
-      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-      "Format email tidak valid (contoh: nama@domain.com)"
+    .email("Format email tidak valid")
+    .refine(
+      (email) => {
+        // Stricter validation: no consecutive dots, valid TLD, proper structure
+        const strictEmailRegex = /^[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9._%+-]*[a-zA-Z0-9]@[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+        // Reject common typos
+        const commonTypos = ['@gmial.com', '@gmal.com', '@gamil.com', '@yaho.com', '@hotmal.com'];
+        const hasTypo = commonTypos.some(typo => email.toLowerCase().includes(typo));
+        return strictEmailRegex.test(email) && !hasTypo;
+      },
+      "Format email tidak valid (contoh: nama@gmail.com)"
     ),
   message: z.string()
     .trim()
