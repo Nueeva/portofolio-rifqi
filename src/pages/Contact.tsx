@@ -14,42 +14,38 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 const TURNSTILE_SITE_KEY = "0x4AAAAAACLFADmrVmL9XOiI";
 
 const contactSchema = z.object({
-  name: z.string()
-    .trim()
-    .min(2, "Nama minimal 2 karakter")
-    .max(50, "Nama maksimal 50 karakter"),
-  email: z.string()
+  name: z.string().trim().min(2, "Nama minimal 2 karakter").max(50, "Nama maksimal 50 karakter"),
+  email: z
+    .string()
     .trim()
     .min(5, "Email minimal 5 karakter")
     .max(100, "Email maksimal 100 karakter")
     .email("Format email tidak valid")
-    .refine(
-      (email) => {
-        // Stricter validation: no consecutive dots, valid TLD, proper structure
-        const strictEmailRegex = /^[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9._%+-]*[a-zA-Z0-9]@[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
-        // Reject common typos
-        const commonTypos = ['@gmial.com', '@gmal.com', '@gamil.com', '@yaho.com', '@hotmal.com'];
-        const hasTypo = commonTypos.some(typo => email.toLowerCase().includes(typo));
-        return strictEmailRegex.test(email) && !hasTypo;
-      },
-      "Format email tidak valid (contoh: nama@gmail.com)"
-    ),
-  message: z.string()
-    .trim()
-    .min(10, "Pesan minimal 10 karakter")
-    .max(1000, "Pesan maksimal 1000 karakter"),
+    .refine((email) => {
+      // Stricter validation: no consecutive dots, valid TLD, proper structure
+      const strictEmailRegex =
+        /^[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9._%+-]*[a-zA-Z0-9]@[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
+      // Reject common typos
+      const commonTypos = ["@gmial.com", "@gmal.com", "@gamil.com", "@yaho.com", "@hotmal.com"];
+      const hasTypo = commonTypos.some((typo) => email.toLowerCase().includes(typo));
+      return strictEmailRegex.test(email) && !hasTypo;
+    }, "Format email tidak valid (contoh: nama@gmail.com)"),
+  message: z.string().trim().min(10, "Pesan minimal 10 karakter").max(1000, "Pesan maksimal 1000 karakter"),
 });
 
 declare global {
   interface Window {
     turnstile: {
-      render: (container: string | HTMLElement, options: {
-        sitekey: string;
-        callback: (token: string) => void;
-        'expired-callback'?: () => void;
-        'error-callback'?: () => void;
-        theme?: 'light' | 'dark' | 'auto';
-      }) => string;
+      render: (
+        container: string | HTMLElement,
+        options: {
+          sitekey: string;
+          callback: (token: string) => void;
+          "expired-callback"?: () => void;
+          "error-callback"?: () => void;
+          theme?: "light" | "dark" | "auto";
+        },
+      ) => string;
       reset: (widgetId: string) => void;
       remove: (widgetId: string) => void;
     };
@@ -115,7 +111,7 @@ const Contact = () => {
       "Saya ingin mendiskusikan proyek baru...",
       "Hello, I would like to collaborate...",
     ],
-    typingSpeed: 50,
+    typingSpeed: 60,
     deletingSpeed: 25,
     pauseDuration: 2000,
   });
@@ -156,13 +152,13 @@ const Contact = () => {
           setTurnstileToken(token);
           setTurnstileError(false);
         },
-        'expired-callback': () => {
+        "expired-callback": () => {
           setTurnstileToken(null);
         },
-        'error-callback': () => {
+        "error-callback": () => {
           setTurnstileError(true);
         },
-        theme: 'dark',
+        theme: "dark",
       });
     };
 
@@ -262,7 +258,7 @@ const Contact = () => {
   const validateField = (name: string, value: string) => {
     const fieldSchema = contactSchema.shape[name as keyof typeof contactSchema.shape];
     if (!fieldSchema) return "";
-    
+
     const result = fieldSchema.safeParse(value);
     if (!result.success) {
       return result.error.errors[0]?.message || "";
@@ -276,15 +272,13 @@ const Contact = () => {
     return !validateField(name, value);
   };
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    
+
     // Real-time validation
     const error = validateField(name, value);
     setErrors((prev) => ({ ...prev, [name]: error }));
@@ -295,12 +289,12 @@ const Contact = () => {
       if (atIndex !== -1 && !value.includes(" ")) {
         const localPart = value.substring(0, atIndex);
         const domainPart = value.substring(atIndex);
-        
+
         // Filter domains that match what user is typing
         const filteredDomains = EMAIL_DOMAINS.filter((domain) =>
-          domain.toLowerCase().startsWith(domainPart.toLowerCase())
+          domain.toLowerCase().startsWith(domainPart.toLowerCase()),
         );
-        
+
         // Create full email suggestions
         const suggestions = filteredDomains.map((domain) => localPart + domain);
         setEmailSuggestions(suggestions);
@@ -318,9 +312,7 @@ const Contact = () => {
 
     if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedSuggestionIndex((prev) =>
-        prev < emailSuggestions.length - 1 ? prev + 1 : prev
-      );
+      setSelectedSuggestionIndex((prev) => (prev < emailSuggestions.length - 1 ? prev + 1 : prev));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setSelectedSuggestionIndex((prev) => (prev > 0 ? prev - 1 : -1));
@@ -340,7 +332,7 @@ const Contact = () => {
     setShowEmailSuggestions(false);
     setEmailSuggestions([]);
     setSelectedSuggestionIndex(-1);
-    
+
     // Validate the selected email
     const error = validateField("email", suggestion);
     setErrors((prev) => ({ ...prev, email: error }));
@@ -357,9 +349,8 @@ const Contact = () => {
                 Get in <span className="text-primary">Touch</span>
               </h1>
               <p className="text-muted-foreground max-w-2xl">
-                Interested in working together or have a security question? 
-                Feel free to reach out. I'm always open to discussing new projects 
-                and opportunities.
+                Interested in working together or have a security question? Feel free to reach out. I'm always open to
+                discussing new projects and opportunities.
               </p>
               <div className="w-20 h-1 bg-primary rounded-full mt-4" />
             </div>
@@ -370,7 +361,7 @@ const Contact = () => {
             <ScrollReveal delay={100}>
               <div>
                 <h2 className="text-xl font-semibold mb-6">Connect With Me</h2>
-                
+
                 <div className="space-y-4">
                   <a
                     href="mailto:contact@example.com"
@@ -382,7 +373,7 @@ const Contact = () => {
                     <div>
                       <p className="text-sm text-muted-foreground">Email</p>
                       <p className="font-medium group-hover:text-primary transition-colors">
-                        contact@example.com
+                        rifqiariansyah123@gmail.com
                       </p>
                     </div>
                   </a>
@@ -398,9 +389,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">GitHub</p>
-                      <p className="font-medium group-hover:text-primary transition-colors">
-                        github.com/username
-                      </p>
+                      <p className="font-medium group-hover:text-primary transition-colors">github.com/Nueeva</p>
                     </div>
                   </a>
 
@@ -415,9 +404,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">LinkedIn</p>
-                      <p className="font-medium group-hover:text-primary transition-colors">
-                        linkedin.com/in/username
-                      </p>
+                      <p className="font-medium group-hover:text-primary transition-colors">linkedin.com/in/rifqia</p>
                     </div>
                   </a>
                 </div>
@@ -429,203 +416,224 @@ const Contact = () => {
               <div className="p-6 rounded-lg bg-card border border-border">
                 <h2 className="text-xl font-semibold mb-6">Send a Message</h2>
 
-              {isSubmitted ? (
-                <div className="p-8 rounded-lg bg-card border border-primary/50 text-center animate-scale-in">
-                  <div className="relative inline-block mb-4">
-                    <CheckCircle className="h-16 w-16 text-primary animate-[pulse_2s_ease-in-out_infinite]" />
-                    <Sparkles className="h-6 w-6 text-primary absolute -top-1 -right-1 animate-[bounce_1s_ease-in-out_infinite]" />
+                {isSubmitted ? (
+                  <div className="p-8 rounded-lg bg-card border border-primary/50 text-center animate-scale-in">
+                    <div className="relative inline-block mb-4">
+                      <CheckCircle className="h-16 w-16 text-primary animate-[pulse_2s_ease-in-out_infinite]" />
+                      <Sparkles className="h-6 w-6 text-primary absolute -top-1 -right-1 animate-[bounce_1s_ease-in-out_infinite]" />
+                    </div>
+                    <h3 className="text-xl font-semibold mb-2 animate-fade-in">Message Sent Successfully!</h3>
+                    <p className="text-muted-foreground mb-6 animate-fade-in">
+                      Thank you for reaching out. I'll respond as soon as possible.
+                    </p>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setIsSubmitted(false);
+                        formStartTime.current = Date.now();
+                      }}
+                      className="animate-fade-in"
+                    >
+                      Send Another Message
+                    </Button>
                   </div>
-                  <h3 className="text-xl font-semibold mb-2 animate-fade-in">Message Sent Successfully!</h3>
-                  <p className="text-muted-foreground mb-6 animate-fade-in">
-                    Thank you for reaching out. I'll respond as soon as possible.
-                  </p>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsSubmitted(false);
-                      formStartTime.current = Date.now();
-                    }}
-                    className="animate-fade-in"
-                  >
-                    Send Another Message
-                  </Button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  {/* Honeypot field - hidden from users */}
-                  <input
-                    type="text"
-                    name="website"
-                    value={honeypot}
-                    onChange={(e) => setHoneypot(e.target.value)}
-                    className="absolute opacity-0 pointer-events-none"
-                    tabIndex={-1}
-                    autoComplete="off"
-                  />
-
-                  <div className="space-y-2">
-                    <Label htmlFor="name" className="flex items-center gap-2">
-                      Name
-                      <span className={`transition-all duration-300 ${isFieldValid('name') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-                        <Check className="h-4 w-4 text-green-500" />
-                      </span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        placeholder={namePlaceholder || "Nama Anda"}
-                        required
-                        minLength={2}
-                        maxLength={50}
-                        className={`pr-10 transition-all ${shakeFields.name ? "animate-shake" : ""} ${errors.name ? "border-destructive" : isFieldValid('name') ? "border-green-500" : ""}`}
-                      />
-                      <div className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ${isFieldValid('name') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-                        <Check className="h-5 w-5 text-green-500" />
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center min-h-[20px]">
-                      <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.name ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-                        <p className="text-sm text-destructive">{errors.name}</p>
-                      </div>
-                      <span className={`text-xs transition-colors duration-200 ${formData.name.length > 50 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                        {formData.name.length}/50
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="flex items-center gap-2">
-                      Email
-                      <span className={`transition-all duration-300 ${isFieldValid('email') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-                        <Check className="h-4 w-4 text-green-500" />
-                      </span>
-                    </Label>
-                    <div className="relative">
-                      <Input
-                        ref={emailInputRef}
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        onKeyDown={handleEmailKeyDown}
-                        onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 150)}
-                        onFocus={() => {
-                          if (emailSuggestions.length > 0) setShowEmailSuggestions(true);
-                        }}
-                        placeholder={emailPlaceholder || "email@domain.com"}
-                        required
-                        minLength={5}
-                        maxLength={100}
-                        autoComplete="off"
-                        className={`pr-10 transition-all ${shakeFields.email ? "animate-shake" : ""} ${errors.email ? "border-destructive" : isFieldValid('email') ? "border-green-500" : ""}`}
-                      />
-                      <div className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ${isFieldValid('email') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-                        <Check className="h-5 w-5 text-green-500" />
-                      </div>
-                      
-                      {/* Email suggestions dropdown */}
-                      {showEmailSuggestions && emailSuggestions.length > 0 && (
-                        <div className="absolute z-50 w-full mt-1 top-full left-0 bg-card border border-border rounded-md shadow-lg overflow-hidden animate-fade-in">
-                          {emailSuggestions.map((suggestion, index) => (
-                            <button
-                              key={suggestion}
-                              type="button"
-                              className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-primary/10 ${
-                                index === selectedSuggestionIndex ? "bg-primary/10 text-primary" : ""
-                              }`}
-                              onMouseDown={(e) => {
-                                e.preventDefault();
-                                selectEmailSuggestion(suggestion);
-                              }}
-                              onMouseEnter={() => setSelectedSuggestionIndex(index)}
-                            >
-                              <span className="font-medium">{suggestion.split("@")[0]}</span>
-                              <span className="text-primary">@{suggestion.split("@")[1]}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex justify-between items-center min-h-[20px]">
-                      <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.email ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-                        <p className="text-sm text-destructive">{errors.email}</p>
-                      </div>
-                      <span className={`text-xs transition-colors duration-200 ${formData.email.length > 100 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                        {formData.email.length}/100
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="message" className="flex items-center gap-2">
-                      Message
-                      <span className={`transition-all duration-300 ${isFieldValid('message') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-                        <Check className="h-4 w-4 text-green-500" />
-                      </span>
-                    </Label>
-                    <div className="relative">
-                      <Textarea
-                        id="message"
-                        name="message"
-                        value={formData.message}
-                        onChange={handleChange}
-                        placeholder={messagePlaceholder || "Tulis pesan Anda..."}
-                        required
-                        minLength={10}
-                        maxLength={1000}
-                        rows={5}
-                        className={`pr-10 transition-all ${shakeFields.message ? "animate-shake" : ""} ${errors.message ? "border-destructive" : isFieldValid('message') ? "border-green-500" : ""}`}
-                      />
-                      <div className={`absolute right-3 top-3 transition-all duration-300 ${isFieldValid('message') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
-                        <Check className="h-5 w-5 text-green-500" />
-                      </div>
-                    </div>
-                    <div className="flex justify-between items-center min-h-[20px]">
-                      <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.message ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-                        <p className="text-sm text-destructive">{errors.message}</p>
-                      </div>
-                      <span className={`text-xs transition-colors duration-200 ${formData.message.length > 1000 ? 'text-destructive' : 'text-muted-foreground'}`}>
-                        {formData.message.length}/1000
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Turnstile CAPTCHA */}
-                  <div className="space-y-2">
-                    <div 
-                      ref={turnstileContainerRef} 
-                      className="flex justify-center"
+                ) : (
+                  <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Honeypot field - hidden from users */}
+                    <input
+                      type="text"
+                      name="website"
+                      value={honeypot}
+                      onChange={(e) => setHoneypot(e.target.value)}
+                      className="absolute opacity-0 pointer-events-none"
+                      tabIndex={-1}
+                      autoComplete="off"
                     />
-                    <div className={`overflow-hidden transition-all duration-300 ease-out ${turnstileError || (!turnstileToken && formData.name && formData.email && formData.message) ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-                      <p className="text-sm text-destructive text-center">
-                        {turnstileError ? "Verifikasi gagal, silakan coba lagi" : "Silakan selesaikan verifikasi CAPTCHA"}
-                      </p>
-                    </div>
-                  </div>
 
-                  <Button
-                    type="submit"
-                    className="w-full glow-primary"
-                    disabled={isSubmitting || !turnstileToken}
-                  >
-                    {isSubmitting ? (
-                      <span className="flex items-center gap-2">
-                        <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                        Sending...
-                      </span>
-                    ) : (
-                      <>
-                        Send Message
-                        <Send className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </form>
-              )}
+                    <div className="space-y-2">
+                      <Label htmlFor="name" className="flex items-center gap-2">
+                        Name
+                        <span
+                          className={`transition-all duration-300 ${isFieldValid("name") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
+                        >
+                          <Check className="h-4 w-4 text-green-500" />
+                        </span>
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          id="name"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder={namePlaceholder || "Nama Anda"}
+                          required
+                          minLength={2}
+                          maxLength={50}
+                          className={`pr-10 transition-all ${shakeFields.name ? "animate-shake" : ""} ${errors.name ? "border-destructive" : isFieldValid("name") ? "border-green-500" : ""}`}
+                        />
+                        <div
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ${isFieldValid("name") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
+                        >
+                          <Check className="h-5 w-5 text-green-500" />
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center min-h-[20px]">
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-out ${errors.name ? "max-h-6 opacity-100" : "max-h-0 opacity-0"}`}
+                        >
+                          <p className="text-sm text-destructive">{errors.name}</p>
+                        </div>
+                        <span
+                          className={`text-xs transition-colors duration-200 ${formData.name.length > 50 ? "text-destructive" : "text-muted-foreground"}`}
+                        >
+                          {formData.name.length}/50
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email" className="flex items-center gap-2">
+                        Email
+                        <span
+                          className={`transition-all duration-300 ${isFieldValid("email") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
+                        >
+                          <Check className="h-4 w-4 text-green-500" />
+                        </span>
+                      </Label>
+                      <div className="relative">
+                        <Input
+                          ref={emailInputRef}
+                          id="email"
+                          name="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          onKeyDown={handleEmailKeyDown}
+                          onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 150)}
+                          onFocus={() => {
+                            if (emailSuggestions.length > 0) setShowEmailSuggestions(true);
+                          }}
+                          placeholder={emailPlaceholder || "email@domain.com"}
+                          required
+                          minLength={5}
+                          maxLength={100}
+                          autoComplete="off"
+                          className={`pr-10 transition-all ${shakeFields.email ? "animate-shake" : ""} ${errors.email ? "border-destructive" : isFieldValid("email") ? "border-green-500" : ""}`}
+                        />
+                        <div
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ${isFieldValid("email") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
+                        >
+                          <Check className="h-5 w-5 text-green-500" />
+                        </div>
+
+                        {/* Email suggestions dropdown */}
+                        {showEmailSuggestions && emailSuggestions.length > 0 && (
+                          <div className="absolute z-50 w-full mt-1 top-full left-0 bg-card border border-border rounded-md shadow-lg overflow-hidden animate-fade-in">
+                            {emailSuggestions.map((suggestion, index) => (
+                              <button
+                                key={suggestion}
+                                type="button"
+                                className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-primary/10 ${
+                                  index === selectedSuggestionIndex ? "bg-primary/10 text-primary" : ""
+                                }`}
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  selectEmailSuggestion(suggestion);
+                                }}
+                                onMouseEnter={() => setSelectedSuggestionIndex(index)}
+                              >
+                                <span className="font-medium">{suggestion.split("@")[0]}</span>
+                                <span className="text-primary">@{suggestion.split("@")[1]}</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <div className="flex justify-between items-center min-h-[20px]">
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-out ${errors.email ? "max-h-6 opacity-100" : "max-h-0 opacity-0"}`}
+                        >
+                          <p className="text-sm text-destructive">{errors.email}</p>
+                        </div>
+                        <span
+                          className={`text-xs transition-colors duration-200 ${formData.email.length > 100 ? "text-destructive" : "text-muted-foreground"}`}
+                        >
+                          {formData.email.length}/100
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="message" className="flex items-center gap-2">
+                        Message
+                        <span
+                          className={`transition-all duration-300 ${isFieldValid("message") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
+                        >
+                          <Check className="h-4 w-4 text-green-500" />
+                        </span>
+                      </Label>
+                      <div className="relative">
+                        <Textarea
+                          id="message"
+                          name="message"
+                          value={formData.message}
+                          onChange={handleChange}
+                          placeholder={messagePlaceholder || "Tulis pesan Anda..."}
+                          required
+                          minLength={10}
+                          maxLength={1000}
+                          rows={5}
+                          className={`pr-10 transition-all ${shakeFields.message ? "animate-shake" : ""} ${errors.message ? "border-destructive" : isFieldValid("message") ? "border-green-500" : ""}`}
+                        />
+                        <div
+                          className={`absolute right-3 top-3 transition-all duration-300 ${isFieldValid("message") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
+                        >
+                          <Check className="h-5 w-5 text-green-500" />
+                        </div>
+                      </div>
+                      <div className="flex justify-between items-center min-h-[20px]">
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-out ${errors.message ? "max-h-6 opacity-100" : "max-h-0 opacity-0"}`}
+                        >
+                          <p className="text-sm text-destructive">{errors.message}</p>
+                        </div>
+                        <span
+                          className={`text-xs transition-colors duration-200 ${formData.message.length > 1000 ? "text-destructive" : "text-muted-foreground"}`}
+                        >
+                          {formData.message.length}/1000
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Turnstile CAPTCHA */}
+                    <div className="space-y-2">
+                      <div ref={turnstileContainerRef} className="flex justify-center" />
+                      <div
+                        className={`overflow-hidden transition-all duration-300 ease-out ${turnstileError || (!turnstileToken && formData.name && formData.email && formData.message) ? "max-h-6 opacity-100" : "max-h-0 opacity-0"}`}
+                      >
+                        <p className="text-sm text-destructive text-center">
+                          {turnstileError
+                            ? "Verifikasi gagal, silakan coba lagi"
+                            : "Silakan selesaikan verifikasi CAPTCHA"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <Button type="submit" className="w-full glow-primary" disabled={isSubmitting || !turnstileToken}>
+                      {isSubmitting ? (
+                        <span className="flex items-center gap-2">
+                          <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          Sending...
+                        </span>
+                      ) : (
+                        <>
+                          Send Message
+                          <Send className="ml-2 h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                )}
               </div>
             </ScrollReveal>
           </div>
