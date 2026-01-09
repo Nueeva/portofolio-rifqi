@@ -74,9 +74,44 @@
     @apply border-border;
   }
   
+  /* Smooth theme transition */
+  html {
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', sans-serif;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Apply transitions to common elements for theme changes */
+  .bg-background,
+  .bg-card,
+  .bg-popover,
+  .bg-muted,
+  .bg-secondary,
+  .bg-primary,
+  .bg-accent,
+  .text-foreground,
+  .text-muted-foreground,
+  .text-primary,
+  .border-border,
+  .border-input,
+  nav,
+  header,
+  footer,
+  main,
+  section,
+  article,
+  aside,
+  div[class*="bg-"],
+  button,
+  input,
+  textarea,
+  select,
+  a {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   }
 
   code, pre, .font-mono {
