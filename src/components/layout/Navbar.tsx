@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Shield, Menu, X, Settings } from "lucide-react";
+import { Shield, Menu, X, Settings, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +30,11 @@ export function Navbar() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsOpen(false);
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -58,17 +63,26 @@ export function Navbar() {
               </Link>
             ))}
             {isLoggedIn && (
-              <Link
-                to="/admin"
-                className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${
-                  location.pathname === "/admin"
-                    ? "text-primary"
-                    : "text-muted-foreground"
-                }`}
-              >
-                <Settings className="h-4 w-4" />
-                Admin
-              </Link>
+              <>
+                <Link
+                  to="/admin"
+                  className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${
+                    location.pathname === "/admin"
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  <Settings className="h-4 w-4" />
+                  Admin
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-destructive"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </>
             )}
           </div>
 
@@ -102,18 +116,27 @@ export function Navbar() {
                 </Link>
               ))}
               {isLoggedIn && (
-                <Link
-                  to="/admin"
-                  onClick={() => setIsOpen(false)}
-                  className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${
-                    location.pathname === "/admin"
-                      ? "text-primary"
-                      : "text-muted-foreground"
-                  }`}
-                >
-                  <Settings className="h-4 w-4" />
-                  Admin
-                </Link>
+                <>
+                  <Link
+                    to="/admin"
+                    onClick={() => setIsOpen(false)}
+                    className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${
+                      location.pathname === "/admin"
+                        ? "text-primary"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    <Settings className="h-4 w-4" />
+                    Admin
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-destructive"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Logout
+                  </button>
+                </>
               )}
             </div>
           </div>

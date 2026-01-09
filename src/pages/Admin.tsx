@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -17,7 +17,9 @@ import {
   Loader2,
   X,
   Save,
-  AlertTriangle
+  AlertTriangle,
+  Upload,
+  Image as ImageIcon
 } from "lucide-react";
 import {
   Dialog,
@@ -47,6 +49,7 @@ interface Project {
   category: string;
   github_url: string | null;
   demo_url: string | null;
+  image_url: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -71,6 +74,10 @@ export default function Admin() {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deletingProject, setDeletingProject] = useState<Project | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<ProjectFormData>({
     title: "",
     problem: "",
@@ -141,6 +148,8 @@ export default function Admin() {
       demo_url: "",
     });
     setErrors({});
+    setImageFile(null);
+    setImagePreview(null);
     setIsDialogOpen(true);
   };
 
@@ -156,12 +165,71 @@ export default function Admin() {
       demo_url: project.demo_url || "",
     });
     setErrors({});
+    setImageFile(null);
+    setImagePreview(project.image_url);
     setIsDialogOpen(true);
   };
 
   const openDeleteDialog = (project: Project) => {
     setDeletingProject(project);
     setIsDeleteDialogOpen(true);
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "Ukuran gambar maksimal 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const uploadImage = async (projectId: string): Promise<string | null> => {
+    if (!imageFile) return editingProject?.image_url || null;
+
+    setIsUploading(true);
+    try {
+      const fileExt = imageFile.name.split(".").pop();
+      const fileName = `${projectId}.${fileExt}`;
+      const filePath = `thumbnails/${fileName}`;
+
+      // Delete old image if exists
+      if (editingProject?.image_url) {
+        const oldPath = editingProject.image_url.split("/").pop();
+        if (oldPath) {
+          await supabase.storage.from("project-images").remove([`thumbnails/${oldPath}`]);
+        }
+      }
+
+      const { error: uploadError } = await supabase.storage
+        .from("project-images")
+        .upload(filePath, imageFile, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("project-images")
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      toast({
+        title: "Error",
+        description: "Gagal mengupload gambar",
+        variant: "destructive",
+      });
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const validateForm = () => {
@@ -188,6 +256,9 @@ export default function Admin() {
     setIsSaving(true);
 
     try {
+      const projectId = editingProject?.id || crypto.randomUUID();
+      const imageUrl = await uploadImage(projectId);
+
       const projectData = {
         title: formData.title.trim(),
         problem: formData.problem.trim(),
@@ -196,6 +267,7 @@ export default function Admin() {
         category: formData.category.trim(),
         github_url: formData.github_url?.trim() || null,
         demo_url: formData.demo_url?.trim() || null,
+        image_url: imageUrl,
       };
 
       if (editingProject) {
@@ -213,7 +285,7 @@ export default function Admin() {
       } else {
         const { error } = await supabase
           .from("projects")
-          .insert(projectData);
+          .insert({ ...projectData, id: projectId });
 
         if (error) throw error;
 
@@ -241,6 +313,14 @@ export default function Admin() {
     if (!deletingProject) return;
 
     try {
+      // Delete image if exists
+      if (deletingProject.image_url) {
+        const fileName = deletingProject.image_url.split("/").pop();
+        if (fileName) {
+          await supabase.storage.from("project-images").remove([`thumbnails/${fileName}`]);
+        }
+      }
+
       const { error } = await supabase
         .from("projects")
         .delete()
@@ -312,6 +392,7 @@ export default function Admin() {
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
+                  <th className="text-left p-4 font-medium">Thumbnail</th>
                   <th className="text-left p-4 font-medium">Judul</th>
                   <th className="text-left p-4 font-medium hidden md:table-cell">Kategori</th>
                   <th className="text-left p-4 font-medium hidden lg:table-cell">Tech Stack</th>
@@ -321,13 +402,26 @@ export default function Admin() {
               <tbody>
                 {projects.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="text-center p-8 text-muted-foreground">
+                    <td colSpan={5} className="text-center p-8 text-muted-foreground">
                       Belum ada project
                     </td>
                   </tr>
                 ) : (
                   projects.map((project) => (
                     <tr key={project.id} className="border-t border-border hover:bg-muted/30 transition-colors">
+                      <td className="p-4">
+                        {project.image_url ? (
+                          <img
+                            src={project.image_url}
+                            alt={project.title}
+                            className="w-16 h-12 object-cover rounded border border-border"
+                          />
+                        ) : (
+                          <div className="w-16 h-12 bg-muted rounded border border-border flex items-center justify-center">
+                            <ImageIcon className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        )}
+                      </td>
                       <td className="p-4">
                         <div className="font-medium">{project.title}</div>
                         <div className="text-sm text-muted-foreground md:hidden">
@@ -398,6 +492,57 @@ export default function Admin() {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
+              {/* Image Upload */}
+              <div className="space-y-2">
+                <Label>Thumbnail</Label>
+                <div className="flex items-center gap-4">
+                  {imagePreview ? (
+                    <div className="relative">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-32 h-24 object-cover rounded border border-border"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setImageFile(null);
+                          setImagePreview(null);
+                          if (fileInputRef.current) fileInputRef.current.value = "";
+                        }}
+                        className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive text-destructive-foreground"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="w-32 h-24 bg-muted rounded border border-dashed border-border flex items-center justify-center">
+                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                    </div>
+                  )}
+                  <div>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="hidden"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Upload Gambar
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Max 5MB. Format: JPG, PNG, GIF, WebP
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="title">Judul *</Label>
                 <Input
@@ -505,13 +650,13 @@ export default function Admin() {
                 <X className="h-4 w-4 mr-2" />
                 Batal
               </Button>
-              <Button onClick={handleSave} disabled={isSaving}>
-                {isSaving ? (
+              <Button onClick={handleSave} disabled={isSaving || isUploading}>
+                {isSaving || isUploading ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 ) : (
                   <Save className="h-4 w-4 mr-2" />
                 )}
-                Simpan
+                {isUploading ? "Mengupload..." : "Simpan"}
               </Button>
             </div>
           </DialogContent>

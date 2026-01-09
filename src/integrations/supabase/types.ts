@@ -21,6 +21,7 @@ export type Database = {
           demo_url: string | null
           github_url: string | null
           id: string
+          image_url: string | null
           problem: string
           solution: string
           tech_stack: string[]
@@ -33,6 +34,7 @@ export type Database = {
           demo_url?: string | null
           github_url?: string | null
           id?: string
+          image_url?: string | null
           problem: string
           solution: string
           tech_stack?: string[]
@@ -45,6 +47,7 @@ export type Database = {
           demo_url?: string | null
           github_url?: string | null
           id?: string
+          image_url?: string | null
           problem?: string
           solution?: string
           tech_stack?: string[]

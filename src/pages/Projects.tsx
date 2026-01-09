@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, Github, Filter } from "lucide-react";
+import { ExternalLink, Github, Filter, Image as ImageIcon } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -77,6 +77,7 @@ const Projects = () => {
             <div className="grid md:grid-cols-2 gap-6">
               {[1, 2, 3].map((i) => (
                 <div key={i} className="p-6 rounded-lg bg-card border border-border animate-pulse">
+                  <div className="h-40 bg-secondary rounded mb-4" />
                   <div className="h-6 bg-secondary rounded w-3/4 mb-4" />
                   <div className="h-4 bg-secondary rounded w-full mb-2" />
                   <div className="h-4 bg-secondary rounded w-2/3" />
@@ -96,72 +97,90 @@ const Projects = () => {
               {filteredProjects?.map((project, index) => (
                 <ScrollReveal key={project.id} delay={index * 100}>
                   <article
-                    className="relative p-6 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full"
+                    className="relative rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full overflow-hidden"
                   >
-                    <div className="line-accent" />
-                    
-                    {/* Category Badge */}
-                    <Badge variant="outline" className="mb-4 text-xs">
-                      {categoryLabels[project.category as ProjectCategory]}
-                    </Badge>
+                    {/* Thumbnail */}
+                    {project.image_url ? (
+                      <div className="relative h-48 overflow-hidden">
+                        <img
+                          src={project.image_url}
+                          alt={project.title}
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
+                      </div>
+                    ) : (
+                      <div className="h-48 bg-muted flex items-center justify-center">
+                        <ImageIcon className="h-12 w-12 text-muted-foreground/50" />
+                      </div>
+                    )}
 
-                    {/* Title */}
-                    <h2 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
-                      {project.title}
-                    </h2>
+                    <div className="p-6">
+                      <div className="line-accent" />
+                      
+                      {/* Category Badge */}
+                      <Badge variant="outline" className="mb-4 text-xs">
+                        {categoryLabels[project.category as ProjectCategory]}
+                      </Badge>
 
-                    {/* Problem */}
-                    <div className="mb-4">
-                      <h3 className="text-sm font-medium text-primary mb-1">The Problem</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {project.problem}
-                      </p>
-                    </div>
+                      {/* Title */}
+                      <h2 className="text-xl font-semibold mb-3 group-hover:text-primary transition-colors">
+                        {project.title}
+                      </h2>
 
-                    {/* Solution */}
-                    <div className="mb-6">
-                      <h3 className="text-sm font-medium text-primary mb-1">The Solution</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {project.solution}
-                      </p>
-                    </div>
+                      {/* Problem */}
+                      <div className="mb-4">
+                        <h3 className="text-sm font-medium text-primary mb-1">The Problem</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {project.problem}
+                        </p>
+                      </div>
 
-                    {/* Tech Stack */}
-                    <div className="flex flex-wrap gap-2 mb-6">
-                      {project.tech_stack.map((tech) => (
-                        <span
-                          key={tech}
-                          className="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground"
-                        >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
+                      {/* Solution */}
+                      <div className="mb-6">
+                        <h3 className="text-sm font-medium text-primary mb-1">The Solution</h3>
+                        <p className="text-sm text-muted-foreground">
+                          {project.solution}
+                        </p>
+                      </div>
 
-                    {/* Links */}
-                    <div className="flex gap-3">
-                      {project.github_url && (
-                        <a
-                          href={project.github_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
-                        >
-                          <Github className="h-4 w-4" />
-                          Code
-                        </a>
-                      )}
-                      {project.demo_url && (
-                        <a
-                          href={project.demo_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
-                        >
-                          <ExternalLink className="h-4 w-4" />
-                          Demo
-                        </a>
-                      )}
+                      {/* Tech Stack */}
+                      <div className="flex flex-wrap gap-2 mb-6">
+                        {project.tech_stack.map((tech) => (
+                          <span
+                            key={tech}
+                            className="px-2 py-1 rounded text-xs font-mono bg-secondary/50 text-muted-foreground"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+
+                      {/* Links */}
+                      <div className="flex gap-3">
+                        {project.github_url && (
+                          <a
+                            href={project.github_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            <Github className="h-4 w-4" />
+                            Code
+                          </a>
+                        )}
+                        {project.demo_url && (
+                          <a
+                            href={project.demo_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            Demo
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </article>
                 </ScrollReveal>
