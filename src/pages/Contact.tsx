@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { Mail, Github, Linkedin, Send, CheckCircle, Sparkles } from "lucide-react";
+import { Mail, Github, Linkedin, Send, CheckCircle, Sparkles, Check } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -219,6 +219,12 @@ const Contact = () => {
     return "";
   };
 
+  const isFieldValid = (name: string) => {
+    const value = formData[name as keyof typeof formData];
+    if (!value) return false;
+    return !validateField(name, value);
+  };
+
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -351,18 +357,28 @@ const Contact = () => {
                   />
 
                   <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      placeholder="Nama lengkap (2-50 karakter)"
-                      required
-                      minLength={2}
-                      maxLength={50}
-                      className={errors.name ? "border-destructive" : ""}
-                    />
+                    <Label htmlFor="name" className="flex items-center gap-2">
+                      Name
+                      <span className={`transition-all duration-300 ${isFieldValid('name') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+                        <Check className="h-4 w-4 text-green-500" />
+                      </span>
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        placeholder="Nama lengkap (2-50 karakter)"
+                        required
+                        minLength={2}
+                        maxLength={50}
+                        className={`pr-10 ${errors.name ? "border-destructive" : isFieldValid('name') ? "border-green-500" : ""}`}
+                      />
+                      <div className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ${isFieldValid('name') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+                        <Check className="h-5 w-5 text-green-500" />
+                      </div>
+                    </div>
                     <div className="flex justify-between items-center min-h-[20px]">
                       <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.name ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
                         <p className="text-sm text-destructive">{errors.name}</p>
@@ -374,19 +390,29 @@ const Contact = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="nama@domain.com"
-                      required
-                      minLength={5}
-                      maxLength={100}
-                      className={errors.email ? "border-destructive" : ""}
-                    />
+                    <Label htmlFor="email" className="flex items-center gap-2">
+                      Email
+                      <span className={`transition-all duration-300 ${isFieldValid('email') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+                        <Check className="h-4 w-4 text-green-500" />
+                      </span>
+                    </Label>
+                    <div className="relative">
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleChange}
+                        placeholder="nama@domain.com"
+                        required
+                        minLength={5}
+                        maxLength={100}
+                        className={`pr-10 ${errors.email ? "border-destructive" : isFieldValid('email') ? "border-green-500" : ""}`}
+                      />
+                      <div className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ${isFieldValid('email') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+                        <Check className="h-5 w-5 text-green-500" />
+                      </div>
+                    </div>
                     <div className="flex justify-between items-center min-h-[20px]">
                       <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.email ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
                         <p className="text-sm text-destructive">{errors.email}</p>
@@ -398,19 +424,29 @@ const Contact = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="message">Message</Label>
-                    <Textarea
-                      id="message"
-                      name="message"
-                      value={formData.message}
-                      onChange={handleChange}
-                      placeholder="Tulis pesan Anda (10-1000 karakter)"
-                      required
-                      minLength={10}
-                      maxLength={1000}
-                      rows={5}
-                      className={errors.message ? "border-destructive" : ""}
-                    />
+                    <Label htmlFor="message" className="flex items-center gap-2">
+                      Message
+                      <span className={`transition-all duration-300 ${isFieldValid('message') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+                        <Check className="h-4 w-4 text-green-500" />
+                      </span>
+                    </Label>
+                    <div className="relative">
+                      <Textarea
+                        id="message"
+                        name="message"
+                        value={formData.message}
+                        onChange={handleChange}
+                        placeholder="Tulis pesan Anda (10-1000 karakter)"
+                        required
+                        minLength={10}
+                        maxLength={1000}
+                        rows={5}
+                        className={`pr-10 ${errors.message ? "border-destructive" : isFieldValid('message') ? "border-green-500" : ""}`}
+                      />
+                      <div className={`absolute right-3 top-3 transition-all duration-300 ${isFieldValid('message') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
+                        <Check className="h-5 w-5 text-green-500" />
+                      </div>
+                    </div>
                     <div className="flex justify-between items-center min-h-[20px]">
                       <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.message ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
                         <p className="text-sm text-destructive">{errors.message}</p>
