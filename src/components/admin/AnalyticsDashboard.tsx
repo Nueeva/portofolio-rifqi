@@ -7,7 +7,8 @@ import {
   TrendingUp, 
   Calendar,
   RefreshCw,
-  Globe
+  Globe,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { 
@@ -44,8 +45,17 @@ const COLORS = [
   "hsl(var(--chart-5))",
 ];
 
+const PAGE_OPTIONS = [
+  { value: "all", label: "Semua Halaman" },
+  { value: "/", label: "Home" },
+  { value: "/projects", label: "Projects" },
+  { value: "/about", label: "About" },
+  { value: "/contact", label: "Contact" },
+];
+
 export const AnalyticsDashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>("30d");
+  const [pageFilter, setPageFilter] = useState<string>("all");
 
   const getDateFilter = () => {
     const now = new Date();
@@ -62,7 +72,7 @@ export const AnalyticsDashboard = () => {
   };
 
   const { data: analytics, isLoading, refetch, isRefetching } = useQuery({
-    queryKey: ["page-analytics", timeRange],
+    queryKey: ["page-analytics", timeRange, pageFilter],
     queryFn: async () => {
       let query = supabase
         .from("page_analytics")
@@ -72,6 +82,10 @@ export const AnalyticsDashboard = () => {
       const dateFilter = getDateFilter();
       if (dateFilter) {
         query = query.gte("created_at", dateFilter);
+      }
+
+      if (pageFilter !== "all") {
+        query = query.eq("page_path", pageFilter);
       }
 
       const { data, error } = await query.limit(1000);
@@ -185,7 +199,20 @@ export const AnalyticsDashboard = () => {
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Select value={pageFilter} onValueChange={setPageFilter}>
+            <SelectTrigger className="w-[160px]">
+              <FileText className="h-4 w-4 mr-2" />
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PAGE_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
             <SelectTrigger className="w-[140px]">
               <Calendar className="h-4 w-4 mr-2" />
