@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,17 @@ import {
   Save,
   AlertTriangle,
   Upload,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Search,
+  Filter,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  FolderOpen,
+  Clock
 } from "lucide-react";
 import {
   Dialog,
@@ -38,6 +48,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { z } from "zod";
 
 interface Project {
@@ -65,6 +82,8 @@ const projectSchema = z.object({
 });
 
 type ProjectFormData = z.infer<typeof projectSchema>;
+type SortField = "title" | "category" | "created_at" | "updated_at";
+type SortOrder = "asc" | "desc";
 
 export default function Admin() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -77,7 +96,18 @@ export default function Admin() {
   const [isUploading, setIsUploading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
+  
+  // Search, Filter, Sort, Pagination state
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterCategory, setFilterCategory] = useState<string>("all");
+  const [sortField, setSortField] = useState<SortField>("created_at");
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const [formData, setFormData] = useState<ProjectFormData>({
     title: "",
     problem: "",
@@ -92,6 +122,78 @@ export default function Admin() {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Get unique categories
+  const categories = useMemo(() => {
+    const cats = [...new Set(projects.map((p) => p.category))];
+    return cats.sort();
+  }, [projects]);
+
+  // Calculate statistics
+  const stats = useMemo(() => {
+    const categoryStats = projects.reduce((acc, p) => {
+      acc[p.category] = (acc[p.category] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const lastUpdated = projects.length > 0
+      ? projects.reduce((latest, p) => 
+          new Date(p.updated_at) > new Date(latest.updated_at) ? p : latest
+        )
+      : null;
+
+    return {
+      total: projects.length,
+      byCategory: categoryStats,
+      lastUpdated,
+    };
+  }, [projects]);
+
+  // Filter and sort projects
+  const filteredAndSortedProjects = useMemo(() => {
+    let result = [...projects];
+
+    // Filter by search query
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      result = result.filter(
+        (p) =>
+          p.title.toLowerCase().includes(query) ||
+          p.category.toLowerCase().includes(query) ||
+          p.tech_stack.some((t) => t.toLowerCase().includes(query))
+      );
+    }
+
+    // Filter by category
+    if (filterCategory !== "all") {
+      result = result.filter((p) => p.category === filterCategory);
+    }
+
+    // Sort
+    result.sort((a, b) => {
+      let comparison = 0;
+      if (sortField === "title" || sortField === "category") {
+        comparison = a[sortField].localeCompare(b[sortField]);
+      } else {
+        comparison = new Date(a[sortField]).getTime() - new Date(b[sortField]).getTime();
+      }
+      return sortOrder === "asc" ? comparison : -comparison;
+    });
+
+    return result;
+  }, [projects, searchQuery, filterCategory, sortField, sortOrder]);
+
+  // Pagination
+  const totalPages = Math.ceil(filteredAndSortedProjects.length / itemsPerPage);
+  const paginatedProjects = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filteredAndSortedProjects.slice(start, start + itemsPerPage);
+  }, [filteredAndSortedProjects, currentPage]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterCategory, sortField, sortOrder]);
 
   useEffect(() => {
     if (!loading) {
@@ -175,21 +277,67 @@ export default function Admin() {
     setIsDeleteDialogOpen(true);
   };
 
+  const handleFileSelect = useCallback((file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "Ukuran gambar maksimal 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const validTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+    if (!validTypes.includes(file.type)) {
+      toast({
+        title: "Error",
+        description: "Format gambar harus JPG, PNG, GIF, atau WebP",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  }, [toast]);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "Error",
-          description: "Ukuran gambar maksimal 5MB",
-          variant: "destructive",
-        });
-        return;
-      }
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
+      handleFileSelect(file);
     }
   };
+
+  // Drag and drop handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (dropZoneRef.current && !dropZoneRef.current.contains(e.relatedTarget as Node)) {
+      setIsDragging(false);
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      handleFileSelect(file);
+    }
+  }, [handleFileSelect]);
 
   const uploadImage = async (projectId: string): Promise<string | null> => {
     if (!imageFile) return editingProject?.image_url || null;
@@ -346,6 +494,22 @@ export default function Admin() {
     }
   };
 
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortField(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <ArrowUpDown className="h-4 w-4 ml-1 opacity-50" />;
+    return sortOrder === "asc" 
+      ? <ArrowUp className="h-4 w-4 ml-1" /> 
+      : <ArrowDown className="h-4 w-4 ml-1" />;
+  };
+
   if (loading || isLoading) {
     return (
       <Layout>
@@ -386,6 +550,81 @@ export default function Admin() {
           </div>
         </div>
 
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="p-4 rounded-lg border border-border bg-card">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <LayoutGrid className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Total Projects</p>
+                <p className="text-2xl font-bold">{stats.total}</p>
+              </div>
+            </div>
+          </div>
+          
+          {Object.entries(stats.byCategory).slice(0, 2).map(([category, count]) => (
+            <div key={category} className="p-4 rounded-lg border border-border bg-card">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-secondary">
+                  <FolderOpen className="h-5 w-5 text-secondary-foreground" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground truncate">{category}</p>
+                  <p className="text-2xl font-bold">{count}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          <div className="p-4 rounded-lg border border-border bg-card">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-accent">
+                <Clock className="h-5 w-5 text-accent-foreground" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Last Updated</p>
+                <p className="text-sm font-medium truncate">
+                  {stats.lastUpdated 
+                    ? new Date(stats.lastUpdated.updated_at).toLocaleDateString("id-ID", { 
+                        day: "numeric", 
+                        month: "short" 
+                      })
+                    : "-"}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filter Bar */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Cari judul, kategori, atau tech stack..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Select value={filterCategory} onValueChange={setFilterCategory}>
+              <SelectTrigger className="w-[180px]">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Filter Kategori" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Semua Kategori</SelectItem>
+                {categories.map((cat) => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
         {/* Projects Table */}
         <div className="rounded-lg border border-border bg-card overflow-hidden">
           <div className="overflow-x-auto">
@@ -393,21 +632,48 @@ export default function Admin() {
               <thead className="bg-muted/50">
                 <tr>
                   <th className="text-left p-4 font-medium">Thumbnail</th>
-                  <th className="text-left p-4 font-medium">Judul</th>
-                  <th className="text-left p-4 font-medium hidden md:table-cell">Kategori</th>
+                  <th className="text-left p-4 font-medium">
+                    <button 
+                      onClick={() => handleSort("title")}
+                      className="flex items-center hover:text-primary transition-colors"
+                    >
+                      Judul
+                      <SortIcon field="title" />
+                    </button>
+                  </th>
+                  <th className="text-left p-4 font-medium hidden md:table-cell">
+                    <button 
+                      onClick={() => handleSort("category")}
+                      className="flex items-center hover:text-primary transition-colors"
+                    >
+                      Kategori
+                      <SortIcon field="category" />
+                    </button>
+                  </th>
                   <th className="text-left p-4 font-medium hidden lg:table-cell">Tech Stack</th>
+                  <th className="text-left p-4 font-medium hidden xl:table-cell">
+                    <button 
+                      onClick={() => handleSort("created_at")}
+                      className="flex items-center hover:text-primary transition-colors"
+                    >
+                      Tanggal
+                      <SortIcon field="created_at" />
+                    </button>
+                  </th>
                   <th className="text-right p-4 font-medium">Aksi</th>
                 </tr>
               </thead>
               <tbody>
-                {projects.length === 0 ? (
+                {paginatedProjects.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="text-center p-8 text-muted-foreground">
-                      Belum ada project
+                    <td colSpan={6} className="text-center p-8 text-muted-foreground">
+                      {searchQuery || filterCategory !== "all" 
+                        ? "Tidak ada project yang cocok dengan filter"
+                        : "Belum ada project"}
                     </td>
                   </tr>
                 ) : (
-                  projects.map((project) => (
+                  paginatedProjects.map((project) => (
                     <tr key={project.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                       <td className="p-4">
                         {project.image_url ? (
@@ -450,6 +716,15 @@ export default function Admin() {
                           )}
                         </div>
                       </td>
+                      <td className="p-4 hidden xl:table-cell">
+                        <span className="text-sm text-muted-foreground">
+                          {new Date(project.created_at).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric"
+                          })}
+                        </span>
+                      </td>
                       <td className="p-4 text-right">
                         <div className="flex justify-end gap-2">
                           <Button
@@ -475,6 +750,57 @@ export default function Admin() {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-4 py-3 border-t border-border">
+              <p className="text-sm text-muted-foreground">
+                Menampilkan {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, filteredAndSortedProjects.length)} dari {filteredAndSortedProjects.length}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <div className="flex gap-1">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1)
+                    .filter(page => {
+                      if (totalPages <= 5) return true;
+                      if (page === 1 || page === totalPages) return true;
+                      if (Math.abs(page - currentPage) <= 1) return true;
+                      return false;
+                    })
+                    .map((page, idx, arr) => (
+                      <div key={page} className="flex items-center">
+                        {idx > 0 && arr[idx - 1] !== page - 1 && (
+                          <span className="px-2 text-muted-foreground">...</span>
+                        )}
+                        <Button
+                          variant={currentPage === page ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setCurrentPage(page)}
+                          className="min-w-[32px]"
+                        >
+                          {page}
+                        </Button>
+                      </div>
+                    ))}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Create/Edit Dialog */}
@@ -492,54 +818,74 @@ export default function Admin() {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              {/* Image Upload */}
+              {/* Image Upload with Drag & Drop */}
               <div className="space-y-2">
                 <Label>Thumbnail</Label>
-                <div className="flex items-center gap-4">
+                <div
+                  ref={dropZoneRef}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                  onDragOver={handleDragOver}
+                  onDrop={handleDrop}
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`
+                    relative cursor-pointer rounded-lg border-2 border-dashed transition-all duration-200
+                    ${isDragging 
+                      ? "border-primary bg-primary/5 scale-[1.02]" 
+                      : "border-border hover:border-primary/50 hover:bg-muted/50"
+                    }
+                    ${imagePreview ? "p-4" : "p-8"}
+                  `}
+                >
                   {imagePreview ? (
-                    <div className="relative">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="w-32 h-24 object-cover rounded border border-border"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setImageFile(null);
-                          setImagePreview(null);
-                          if (fileInputRef.current) fileInputRef.current.value = "";
-                        }}
-                        className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive text-destructive-foreground"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
+                    <div className="flex items-center gap-4">
+                      <div className="relative">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="w-32 h-24 object-cover rounded border border-border"
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setImageFile(null);
+                            setImagePreview(null);
+                            if (fileInputRef.current) fileInputRef.current.value = "";
+                          }}
+                          className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        <p>Klik atau drag gambar baru untuk mengganti</p>
+                        <p className="text-xs mt-1">Max 5MB. Format: JPG, PNG, GIF, WebP</p>
+                      </div>
                     </div>
                   ) : (
-                    <div className="w-32 h-24 bg-muted rounded border border-dashed border-border flex items-center justify-center">
-                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                    <div className="flex flex-col items-center justify-center text-center">
+                      <div className={`p-3 rounded-full mb-3 transition-colors ${isDragging ? "bg-primary/10" : "bg-muted"}`}>
+                        <Upload className={`h-6 w-6 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
+                      </div>
+                      <p className="font-medium">
+                        {isDragging ? "Lepaskan gambar di sini" : "Drag & drop gambar di sini"}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        atau klik untuk memilih file
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Max 5MB. Format: JPG, PNG, GIF, WebP
+                      </p>
                     </div>
                   )}
-                  <div>
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
-                      className="hidden"
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Upload Gambar
-                    </Button>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Max 5MB. Format: JPG, PNG, GIF, WebP
-                    </p>
-                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={handleImageChange}
+                    className="hidden"
+                  />
                 </div>
               </div>
 
