@@ -58,6 +58,7 @@ export type Database = {
           page_path: string
           referrer: string | null
           user_agent: string | null
+          visit_date: string | null
           visitor_id: string
         }
         Insert: {
@@ -67,6 +68,7 @@ export type Database = {
           page_path: string
           referrer?: string | null
           user_agent?: string | null
+          visit_date?: string | null
           visitor_id: string
         }
         Update: {
@@ -76,6 +78,7 @@ export type Database = {
           page_path?: string
           referrer?: string | null
           user_agent?: string | null
+          visit_date?: string | null
           visitor_id?: string
         }
         Relationships: []
