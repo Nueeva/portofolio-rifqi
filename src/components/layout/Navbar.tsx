@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { Shield, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Shield, Menu, X, Settings } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -12,7 +13,22 @@ const navLinks = [
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const location = useLocation();
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setIsLoggedIn(!!session);
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsLoggedIn(!!session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
@@ -41,6 +57,19 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {isLoggedIn && (
+              <Link
+                to="/admin"
+                className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${
+                  location.pathname === "/admin"
+                    ? "text-primary"
+                    : "text-muted-foreground"
+                }`}
+              >
+                <Settings className="h-4 w-4" />
+                Admin
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -72,6 +101,20 @@ export function Navbar() {
                   {link.label}
                 </Link>
               ))}
+              {isLoggedIn && (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className={`flex items-center gap-1 text-sm font-medium transition-colors hover:text-primary ${
+                    location.pathname === "/admin"
+                      ? "text-primary"
+                      : "text-muted-foreground"
+                  }`}
+                >
+                  <Settings className="h-4 w-4" />
+                  Admin
+                </Link>
+              )}
             </div>
           </div>
         )}
