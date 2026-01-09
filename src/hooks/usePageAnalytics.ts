@@ -23,16 +23,19 @@ export const usePageAnalytics = (pagePath: string) => {
       try {
         const visitorId = getVisitorId();
         
-        // Use upsert with ignoreDuplicates to handle unique constraint
-        // This prevents duplicate entries per visitor per page per day
-        await supabase.from("page_analytics").upsert([
-          {
+        // Call the edge function with rate limiting
+        const { error } = await supabase.functions.invoke('track-analytics', {
+          body: {
             page_path: pagePath,
             visitor_id: visitorId,
             user_agent: navigator.userAgent,
             referrer: document.referrer || null,
           },
-        ], { onConflict: 'visitor_id,page_path,visit_date', ignoreDuplicates: true });
+        });
+
+        if (error) {
+          console.error("Analytics tracking failed:", error);
+        }
       } catch (error) {
         // Silently fail - analytics shouldn't break the app
         console.error("Analytics tracking failed:", error);
@@ -47,16 +50,19 @@ export const trackPageVisit = async (pagePath: string) => {
   try {
     const visitorId = getVisitorId();
     
-    // Use upsert with ignoreDuplicates to handle unique constraint
-    // This prevents duplicate entries per visitor per page per day
-    await supabase.from("page_analytics").upsert([
-      {
+    // Call the edge function with rate limiting
+    const { error } = await supabase.functions.invoke('track-analytics', {
+      body: {
         page_path: pagePath,
         visitor_id: visitorId,
         user_agent: navigator.userAgent,
         referrer: document.referrer || null,
       },
-    ], { onConflict: 'visitor_id,page_path,visit_date', ignoreDuplicates: true });
+    });
+
+    if (error) {
+      console.error("Analytics tracking failed:", error);
+    }
   } catch (error) {
     console.error("Analytics tracking failed:", error);
   }
