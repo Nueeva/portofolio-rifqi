@@ -64,6 +64,7 @@ const Contact = () => {
     message: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [shakeFields, setShakeFields] = useState<Record<string, boolean>>({});
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileError, setTurnstileError] = useState(false);
   const turnstileWidgetId = useRef<string | null>(null);
@@ -161,12 +162,17 @@ const Contact = () => {
     const result = contactSchema.safeParse(formData);
     if (!result.success) {
       const fieldErrors: Record<string, string> = {};
+      const fieldsToShake: Record<string, boolean> = {};
       result.error.errors.forEach((err) => {
         if (err.path[0]) {
           fieldErrors[err.path[0] as string] = err.message;
+          fieldsToShake[err.path[0] as string] = true;
         }
       });
       setErrors(fieldErrors);
+      setShakeFields(fieldsToShake);
+      // Remove shake after animation completes
+      setTimeout(() => setShakeFields({}), 500);
       return;
     }
 
@@ -373,7 +379,7 @@ const Contact = () => {
                         required
                         minLength={2}
                         maxLength={50}
-                        className={`pr-10 ${errors.name ? "border-destructive" : isFieldValid('name') ? "border-green-500" : ""}`}
+                        className={`pr-10 transition-all ${shakeFields.name ? "animate-shake" : ""} ${errors.name ? "border-destructive" : isFieldValid('name') ? "border-green-500" : ""}`}
                       />
                       <div className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ${isFieldValid('name') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
                         <Check className="h-5 w-5 text-green-500" />
@@ -407,7 +413,7 @@ const Contact = () => {
                         required
                         minLength={5}
                         maxLength={100}
-                        className={`pr-10 ${errors.email ? "border-destructive" : isFieldValid('email') ? "border-green-500" : ""}`}
+                        className={`pr-10 transition-all ${shakeFields.email ? "animate-shake" : ""} ${errors.email ? "border-destructive" : isFieldValid('email') ? "border-green-500" : ""}`}
                       />
                       <div className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ${isFieldValid('email') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
                         <Check className="h-5 w-5 text-green-500" />
@@ -441,7 +447,7 @@ const Contact = () => {
                         minLength={10}
                         maxLength={1000}
                         rows={5}
-                        className={`pr-10 ${errors.message ? "border-destructive" : isFieldValid('message') ? "border-green-500" : ""}`}
+                        className={`pr-10 transition-all ${shakeFields.message ? "animate-shake" : ""} ${errors.message ? "border-destructive" : isFieldValid('message') ? "border-green-500" : ""}`}
                       />
                       <div className={`absolute right-3 top-3 transition-all duration-300 ${isFieldValid('message') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
                         <Check className="h-5 w-5 text-green-500" />
