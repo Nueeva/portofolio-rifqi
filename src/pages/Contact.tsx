@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { ScrollReveal } from "@/components/ScrollReveal";
@@ -91,6 +92,33 @@ const Contact = () => {
 
   // Honeypot field (hidden from users, bots will fill it)
   const [honeypot, setHoneypot] = useState("");
+
+  // Typing placeholder animations
+  const namePlaceholder = useTypingPlaceholder({
+    texts: ["John Doe", "Ahmad Rizki", "Sarah Johnson", "Budi Santoso"],
+    typingSpeed: 80,
+    deletingSpeed: 40,
+    pauseDuration: 1500,
+  });
+
+  const emailPlaceholder = useTypingPlaceholder({
+    texts: ["john@gmail.com", "ahmad@yahoo.com", "sarah@outlook.com", "budi@mail.com"],
+    typingSpeed: 70,
+    deletingSpeed: 35,
+    pauseDuration: 1500,
+  });
+
+  const messagePlaceholder = useTypingPlaceholder({
+    texts: [
+      "Halo, saya tertarik untuk bekerja sama...",
+      "Hi, I have a question about security...",
+      "Saya ingin mendiskusikan proyek baru...",
+      "Hello, I would like to collaborate...",
+    ],
+    typingSpeed: 50,
+    deletingSpeed: 25,
+    pauseDuration: 2000,
+  });
 
   // Load Turnstile script and render widget
   useEffect(() => {
@@ -448,7 +476,7 @@ const Contact = () => {
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
-                        placeholder="Nama lengkap (2-50 karakter)"
+                        placeholder={namePlaceholder || "Nama Anda"}
                         required
                         minLength={2}
                         maxLength={50}
@@ -488,7 +516,7 @@ const Contact = () => {
                         onFocus={() => {
                           if (emailSuggestions.length > 0) setShowEmailSuggestions(true);
                         }}
-                        placeholder="nama@domain.com"
+                        placeholder={emailPlaceholder || "email@domain.com"}
                         required
                         minLength={5}
                         maxLength={100}
@@ -545,7 +573,7 @@ const Contact = () => {
                         name="message"
                         value={formData.message}
                         onChange={handleChange}
-                        placeholder="Tulis pesan Anda (10-1000 karakter)"
+                        placeholder={messagePlaceholder || "Tulis pesan Anda..."}
                         required
                         minLength={10}
                         maxLength={1000}
