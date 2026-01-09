@@ -10,6 +10,7 @@ import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 
 const TURNSTILE_SITE_KEY = "0x4AAAAAACLFADmrVmL9XOiI";
 
@@ -66,6 +67,8 @@ const EMAIL_DOMAINS = [
 ];
 
 const Contact = () => {
+  // Track page visit for analytics
+  usePageAnalytics("/contact");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({

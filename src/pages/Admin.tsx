@@ -35,7 +35,8 @@ import {
   FileJson,
   FileSpreadsheet,
   History,
-  CheckSquare
+  CheckSquare,
+  BarChart3
 } from "lucide-react";
 import {
   Dialog,
@@ -75,7 +76,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { z } from "zod";
+import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 
 interface Project {
   id: string;
@@ -881,53 +884,67 @@ export default function Admin() {
           </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-          <div className="p-4 rounded-lg border border-border bg-card">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10">
-                <LayoutGrid className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Total Projects</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
-              </div>
-            </div>
-          </div>
-          
-          {Object.entries(stats.byCategory).slice(0, 2).map(([category, count]) => (
-            <div key={category} className="p-4 rounded-lg border border-border bg-card">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-secondary">
-                  <FolderOpen className="h-5 w-5 text-secondary-foreground" />
+        {/* Main Tabs */}
+        <Tabs defaultValue="projects" className="w-full">
+          <TabsList className="mb-6">
+            <TabsTrigger value="projects" className="flex items-center gap-2">
+              <LayoutGrid className="h-4 w-4" />
+              Projects
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Analytics
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="projects">
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="p-4 rounded-lg border border-border bg-card">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <LayoutGrid className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Total Projects</p>
+                    <p className="text-2xl font-bold">{stats.total}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground truncate">{category}</p>
-                  <p className="text-2xl font-bold">{count}</p>
+              </div>
+              
+              {Object.entries(stats.byCategory).slice(0, 2).map(([category, count]) => (
+                <div key={category} className="p-4 rounded-lg border border-border bg-card">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-secondary">
+                      <FolderOpen className="h-5 w-5 text-secondary-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground truncate">{category}</p>
+                      <p className="text-2xl font-bold">{count}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              
+              <div className="p-4 rounded-lg border border-border bg-card">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-accent">
+                    <Clock className="h-5 w-5 text-accent-foreground" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Last Updated</p>
+                    <p className="text-sm font-medium truncate">
+                      {stats.lastUpdated 
+                        ? new Date(stats.lastUpdated.updated_at).toLocaleDateString("id-ID", { 
+                            day: "numeric", 
+                            month: "short" 
+                          })
+                        : "-"}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
-          ))}
-          
-          <div className="p-4 rounded-lg border border-border bg-card">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-accent">
-                <Clock className="h-5 w-5 text-accent-foreground" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Last Updated</p>
-                <p className="text-sm font-medium truncate">
-                  {stats.lastUpdated 
-                    ? new Date(stats.lastUpdated.updated_at).toLocaleDateString("id-ID", { 
-                        day: "numeric", 
-                        month: "short" 
-                      })
-                    : "-"}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Search and Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -1163,6 +1180,12 @@ export default function Admin() {
             </div>
           )}
         </div>
+          </TabsContent>
+
+          <TabsContent value="analytics">
+            <AnalyticsDashboard />
+          </TabsContent>
+        </Tabs>
 
         {/* Create/Edit Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

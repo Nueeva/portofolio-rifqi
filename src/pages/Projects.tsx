@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, Github, Filter, Image as ImageIcon } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 
 type ProjectCategory = "all" | "pentesting" | "tools" | "web-security";
 
@@ -18,6 +19,9 @@ const categoryLabels: Record<ProjectCategory, string> = {
 
 const Projects = () => {
   const [activeCategory, setActiveCategory] = useState<ProjectCategory>("all");
+  
+  // Track page visit for analytics
+  usePageAnalytics("/projects");
 
   const { data: projects, isLoading, error } = useQuery({
     queryKey: ["projects"],

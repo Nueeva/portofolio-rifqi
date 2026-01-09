@@ -1,6 +1,7 @@
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 
 const securitySkills = [
   "Penetration Testing",
@@ -32,6 +33,9 @@ const tools = [
 ];
 
 const About = () => {
+  // Track page visit for analytics
+  usePageAnalytics("/about");
+
   return (
     <Layout>
       <div className="min-h-[calc(100vh-4rem)] py-20">
