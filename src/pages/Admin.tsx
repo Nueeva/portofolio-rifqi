@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,7 +30,12 @@ import {
   ChevronRight,
   LayoutGrid,
   FolderOpen,
-  Clock
+  Clock,
+  Download,
+  FileJson,
+  FileSpreadsheet,
+  History,
+  CheckSquare
 } from "lucide-react";
 import {
   Dialog,
@@ -55,6 +61,20 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { z } from "zod";
 
 interface Project {
@@ -69,6 +89,18 @@ interface Project {
   image_url: string | null;
   created_at: string;
   updated_at: string;
+}
+
+interface ActivityLog {
+  id: string;
+  user_id: string;
+  user_email: string;
+  action: string;
+  entity_type: string;
+  entity_id: string | null;
+  entity_title: string | null;
+  details: { count?: number; format?: string; titles?: string[]; changes?: string } | null;
+  created_at: string;
 }
 
 const projectSchema = z.object({
@@ -87,9 +119,11 @@ type SortOrder = "asc" | "desc";
 
 export default function Admin() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deletingProject, setDeletingProject] = useState<Project | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -97,6 +131,8 @@ export default function Admin() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedProjects, setSelectedProjects] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   
@@ -208,6 +244,7 @@ export default function Admin() {
         navigate("/");
       } else {
         fetchProjects();
+        fetchActivityLogs();
       }
     }
   }, [user, isAdmin, loading, navigate, toast]);
@@ -230,6 +267,46 @@ export default function Admin() {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const fetchActivityLogs = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("activity_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50);
+
+      if (error) throw error;
+      setActivityLogs((data || []) as unknown as ActivityLog[]);
+    } catch (error) {
+      console.error("Error fetching activity logs:", error);
+    }
+  };
+
+  const logActivity = async (
+    action: string,
+    entityType: string,
+    entityId?: string,
+    entityTitle?: string,
+    details?: { count?: number; format?: string; titles?: string[]; changes?: string }
+  ) => {
+    if (!user) return;
+
+    try {
+      await supabase.from("activity_logs").insert([{
+        user_id: user.id,
+        user_email: user.email || "Unknown",
+        action,
+        entity_type: entityType,
+        entity_id: entityId || null,
+        entity_title: entityTitle || null,
+        details: details || null,
+      }]);
+      fetchActivityLogs();
+    } catch (error) {
+      console.error("Error logging activity:", error);
     }
   };
 
@@ -426,6 +503,10 @@ export default function Admin() {
 
         if (error) throw error;
 
+        await logActivity("UPDATE", "project", editingProject.id, projectData.title, {
+          changes: "Project updated",
+        });
+
         toast({
           title: "Berhasil",
           description: "Project berhasil diupdate",
@@ -436,6 +517,8 @@ export default function Admin() {
           .insert({ ...projectData, id: projectId });
 
         if (error) throw error;
+
+        await logActivity("CREATE", "project", projectId, projectData.title);
 
         toast({
           title: "Berhasil",
@@ -476,6 +559,8 @@ export default function Admin() {
 
       if (error) throw error;
 
+      await logActivity("DELETE", "project", deletingProject.id, deletingProject.title);
+
       toast({
         title: "Berhasil",
         description: "Project berhasil dihapus",
@@ -494,6 +579,141 @@ export default function Admin() {
     }
   };
 
+  // Bulk delete
+  const handleBulkDelete = async () => {
+    if (selectedProjects.size === 0) return;
+
+    setIsDeleting(true);
+    try {
+      const projectsToDelete = projects.filter((p) => selectedProjects.has(p.id));
+      
+      // Delete images
+      const imagesToDelete = projectsToDelete
+        .filter((p) => p.image_url)
+        .map((p) => `thumbnails/${p.image_url!.split("/").pop()}`);
+      
+      if (imagesToDelete.length > 0) {
+        await supabase.storage.from("project-images").remove(imagesToDelete);
+      }
+
+      // Delete projects
+      const { error } = await supabase
+        .from("projects")
+        .delete()
+        .in("id", Array.from(selectedProjects));
+
+      if (error) throw error;
+
+      await logActivity("BULK_DELETE", "project", undefined, undefined, {
+        count: selectedProjects.size,
+        titles: projectsToDelete.map((p) => p.title),
+      });
+
+      toast({
+        title: "Berhasil",
+        description: `${selectedProjects.size} project berhasil dihapus`,
+      });
+
+      setSelectedProjects(new Set());
+      setIsBulkDeleteDialogOpen(false);
+      fetchProjects();
+    } catch (error) {
+      console.error("Error bulk deleting:", error);
+      toast({
+        title: "Error",
+        description: "Gagal menghapus projects",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Toggle project selection
+  const toggleProjectSelection = (projectId: string) => {
+    const newSelected = new Set(selectedProjects);
+    if (newSelected.has(projectId)) {
+      newSelected.delete(projectId);
+    } else {
+      newSelected.add(projectId);
+    }
+    setSelectedProjects(newSelected);
+  };
+
+  // Select all visible projects
+  const toggleSelectAll = () => {
+    if (selectedProjects.size === paginatedProjects.length) {
+      setSelectedProjects(new Set());
+    } else {
+      setSelectedProjects(new Set(paginatedProjects.map((p) => p.id)));
+    }
+  };
+
+  // Export functions
+  const exportToJSON = () => {
+    const dataToExport = filteredAndSortedProjects.map(({ id, created_at, updated_at, ...rest }) => rest);
+    const blob = new Blob([JSON.stringify(dataToExport, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `projects-${new Date().toISOString().split("T")[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    logActivity("EXPORT", "projects", undefined, undefined, {
+      format: "JSON",
+      count: dataToExport.length,
+    });
+
+    toast({
+      title: "Berhasil",
+      description: `${dataToExport.length} project diekspor ke JSON`,
+    });
+  };
+
+  const exportToCSV = () => {
+    const headers = ["title", "category", "problem", "solution", "tech_stack", "github_url", "demo_url", "image_url"];
+    const csvRows = [
+      headers.join(","),
+      ...filteredAndSortedProjects.map((p) =>
+        headers
+          .map((h) => {
+            const value = p[h as keyof Project];
+            if (Array.isArray(value)) {
+              return `"${value.join("; ")}"`;
+            }
+            if (typeof value === "string") {
+              return `"${value.replace(/"/g, '""')}"`;
+            }
+            return value ?? "";
+          })
+          .join(",")
+      ),
+    ];
+
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `projects-${new Date().toISOString().split("T")[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    logActivity("EXPORT", "projects", undefined, undefined, {
+      format: "CSV",
+      count: filteredAndSortedProjects.length,
+    });
+
+    toast({
+      title: "Berhasil",
+      description: `${filteredAndSortedProjects.length} project diekspor ke CSV`,
+    });
+  };
+
   const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -508,6 +728,22 @@ export default function Admin() {
     return sortOrder === "asc" 
       ? <ArrowUp className="h-4 w-4 ml-1" /> 
       : <ArrowDown className="h-4 w-4 ml-1" />;
+  };
+
+  const getActionColor = (action: string) => {
+    switch (action) {
+      case "CREATE":
+        return "text-green-600 bg-green-100 dark:bg-green-900/30 dark:text-green-400";
+      case "UPDATE":
+        return "text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400";
+      case "DELETE":
+      case "BULK_DELETE":
+        return "text-red-600 bg-red-100 dark:bg-red-900/30 dark:text-red-400";
+      case "EXPORT":
+        return "text-purple-600 bg-purple-100 dark:bg-purple-900/30 dark:text-purple-400";
+      default:
+        return "text-gray-600 bg-gray-100 dark:bg-gray-900/30 dark:text-gray-400";
+    }
   };
 
   if (loading || isLoading) {
@@ -538,7 +774,102 @@ export default function Admin() {
               <p className="text-sm text-muted-foreground">{user?.email}</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            {/* Activity Log Sheet */}
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <History className="h-4 w-4 mr-2" />
+                  Activity Log
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2">
+                    <History className="h-5 w-5" />
+                    Activity Log
+                  </SheetTitle>
+                  <SheetDescription>
+                    Riwayat aktivitas terbaru di admin dashboard
+                  </SheetDescription>
+                </SheetHeader>
+                <div className="mt-6 space-y-4">
+                  {activityLogs.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-8">
+                      Belum ada aktivitas
+                    </p>
+                  ) : (
+                    activityLogs.map((log) => (
+                      <div
+                        key={log.id}
+                        className="p-3 rounded-lg border border-border bg-card"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span
+                                className={`px-2 py-0.5 rounded text-xs font-medium ${getActionColor(log.action)}`}
+                              >
+                                {log.action}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {log.entity_type}
+                              </span>
+                            </div>
+                            {log.entity_title && (
+                              <p className="font-medium text-sm">{log.entity_title}</p>
+                            )}
+                            {log.details && (
+                              <p className="text-xs text-muted-foreground mt-1">
+                                {log.action === "BULK_DELETE" && log.details.count
+                                  ? `Menghapus ${log.details.count} project`
+                                  : log.action === "EXPORT" && log.details.format
+                                  ? `Export ${log.details.count} project ke ${log.details.format}`
+                                  : JSON.stringify(log.details)}
+                              </p>
+                            )}
+                          </div>
+                          <div className="text-right">
+                            <p className="text-xs text-muted-foreground">
+                              {new Date(log.created_at).toLocaleDateString("id-ID", {
+                                day: "numeric",
+                                month: "short",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate max-w-[120px]">
+                              {log.user_email}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </SheetContent>
+            </Sheet>
+
+            {/* Export Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={exportToJSON}>
+                  <FileJson className="h-4 w-4 mr-2" />
+                  Export ke JSON
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={exportToCSV}>
+                  <FileSpreadsheet className="h-4 w-4 mr-2" />
+                  Export ke CSV
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             <Button onClick={openCreateDialog}>
               <Plus className="h-4 w-4 mr-2" />
               Tambah Project
@@ -622,6 +953,17 @@ export default function Admin() {
                 ))}
               </SelectContent>
             </Select>
+
+            {/* Bulk Delete Button */}
+            {selectedProjects.size > 0 && (
+              <Button
+                variant="destructive"
+                onClick={() => setIsBulkDeleteDialogOpen(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Hapus ({selectedProjects.size})
+              </Button>
+            )}
           </div>
         </div>
 
@@ -631,6 +973,12 @@ export default function Admin() {
             <table className="w-full">
               <thead className="bg-muted/50">
                 <tr>
+                  <th className="text-left p-4 font-medium w-12">
+                    <Checkbox
+                      checked={paginatedProjects.length > 0 && selectedProjects.size === paginatedProjects.length}
+                      onCheckedChange={toggleSelectAll}
+                    />
+                  </th>
                   <th className="text-left p-4 font-medium">Thumbnail</th>
                   <th className="text-left p-4 font-medium">
                     <button 
@@ -666,7 +1014,7 @@ export default function Admin() {
               <tbody>
                 {paginatedProjects.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="text-center p-8 text-muted-foreground">
+                    <td colSpan={7} className="text-center p-8 text-muted-foreground">
                       {searchQuery || filterCategory !== "all" 
                         ? "Tidak ada project yang cocok dengan filter"
                         : "Belum ada project"}
@@ -674,7 +1022,20 @@ export default function Admin() {
                   </tr>
                 ) : (
                   paginatedProjects.map((project) => (
-                    <tr key={project.id} className="border-t border-border hover:bg-muted/30 transition-colors">
+                    <tr 
+                      key={project.id} 
+                      className={`border-t border-border transition-colors ${
+                        selectedProjects.has(project.id) 
+                          ? "bg-primary/5" 
+                          : "hover:bg-muted/30"
+                      }`}
+                    >
+                      <td className="p-4">
+                        <Checkbox
+                          checked={selectedProjects.has(project.id)}
+                          onCheckedChange={() => toggleProjectSelection(project.id)}
+                        />
+                      </td>
                       <td className="p-4">
                         {project.image_url ? (
                           <img
@@ -1028,6 +1389,42 @@ export default function Admin() {
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
                 Hapus
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Bulk Delete Confirmation Dialog */}
+        <AlertDialog open={isBulkDeleteDialogOpen} onOpenChange={setIsBulkDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+                Hapus {selectedProjects.size} Project?
+              </AlertDialogTitle>
+              <AlertDialogDescription>
+                Anda yakin ingin menghapus {selectedProjects.size} project yang dipilih? 
+                Tindakan ini tidak dapat dibatalkan.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel disabled={isDeleting}>Batal</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={handleBulkDelete}
+                disabled={isDeleting}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                {isDeleting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Menghapus...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Hapus Semua
+                  </>
+                )}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
