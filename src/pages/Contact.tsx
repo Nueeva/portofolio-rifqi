@@ -55,6 +55,19 @@ declare global {
   }
 }
 
+const EMAIL_DOMAINS = [
+  "@gmail.com",
+  "@yahoo.com",
+  "@hotmail.com",
+  "@outlook.com",
+  "@icloud.com",
+  "@protonmail.com",
+  "@mail.com",
+  "@live.com",
+  "@ymail.com",
+  "@aol.com",
+];
+
 const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -67,8 +80,12 @@ const Contact = () => {
   const [shakeFields, setShakeFields] = useState<Record<string, boolean>>({});
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileError, setTurnstileError] = useState(false);
+  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
+  const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const turnstileWidgetId = useRef<string | null>(null);
   const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const emailInputRef = useRef<HTMLInputElement>(null);
   const formStartTime = useRef<number>(Date.now());
   const { toast } = useToast();
 
@@ -243,6 +260,62 @@ const Contact = () => {
     // Real-time validation
     const error = validateField(name, value);
     setErrors((prev) => ({ ...prev, [name]: error }));
+
+    // Email auto-suggest logic
+    if (name === "email") {
+      const atIndex = value.indexOf("@");
+      if (atIndex !== -1 && !value.includes(" ")) {
+        const localPart = value.substring(0, atIndex);
+        const domainPart = value.substring(atIndex);
+        
+        // Filter domains that match what user is typing
+        const filteredDomains = EMAIL_DOMAINS.filter((domain) =>
+          domain.toLowerCase().startsWith(domainPart.toLowerCase())
+        );
+        
+        // Create full email suggestions
+        const suggestions = filteredDomains.map((domain) => localPart + domain);
+        setEmailSuggestions(suggestions);
+        setShowEmailSuggestions(suggestions.length > 0 && domainPart !== suggestions[0]?.substring(atIndex));
+        setSelectedSuggestionIndex(-1);
+      } else {
+        setShowEmailSuggestions(false);
+        setEmailSuggestions([]);
+      }
+    }
+  };
+
+  const handleEmailKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (!showEmailSuggestions || emailSuggestions.length === 0) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setSelectedSuggestionIndex((prev) =>
+        prev < emailSuggestions.length - 1 ? prev + 1 : prev
+      );
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setSelectedSuggestionIndex((prev) => (prev > 0 ? prev - 1 : -1));
+    } else if (e.key === "Enter" && selectedSuggestionIndex >= 0) {
+      e.preventDefault();
+      selectEmailSuggestion(emailSuggestions[selectedSuggestionIndex]);
+    } else if (e.key === "Tab" && emailSuggestions.length > 0) {
+      e.preventDefault();
+      selectEmailSuggestion(emailSuggestions[selectedSuggestionIndex >= 0 ? selectedSuggestionIndex : 0]);
+    } else if (e.key === "Escape") {
+      setShowEmailSuggestions(false);
+    }
+  };
+
+  const selectEmailSuggestion = (suggestion: string) => {
+    setFormData((prev) => ({ ...prev, email: suggestion }));
+    setShowEmailSuggestions(false);
+    setEmailSuggestions([]);
+    setSelectedSuggestionIndex(-1);
+    
+    // Validate the selected email
+    const error = validateField("email", suggestion);
+    setErrors((prev) => ({ ...prev, email: error }));
   };
 
   return (
@@ -404,20 +477,50 @@ const Contact = () => {
                     </Label>
                     <div className="relative">
                       <Input
+                        ref={emailInputRef}
                         id="email"
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
+                        onKeyDown={handleEmailKeyDown}
+                        onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 150)}
+                        onFocus={() => {
+                          if (emailSuggestions.length > 0) setShowEmailSuggestions(true);
+                        }}
                         placeholder="nama@domain.com"
                         required
                         minLength={5}
                         maxLength={100}
+                        autoComplete="off"
                         className={`pr-10 transition-all ${shakeFields.email ? "animate-shake" : ""} ${errors.email ? "border-destructive" : isFieldValid('email') ? "border-green-500" : ""}`}
                       />
                       <div className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ${isFieldValid('email') ? 'opacity-100 scale-100' : 'opacity-0 scale-75'}`}>
                         <Check className="h-5 w-5 text-green-500" />
                       </div>
+                      
+                      {/* Email suggestions dropdown */}
+                      {showEmailSuggestions && emailSuggestions.length > 0 && (
+                        <div className="absolute z-50 w-full mt-1 top-full left-0 bg-card border border-border rounded-md shadow-lg overflow-hidden animate-fade-in">
+                          {emailSuggestions.map((suggestion, index) => (
+                            <button
+                              key={suggestion}
+                              type="button"
+                              className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-primary/10 ${
+                                index === selectedSuggestionIndex ? "bg-primary/10 text-primary" : ""
+                              }`}
+                              onMouseDown={(e) => {
+                                e.preventDefault();
+                                selectEmailSuggestion(suggestion);
+                              }}
+                              onMouseEnter={() => setSelectedSuggestionIndex(index)}
+                            >
+                              <span className="font-medium">{suggestion.split("@")[0]}</span>
+                              <span className="text-primary">@{suggestion.split("@")[1]}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="flex justify-between items-center min-h-[20px]">
                       <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.email ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
