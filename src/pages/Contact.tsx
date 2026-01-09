@@ -111,7 +111,7 @@ const Contact = () => {
       "Saya ingin mendiskusikan proyek baru...",
       "Hello, I would like to collaborate...",
     ],
-    typingSpeed: 60,
+    typingSpeed: 50,
     deletingSpeed: 25,
     pauseDuration: 2000,
   });
@@ -364,7 +364,7 @@ const Contact = () => {
 
                 <div className="space-y-4">
                   <a
-                    href="mailto:contact@example.com"
+                    href="mailto:rifqiariansyah123@gmail.com"
                     className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group"
                   >
                     <div className="p-2 rounded-md bg-primary/10">
@@ -379,7 +379,7 @@ const Contact = () => {
                   </a>
 
                   <a
-                    href="https://github.com"
+                    href="https://github.com/Nueeva"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group"
@@ -394,7 +394,7 @@ const Contact = () => {
                   </a>
 
                   <a
-                    href="https://linkedin.com"
+                    href="https://linkedin.com/rifqia"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group"
