@@ -17,7 +17,7 @@ export function Footer() {
           {/* Social Links */}
           <div className="flex items-center gap-4">
             <a
-              href="https://github.com"
+              href="https://github.com/Nueeva"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -26,7 +26,7 @@ export function Footer() {
               <Github className="h-5 w-5" />
             </a>
             <a
-              href="https://linkedin.com"
+              href="https://linkedin.com/id/rifqia"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-primary transition-colors"
@@ -35,7 +35,7 @@ export function Footer() {
               <Linkedin className="h-5 w-5" />
             </a>
             <a
-              href="mailto:contact@example.com"
+              href="mailto:rifqiaeiansyah123@gmail.com"
               className="text-muted-foreground hover:text-primary transition-colors"
               aria-label="Email"
             >
@@ -44,9 +44,7 @@ export function Footer() {
           </div>
 
           {/* Copyright */}
-          <p className="text-sm text-muted-foreground">
-            © {new Date().getFullYear()} All rights reserved.
-          </p>
+          <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} All rights reserved.</p>
         </div>
       </div>
     </footer>
