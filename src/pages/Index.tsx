@@ -3,8 +3,11 @@ import { ArrowRight, Shield, Lock, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 
 const Index = () => {
+  // Track page visit for analytics
+  usePageAnalytics("/");
   return (
     <Layout>
       {/* Hero Section */}
