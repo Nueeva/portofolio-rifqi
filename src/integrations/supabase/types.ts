@@ -80,28 +80,40 @@ export type Database = {
       ip_logs: {
         Row: {
           action: string
+          city: string | null
+          country: string | null
           created_at: string
           id: string
           identifier: string | null
           ip_address: string
+          isp: string | null
+          region: string | null
           success: boolean | null
           user_agent: string | null
         }
         Insert: {
           action: string
+          city?: string | null
+          country?: string | null
           created_at?: string
           id?: string
           identifier?: string | null
           ip_address: string
+          isp?: string | null
+          region?: string | null
           success?: boolean | null
           user_agent?: string | null
         }
         Update: {
           action?: string
+          city?: string | null
+          country?: string | null
           created_at?: string
           id?: string
           identifier?: string | null
           ip_address?: string
+          isp?: string | null
+          region?: string | null
           success?: boolean | null
           user_agent?: string | null
         }
@@ -256,20 +268,36 @@ export type Database = {
         Returns: boolean
       }
       is_ip_blocked: { Args: { p_ip_address: string }; Returns: boolean }
-      log_ip_activity: {
-        Args: {
-          p_action: string
-          p_identifier: string
-          p_ip_address: string
-          p_success?: boolean
-          p_user_agent?: string
-        }
-        Returns: undefined
-      }
+      log_ip_activity:
+        | {
+            Args: {
+              p_action: string
+              p_identifier: string
+              p_ip_address: string
+              p_success?: boolean
+              p_user_agent?: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_action: string
+              p_city?: string
+              p_country?: string
+              p_identifier: string
+              p_ip_address: string
+              p_isp?: string
+              p_region?: string
+              p_success?: boolean
+              p_user_agent?: string
+            }
+            Returns: undefined
+          }
       record_login_attempt: {
         Args: { p_identifier: string; p_success?: boolean }
         Returns: undefined
       }
+      unblock_ip: { Args: { p_ip_address: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"
