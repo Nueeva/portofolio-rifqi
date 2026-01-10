@@ -397,7 +397,7 @@ const handler = async (req: Request): Promise<Response> => {
           <tr>
             <td align="center" style="padding-bottom: 32px;">
               <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">
-                <span style="font-size: 28px; color: #0a0a0f; font-weight: bold;">✉</span>
+                <span style="font-size: 28px;">🛡️</span>
               </div>
             </td>
           </tr>
