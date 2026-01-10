@@ -100,7 +100,6 @@ interface Project {
 interface ActivityLog {
   id: string;
   user_id: string;
-  user_email: string;
   action: string;
   entity_type: string;
   entity_id: string | null;
@@ -303,7 +302,6 @@ export default function Admin() {
     try {
       await supabase.from("activity_logs").insert([{
         user_id: user.id,
-        user_email: user.email || "Unknown",
         action,
         entity_type: entityType,
         entity_id: entityId || null,
@@ -845,7 +843,7 @@ export default function Admin() {
                               })}
                             </p>
                             <p className="text-xs text-muted-foreground truncate max-w-[120px]">
-                              {log.user_email}
+                              Admin
                             </p>
                           </div>
                         </div>
