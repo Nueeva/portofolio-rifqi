@@ -351,6 +351,28 @@ export function SecurityDashboard() {
   const uniqueIPs = new Set(ipLogs.map((log) => log.ip_address)).size;
   const countriesDetected = new Set(ipLogs.filter((log) => log.country).map((log) => log.country)).size;
 
+  // Geographic breakdown
+  const countryBreakdown = ipLogs
+    .filter((log) => log.country)
+    .reduce((acc, log) => {
+      const country = log.country!;
+      if (!acc[country]) {
+        acc[country] = { total: 0, failed: 0, success: 0 };
+      }
+      acc[country].total++;
+      if (log.success) {
+        acc[country].success++;
+      } else {
+        acc[country].failed++;
+      }
+      return acc;
+    }, {} as Record<string, { total: number; failed: number; success: number }>);
+
+  const topCountries = Object.entries(countryBreakdown)
+    .map(([country, stats]) => ({ country, ...stats }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -412,7 +434,46 @@ export function SecurityDashboard() {
         </div>
       </div>
 
-      {/* Search, Refresh, and Actions */}
+      {/* Geographic Breakdown */}
+      {topCountries.length > 0 && (
+        <div className="rounded-lg border border-border bg-card p-4">
+          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Geographic Breakdown (Top 5)
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3">
+            {topCountries.map(({ country, total, failed, success }) => (
+              <div 
+                key={country} 
+                className="p-3 rounded-lg bg-muted/50 border border-border/50"
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium text-sm truncate">{country}</span>
+                  <Badge variant="outline" className="text-xs">{total}</Badge>
+                </div>
+                <div className="flex gap-2 text-xs">
+                  <span className="flex items-center gap-1 text-green-600">
+                    <CheckCircle className="h-3 w-3" />
+                    {success}
+                  </span>
+                  <span className="flex items-center gap-1 text-red-600">
+                    <XCircle className="h-3 w-3" />
+                    {failed}
+                  </span>
+                </div>
+                {failed > success && (
+                  <div className="mt-2">
+                    <Badge variant="destructive" className="text-xs">
+                      <AlertTriangle className="h-3 w-3 mr-1" />
+                      High Risk
+                    </Badge>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

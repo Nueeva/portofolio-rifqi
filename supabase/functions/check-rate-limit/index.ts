@@ -22,7 +22,8 @@ async function sendBruteForceAlert(
   identifier: string, 
   attemptCount: number, 
   ipAddress?: string,
-  isIpBlocked?: boolean
+  isIpBlocked?: boolean,
+  geoLocation?: GeoLocation
 ) {
   if (!adminEmail || !resend) {
     console.log("Admin email or Resend not configured, skipping notification");
@@ -38,13 +39,20 @@ async function sendBruteForceAlert(
     return;
   }
 
+  // Format location string
+  const locationParts = [];
+  if (geoLocation?.city) locationParts.push(geoLocation.city);
+  if (geoLocation?.region) locationParts.push(geoLocation.region);
+  if (geoLocation?.country) locationParts.push(geoLocation.country);
+  const locationString = locationParts.length > 0 ? locationParts.join(", ") : "Unknown";
+
   try {
     const { error } = await resend.emails.send({
       from: "Security Alert <onboarding@resend.dev>",
       to: [adminEmail],
       subject: isIpBlocked 
-        ? "🚫 IP Address Blocked - Brute Force Attack" 
-        : "🚨 Brute Force Attack Detected",
+        ? `🚫 IP Blocked - ${geoLocation?.country || 'Unknown Location'}` 
+        : `🚨 Brute Force Attack - ${geoLocation?.country || 'Unknown Location'}`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #dc2626;">⚠️ Security Alert</h1>
@@ -53,6 +61,8 @@ async function sendBruteForceAlert(
           <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px; margin: 20px 0;">
             <p style="margin: 0;"><strong>Target Email:</strong> ${identifier}</p>
             <p style="margin: 8px 0 0;"><strong>IP Address:</strong> ${ipAddress || 'Unknown'}</p>
+            <p style="margin: 8px 0 0;"><strong>📍 Location:</strong> ${locationString}</p>
+            ${geoLocation?.isp ? `<p style="margin: 8px 0 0;"><strong>🌐 ISP:</strong> ${geoLocation.isp}</p>` : ''}
             <p style="margin: 8px 0 0;"><strong>Failed Attempts:</strong> ${attemptCount}+ in the last 15 minutes</p>
             <p style="margin: 8px 0 0;"><strong>Action Taken:</strong> ${isIpBlocked 
               ? 'IP address blocked for 24 hours' 
@@ -252,14 +262,17 @@ Deno.serve(async (req) => {
       const attemptCount = attempts?.length || 0;
       const isBlocked = attemptCount >= 5;
 
-      if (isBlocked && attempts && attempts.length > 0) {
+if (isBlocked && attempts && attempts.length > 0) {
         // Calculate when the oldest attempt in the window will expire
         const oldestAttempt = new Date(attempts[0].attempted_at);
         const expiresAt = new Date(oldestAttempt.getTime() + windowMinutes * 60 * 1000);
         const remainingSeconds = Math.ceil((expiresAt.getTime() - Date.now()) / 1000);
 
+        // Get geo-location for alert
+        const geoLocation = await getGeoLocation(ipAddress);
+        
         // Send alert to admin (fire and forget)
-        EdgeRuntime.waitUntil(sendBruteForceAlert(identifier, attemptCount, ipAddress, false));
+        EdgeRuntime.waitUntil(sendBruteForceAlert(identifier, attemptCount, ipAddress, false, geoLocation));
 
         return new Response(
           JSON.stringify({ 
@@ -341,8 +354,8 @@ Deno.serve(async (req) => {
           if (blockError) {
             console.error("Error blocking IP:", blockError);
           } else {
-            // Send alert about IP block
-            EdgeRuntime.waitUntil(sendBruteForceAlert(identifier, ipFailedCount, ipAddress, true));
+            // Send alert about IP block with geo-location
+            EdgeRuntime.waitUntil(sendBruteForceAlert(identifier, ipFailedCount, ipAddress, true, geoLocation));
           }
         }
       }
