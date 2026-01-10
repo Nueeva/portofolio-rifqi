@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Mail, Github, Linkedin, Send, CheckCircle, Sparkles, Check } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
-
-const TURNSTILE_SITE_KEY = "0x4AAAAAACLFADmrVmL9XOiI";
+import { TurnstileCaptcha, TurnstileCaptchaRef } from "@/components/TurnstileCaptcha";
 
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Nama minimal 2 karakter").max(50, "Nama maksimal 50 karakter"),
@@ -33,25 +32,6 @@ const contactSchema = z.object({
     }, "Format email tidak valid (contoh: nama@gmail.com)"),
   message: z.string().trim().min(10, "Pesan minimal 10 karakter").max(1000, "Pesan maksimal 1000 karakter"),
 });
-
-declare global {
-  interface Window {
-    turnstile: {
-      render: (
-        container: string | HTMLElement,
-        options: {
-          sitekey: string;
-          callback: (token: string) => void;
-          "expired-callback"?: () => void;
-          "error-callback"?: () => void;
-          theme?: "light" | "dark" | "auto";
-        },
-      ) => string;
-      reset: (widgetId: string) => void;
-      remove: (widgetId: string) => void;
-    };
-  }
-}
 
 const EMAIL_DOMAINS = [
   "@gmail.com",
@@ -83,8 +63,7 @@ const Contact = () => {
   const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
   const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
-  const turnstileWidgetId = useRef<string | null>(null);
-  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileRef = useRef<TurnstileCaptchaRef>(null);
   const emailInputRef = useRef<HTMLInputElement>(null);
   const formStartTime = useRef<number>(Date.now());
   const { toast } = useToast();
@@ -118,65 +97,6 @@ const Contact = () => {
     deletingSpeed: 25,
     pauseDuration: 2000,
   });
-
-  // Load Turnstile script and render widget
-  useEffect(() => {
-    const loadTurnstile = () => {
-      if (document.querySelector('script[src*="turnstile"]')) {
-        renderWidget();
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-      script.async = true;
-      script.onload = renderWidget;
-      document.head.appendChild(script);
-    };
-
-    const renderWidget = () => {
-      if (!window.turnstile || !turnstileContainerRef.current) {
-        setTimeout(renderWidget, 100);
-        return;
-      }
-
-      // Clear any existing widget
-      if (turnstileWidgetId.current) {
-        try {
-          window.turnstile.remove(turnstileWidgetId.current);
-        } catch (e) {
-          // Widget might already be removed
-        }
-      }
-
-      turnstileWidgetId.current = window.turnstile.render(turnstileContainerRef.current, {
-        sitekey: TURNSTILE_SITE_KEY,
-        callback: (token: string) => {
-          setTurnstileToken(token);
-          setTurnstileError(false);
-        },
-        "expired-callback": () => {
-          setTurnstileToken(null);
-        },
-        "error-callback": () => {
-          setTurnstileError(true);
-        },
-        theme: "dark",
-      });
-    };
-
-    loadTurnstile();
-
-    return () => {
-      if (turnstileWidgetId.current && window.turnstile) {
-        try {
-          window.turnstile.remove(turnstileWidgetId.current);
-        } catch (e) {
-          // Widget might already be removed
-        }
-      }
-    };
-  }, [isSubmitted]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -610,7 +530,16 @@ const Contact = () => {
 
                     {/* Turnstile CAPTCHA */}
                     <div className="space-y-2">
-                      <div ref={turnstileContainerRef} className="flex justify-center" />
+                      <TurnstileCaptcha
+                        ref={turnstileRef}
+                        onVerify={(token) => {
+                          setTurnstileToken(token);
+                          setTurnstileError(false);
+                        }}
+                        onExpire={() => setTurnstileToken(null)}
+                        onError={() => setTurnstileError(true)}
+                        theme="dark"
+                      />
                       <div
                         className={`overflow-hidden transition-all duration-300 ease-out ${turnstileError || (!turnstileToken && formData.name && formData.email && formData.message) ? "max-h-6 opacity-100" : "max-h-0 opacity-0"}`}
                       >

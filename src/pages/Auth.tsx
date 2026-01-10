@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -9,25 +9,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { Shield, LogIn, UserPlus, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
-
-const TURNSTILE_SITE_KEY = "0x4AAAAAACLFADmrVmL9XOiI";
+import { TurnstileCaptcha, TurnstileCaptchaRef } from "@/components/TurnstileCaptcha";
 
 const authSchema = z.object({
   email: z.string().trim().email({ message: "Email tidak valid" }),
   password: z.string().min(6, { message: "Password minimal 6 karakter" }),
 });
-
-interface TurnstileInstance {
-  render: (container: string | HTMLElement, options: {
-    sitekey: string;
-    callback: (token: string) => void;
-    'expired-callback'?: () => void;
-    'error-callback'?: () => void;
-    theme?: 'light' | 'dark' | 'auto';
-  }) => string;
-  reset: (widgetId: string) => void;
-  remove: (widgetId: string) => void;
-}
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -36,131 +23,11 @@ export default function Auth() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileReady, setTurnstileReady] = useState(false);
-  const turnstileWidgetId = useRef<string | null>(null);
-  const turnstileContainerRef = useRef<HTMLDivElement>(null);
+  const turnstileRef = useRef<TurnstileCaptchaRef>(null);
   
   const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const getTurnstile = (): TurnstileInstance | undefined => {
-    return (window as unknown as { turnstile?: TurnstileInstance }).turnstile;
-  };
-
-  const renderTurnstile = useCallback(() => {
-    const turnstile = getTurnstile();
-    if (!turnstile || !turnstileContainerRef.current || !TURNSTILE_SITE_KEY) {
-      console.log("Cannot render Turnstile:", { 
-        hasTurnstile: !!turnstile, 
-        hasContainer: !!turnstileContainerRef.current, 
-        hasSiteKey: !!TURNSTILE_SITE_KEY 
-      });
-      return;
-    }
-    
-    // Clear previous widget if exists
-    if (turnstileWidgetId.current) {
-      try {
-        turnstile.remove(turnstileWidgetId.current);
-        turnstileWidgetId.current = null;
-      } catch (e) {
-        console.log("Widget already removed");
-      }
-    }
-    
-    // Clear container
-    turnstileContainerRef.current.innerHTML = '';
-    
-    try {
-      turnstileWidgetId.current = turnstile.render(turnstileContainerRef.current, {
-        sitekey: TURNSTILE_SITE_KEY,
-        callback: (token: string) => {
-          console.log("Turnstile token received");
-          setTurnstileToken(token);
-        },
-        'expired-callback': () => {
-          console.log("Turnstile token expired");
-          setTurnstileToken(null);
-        },
-        'error-callback': () => {
-          console.error("Turnstile error");
-          setTurnstileToken(null);
-        },
-        theme: 'auto',
-      });
-      console.log("Turnstile widget rendered");
-    } catch (error) {
-      console.error("Failed to render Turnstile:", error);
-    }
-  }, []);
-
-  // Load Turnstile script - using same approach as Contact page for consistency
-  useEffect(() => {
-    const loadTurnstile = () => {
-      // Check if script already exists
-      if (document.querySelector('script[src*="turnstile"]')) {
-        checkAndSetReady();
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
-      script.async = true;
-      script.onload = checkAndSetReady;
-      script.onerror = () => {
-        console.error("Failed to load Turnstile script");
-      };
-      document.head.appendChild(script);
-    };
-
-    const checkAndSetReady = () => {
-      const turnstile = getTurnstile();
-      if (turnstile) {
-        setTurnstileReady(true);
-      } else {
-        // Retry until ready (max 10 seconds)
-        const checkInterval = setInterval(() => {
-          if (getTurnstile()) {
-            clearInterval(checkInterval);
-            setTurnstileReady(true);
-          }
-        }, 100);
-        setTimeout(() => clearInterval(checkInterval), 10000);
-      }
-    };
-
-    loadTurnstile();
-  }, []);
-
-  // Render widget when ready (and after the form DOM is mounted)
-  useEffect(() => {
-    if (!turnstileReady || loading) return;
-
-    let cancelled = false;
-
-    const tryRender = (attempt = 0) => {
-      if (cancelled) return;
-
-      // When page was still in `loading` state, the container isn't mounted yet.
-      // So we retry briefly until the ref exists.
-      if (turnstileContainerRef.current) {
-        renderTurnstile();
-        return;
-      }
-
-      if (attempt < 50) {
-        setTimeout(() => tryRender(attempt + 1), 50);
-      }
-    };
-
-    // Next tick to ensure DOM is painted
-    setTimeout(() => tryRender(), 0);
-
-    return () => {
-      cancelled = true;
-    };
-  }, [turnstileReady, loading, renderTurnstile]);
 
   useEffect(() => {
     if (!loading && user) {
@@ -237,13 +104,18 @@ export default function Auth() {
     }
   };
 
+  const resetTurnstile = () => {
+    setTurnstileToken(null);
+    turnstileRef.current?.reset();
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
 
     // Check Turnstile verification
-    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+    if (!turnstileToken) {
       toast({
         title: "Verifikasi Diperlukan",
         description: "Silakan selesaikan verifikasi keamanan",
@@ -270,23 +142,16 @@ export default function Auth() {
       }
 
       // Verify Turnstile token on server
-      if (TURNSTILE_SITE_KEY && turnstileToken) {
-        const isValid = await verifyTurnstile(turnstileToken);
-        if (!isValid) {
-          toast({
-            title: "Verifikasi Gagal",
-            description: "Verifikasi keamanan gagal, silakan coba lagi",
-            variant: "destructive",
-          });
-          // Reset Turnstile
-          setTurnstileToken(null);
-          const turnstile = getTurnstile();
-          if (turnstileWidgetId.current && turnstile) {
-            turnstile.reset(turnstileWidgetId.current);
-          }
-          setIsSubmitting(false);
-          return;
-        }
+      const isValid = await verifyTurnstile(turnstileToken);
+      if (!isValid) {
+        toast({
+          title: "Verifikasi Gagal",
+          description: "Verifikasi keamanan gagal, silakan coba lagi",
+          variant: "destructive",
+        });
+        resetTurnstile();
+        setIsSubmitting(false);
+        return;
       }
 
       if (isLogin) {
@@ -343,12 +208,7 @@ export default function Auth() {
       }
     } finally {
       setIsSubmitting(false);
-      // Reset Turnstile after submission
-      setTurnstileToken(null);
-      const turnstile = getTurnstile();
-      if (turnstileWidgetId.current && turnstile) {
-        turnstile.reset(turnstileWidgetId.current);
-      }
+      resetTurnstile();
     }
   };
 
@@ -412,17 +272,19 @@ export default function Auth() {
                 </div>
               </div>
 
-              {/* Turnstile Widget */}
-              {TURNSTILE_SITE_KEY && (
-                <div className="flex justify-center">
-                  <div ref={turnstileContainerRef} />
-                </div>
-              )}
+              {/* Turnstile CAPTCHA */}
+              <TurnstileCaptcha
+                ref={turnstileRef}
+                onVerify={setTurnstileToken}
+                onExpire={() => setTurnstileToken(null)}
+                onError={() => setTurnstileToken(null)}
+                theme="auto"
+              />
 
               <Button 
                 type="submit" 
                 className="w-full"
-                disabled={isSubmitting || (TURNSTILE_SITE_KEY && !turnstileToken)}
+                disabled={isSubmitting || !turnstileToken}
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
