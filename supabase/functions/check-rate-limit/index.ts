@@ -170,20 +170,29 @@ Deno.serve(async (req) => {
 
     // Action: check-ip - Check if IP is blocked
     if (action === "check-ip") {
-      const { data: isIpBlocked, error: ipError } = await supabase.rpc("is_ip_blocked", {
-        p_ip_address: ipAddress,
-      });
+      // Query directly to get expires_at for countdown
+      const { data: ipBlockData, error: ipError } = await supabase
+        .from("blocked_ips")
+        .select("expires_at")
+        .eq("ip_address", ipAddress)
+        .gt("expires_at", new Date().toISOString())
+        .single();
 
-      if (ipError) {
+      if (ipError && ipError.code !== "PGRST116") {
         console.error("Error checking IP block:", ipError);
       }
 
-      if (isIpBlocked) {
+      if (ipBlockData) {
+        const expiresAt = new Date(ipBlockData.expires_at);
+        const remainingSeconds = Math.ceil((expiresAt.getTime() - Date.now()) / 1000);
+        
         return new Response(
           JSON.stringify({ 
             blocked: true,
             blockedType: "ip",
-            message: "IP address Anda telah diblokir karena aktivitas mencurigakan. Silakan coba lagi dalam 24 jam."
+            message: "IP address Anda telah diblokir karena aktivitas mencurigakan.",
+            remainingSeconds,
+            expiresAt: ipBlockData.expires_at
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
@@ -196,51 +205,81 @@ Deno.serve(async (req) => {
     }
 
     if (action === "check") {
-      // First check if IP is blocked
-      const { data: isIpBlocked, error: ipError } = await supabase.rpc("is_ip_blocked", {
-        p_ip_address: ipAddress,
-      });
+      // First check if IP is blocked - query directly to get expires_at
+      const { data: ipBlockData, error: ipError } = await supabase
+        .from("blocked_ips")
+        .select("expires_at")
+        .eq("ip_address", ipAddress)
+        .gt("expires_at", new Date().toISOString())
+        .single();
 
-      if (ipError) {
+      if (ipError && ipError.code !== "PGRST116") {
         console.error("Error checking IP block:", ipError);
       }
 
-      if (isIpBlocked) {
+      if (ipBlockData) {
+        const expiresAt = new Date(ipBlockData.expires_at);
+        const remainingSeconds = Math.ceil((expiresAt.getTime() - Date.now()) / 1000);
+        
         return new Response(
           JSON.stringify({ 
             blocked: true,
             blockedType: "ip",
-            message: "IP address Anda telah diblokir karena aktivitas mencurigakan. Silakan coba lagi dalam 24 jam."
+            message: "IP address Anda telah diblokir karena aktivitas mencurigakan.",
+            remainingSeconds,
+            expiresAt: ipBlockData.expires_at
           }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      // Check email rate limit
-      const { data: isBlocked, error } = await supabase.rpc("check_rate_limit", {
-        p_identifier: identifier,
-        p_max_attempts: 5,
-        p_window_minutes: 15,
-      });
+      // Check email rate limit - get failed attempts in the window
+      const windowMinutes = 15;
+      const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000).toISOString();
+      
+      const { data: attempts, error: attemptsError } = await supabase
+        .from("login_attempts")
+        .select("attempted_at")
+        .eq("identifier", identifier)
+        .eq("success", false)
+        .gte("attempted_at", windowStart)
+        .order("attempted_at", { ascending: true });
 
-      if (error) {
-        console.error("Error checking rate limit:", error);
-        return new Response(
-          JSON.stringify({ error: "Failed to check rate limit" }),
-          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
+      if (attemptsError) {
+        console.error("Error fetching attempts:", attemptsError);
       }
 
-      // If blocked, send alert to admin (fire and forget)
-      if (isBlocked) {
-        EdgeRuntime.waitUntil(sendBruteForceAlert(identifier, 5, ipAddress, false));
+      const attemptCount = attempts?.length || 0;
+      const isBlocked = attemptCount >= 5;
+
+      if (isBlocked && attempts && attempts.length > 0) {
+        // Calculate when the oldest attempt in the window will expire
+        const oldestAttempt = new Date(attempts[0].attempted_at);
+        const expiresAt = new Date(oldestAttempt.getTime() + windowMinutes * 60 * 1000);
+        const remainingSeconds = Math.ceil((expiresAt.getTime() - Date.now()) / 1000);
+
+        // Send alert to admin (fire and forget)
+        EdgeRuntime.waitUntil(sendBruteForceAlert(identifier, attemptCount, ipAddress, false));
+
+        return new Response(
+          JSON.stringify({ 
+            blocked: true,
+            blockedType: "email",
+            message: "Terlalu banyak percobaan login.",
+            remainingSeconds: Math.max(0, remainingSeconds),
+            expiresAt: expiresAt.toISOString(),
+            attemptCount
+          }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
 
       return new Response(
         JSON.stringify({ 
-          blocked: isBlocked,
-          blockedType: isBlocked ? "email" : null,
-          message: isBlocked ? "Terlalu banyak percobaan login. Silakan coba lagi dalam 15 menit." : null
+          blocked: false,
+          blockedType: null,
+          message: null,
+          attemptCount
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
