@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -8,11 +8,26 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Shield, LogIn, UserPlus, Loader2 } from "lucide-react";
 import { z } from "zod";
+import { supabase } from "@/integrations/supabase/client";
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || "";
 
 const authSchema = z.object({
   email: z.string().trim().email({ message: "Email tidak valid" }),
   password: z.string().min(6, { message: "Password minimal 6 karakter" }),
 });
+
+interface TurnstileInstance {
+  render: (container: string | HTMLElement, options: {
+    sitekey: string;
+    callback: (token: string) => void;
+    'expired-callback'?: () => void;
+    'error-callback'?: () => void;
+    theme?: 'light' | 'dark' | 'auto';
+  }) => string;
+  reset: (widgetId: string) => void;
+  remove: (widgetId: string) => void;
+}
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
@@ -20,10 +35,86 @@ export default function Auth() {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileReady, setTurnstileReady] = useState(false);
+  const turnstileWidgetId = useRef<string | null>(null);
+  const turnstileContainerRef = useRef<HTMLDivElement>(null);
   
   const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const getTurnstile = (): TurnstileInstance | undefined => {
+    return (window as unknown as { turnstile?: TurnstileInstance }).turnstile;
+  };
+
+  const renderTurnstile = useCallback(() => {
+    const turnstile = getTurnstile();
+    if (!turnstile || !turnstileContainerRef.current || !TURNSTILE_SITE_KEY) return;
+    
+    // Clear previous widget if exists
+    if (turnstileWidgetId.current) {
+      try {
+        turnstile.remove(turnstileWidgetId.current);
+      } catch (e) {
+        // Widget might already be removed
+      }
+    }
+    
+    // Clear container
+    turnstileContainerRef.current.innerHTML = '';
+    
+    turnstileWidgetId.current = turnstile.render(turnstileContainerRef.current, {
+      sitekey: TURNSTILE_SITE_KEY,
+      callback: (token: string) => {
+        setTurnstileToken(token);
+      },
+      'expired-callback': () => {
+        setTurnstileToken(null);
+      },
+      'error-callback': () => {
+        setTurnstileToken(null);
+      },
+      theme: 'auto',
+    });
+  }, []);
+
+  // Load Turnstile script
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY) {
+      console.warn("Turnstile site key not configured");
+      return;
+    }
+
+    const existingScript = document.querySelector('script[src*="turnstile"]');
+    if (existingScript) {
+      if (getTurnstile()) {
+        setTurnstileReady(true);
+      }
+      return;
+    }
+
+    (window as unknown as { onTurnstileLoad?: () => void }).onTurnstileLoad = () => {
+      setTurnstileReady(true);
+    };
+
+    const script = document.createElement('script');
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad';
+    script.async = true;
+    script.defer = true;
+    document.head.appendChild(script);
+
+    return () => {
+      delete (window as unknown as { onTurnstileLoad?: () => void }).onTurnstileLoad;
+    };
+  }, []);
+
+  // Render widget when ready
+  useEffect(() => {
+    if (turnstileReady) {
+      renderTurnstile();
+    }
+  }, [turnstileReady, renderTurnstile]);
 
   useEffect(() => {
     if (!loading && user) {
@@ -49,14 +140,62 @@ export default function Auth() {
     }
   };
 
+  const verifyTurnstile = async (token: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('verify-turnstile', {
+        body: { token },
+      });
+      
+      if (error) {
+        console.error("Turnstile verification error:", error);
+        return false;
+      }
+      
+      return data?.success === true;
+    } catch (err) {
+      console.error("Failed to verify Turnstile:", err);
+      return false;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!validateForm()) return;
 
+    // Check Turnstile verification
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      toast({
+        title: "Verifikasi Diperlukan",
+        description: "Silakan selesaikan verifikasi keamanan",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
+      // Verify Turnstile token on server
+      if (TURNSTILE_SITE_KEY && turnstileToken) {
+        const isValid = await verifyTurnstile(turnstileToken);
+        if (!isValid) {
+          toast({
+            title: "Verifikasi Gagal",
+            description: "Verifikasi keamanan gagal, silakan coba lagi",
+            variant: "destructive",
+          });
+          // Reset Turnstile
+          setTurnstileToken(null);
+          const turnstile = getTurnstile();
+          if (turnstileWidgetId.current && turnstile) {
+            turnstile.reset(turnstileWidgetId.current);
+          }
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
@@ -105,6 +244,12 @@ export default function Auth() {
       }
     } finally {
       setIsSubmitting(false);
+      // Reset Turnstile after submission
+      setTurnstileToken(null);
+      const turnstile = getTurnstile();
+      if (turnstileWidgetId.current && turnstile) {
+        turnstile.reset(turnstileWidgetId.current);
+      }
     }
   };
 
@@ -168,10 +313,17 @@ export default function Auth() {
                 </div>
               </div>
 
+              {/* Turnstile Widget */}
+              {TURNSTILE_SITE_KEY && (
+                <div className="flex justify-center">
+                  <div ref={turnstileContainerRef} />
+                </div>
+              )}
+
               <Button 
                 type="submit" 
                 className="w-full"
-                disabled={isSubmitting}
+                disabled={isSubmitting || (TURNSTILE_SITE_KEY && !turnstileToken)}
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
