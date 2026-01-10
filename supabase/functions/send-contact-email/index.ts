@@ -20,6 +20,18 @@ interface TurnstileResponse {
   'error-codes'?: string[];
 }
 
+// HTML escape function to prevent XSS attacks in email content
+function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return text.replace(/[&<>"']/g, (char) => map[char]);
+}
+
 // Rate limiting configuration
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const MAX_REQUESTS_PER_WINDOW = 5; // Max 5 emails per hour per IP
@@ -184,10 +196,10 @@ const handler = async (req: Request): Promise<Response> => {
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #00e5a0;">New Portfolio Contact</h2>
             <div style="background: #1a1a2e; padding: 20px; border-radius: 8px; color: #fff;">
-              <p><strong style="color: #00e5a0;">Name:</strong> ${name}</p>
-              <p><strong style="color: #00e5a0;">Email:</strong> ${email}</p>
+              <p><strong style="color: #00e5a0;">Name:</strong> ${escapeHtml(name)}</p>
+              <p><strong style="color: #00e5a0;">Email:</strong> ${escapeHtml(email)}</p>
               <p><strong style="color: #00e5a0;">Message:</strong></p>
-              <p style="white-space: pre-wrap;">${message}</p>
+              <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
             </div>
             <p style="color: #888; font-size: 12px; margin-top: 20px;">
               This message was sent from your portfolio contact form.
