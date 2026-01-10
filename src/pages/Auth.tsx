@@ -4,9 +4,9 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { Shield, LogIn, UserPlus, Loader2, Clock, AlertTriangle } from "lucide-react";
+import { Shield, LogIn, UserPlus, Loader2, Clock, AlertTriangle, CheckCircle2, XCircle, ShieldAlert, UserCheck, ShieldX, Mail } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { TurnstileCaptcha, TurnstileCaptchaRef } from "@/components/TurnstileCaptcha";
@@ -44,7 +44,6 @@ export default function Auth() {
   
   const { user, loading, signIn, signUp } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   // Cleanup countdown on unmount
   useEffect(() => {
@@ -191,10 +190,9 @@ export default function Auth() {
 
     // Check Turnstile verification
     if (!turnstileToken) {
-      toast({
-        title: "Verifikasi Diperlukan",
+      toast.warning("Verifikasi Diperlukan", {
         description: "Silakan selesaikan verifikasi keamanan",
-        variant: "destructive",
+        icon: <ShieldAlert className="h-5 w-5" />,
       });
       return;
     }
@@ -218,6 +216,15 @@ export default function Auth() {
             startCountdown(rateLimitResult.remainingSeconds);
           }
           
+          // Show blocked toast
+          toast.error("Akses Diblokir", {
+            description: rateLimitResult.blockedType === "ip" 
+              ? "IP Anda telah diblokir sementara" 
+              : "Terlalu banyak percobaan gagal",
+            icon: <ShieldX className="h-5 w-5" />,
+            duration: 5000,
+          });
+          
           setIsSubmitting(false);
           return;
         }
@@ -226,10 +233,9 @@ export default function Auth() {
       // Verify Turnstile token on server
       const isValid = await verifyTurnstile(turnstileToken);
       if (!isValid) {
-        toast({
-          title: "Verifikasi Gagal",
+        toast.error("Verifikasi Gagal", {
           description: "Verifikasi keamanan gagal, silakan coba lagi",
-          variant: "destructive",
+          icon: <ShieldAlert className="h-5 w-5" />,
         });
         resetTurnstile();
         setIsSubmitting(false);
@@ -256,19 +262,22 @@ export default function Auth() {
             if (updatedRateLimit.remainingSeconds) {
               startCountdown(updatedRateLimit.remainingSeconds);
             }
-          }
-          
-          if (error.message.includes("Invalid login credentials")) {
-            toast({
-              title: "Login Gagal",
+            
+            // Show blocked toast
+            toast.error("Akses Diblokir", {
+              description: "Terlalu banyak percobaan gagal. Silakan tunggu.",
+              icon: <ShieldX className="h-5 w-5" />,
+              duration: 5000,
+            });
+          } else if (error.message.includes("Invalid login credentials")) {
+            toast.error("Login Gagal", {
               description: "Email atau password salah",
-              variant: "destructive",
+              icon: <XCircle className="h-5 w-5" />,
             });
           } else {
-            toast({
-              title: "Login Gagal",
+            toast.error("Login Gagal", {
               description: error.message,
-              variant: "destructive",
+              icon: <XCircle className="h-5 w-5" />,
             });
           }
         } else {
@@ -287,31 +296,29 @@ export default function Auth() {
             initialSeconds: 0,
           });
           
-          toast({
-            title: "Login Berhasil",
+          toast.success("Login Berhasil", {
             description: "Selamat datang kembali!",
+            icon: <CheckCircle2 className="h-5 w-5" />,
           });
         }
       } else {
         const { error } = await signUp(email, password);
         if (error) {
           if (error.message.includes("User already registered")) {
-            toast({
-              title: "Registrasi Gagal",
+            toast.error("Registrasi Gagal", {
               description: "Email sudah terdaftar",
-              variant: "destructive",
+              icon: <Mail className="h-5 w-5" />,
             });
           } else {
-            toast({
-              title: "Registrasi Gagal",
+            toast.error("Registrasi Gagal", {
               description: error.message,
-              variant: "destructive",
+              icon: <XCircle className="h-5 w-5" />,
             });
           }
         } else {
-          toast({
-            title: "Registrasi Berhasil",
+          toast.success("Registrasi Berhasil", {
             description: "Akun berhasil dibuat, silakan login",
+            icon: <UserCheck className="h-5 w-5" />,
           });
           setIsLogin(true);
         }
