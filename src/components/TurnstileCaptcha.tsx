@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, forwardRef, useImperativeHandle } from "react";
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShieldCheck } from "lucide-react";
 
@@ -39,9 +39,21 @@ const getTurnstile = (): TurnstileInstance | undefined => {
 export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptchaProps>(
   ({ onVerify, onExpire, onError, theme = "dark", className }, ref) => {
     const [isLoading, setIsLoading] = useState(true);
-    const [scriptReady, setScriptReady] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<string | null>(null);
+    const isRenderedRef = useRef(false);
+    
+    // Use refs to store callbacks to prevent re-renders from triggering re-initialization
+    const onVerifyRef = useRef(onVerify);
+    const onExpireRef = useRef(onExpire);
+    const onErrorRef = useRef(onError);
+    
+    // Update refs when props change
+    useEffect(() => {
+      onVerifyRef.current = onVerify;
+      onExpireRef.current = onExpire;
+      onErrorRef.current = onError;
+    }, [onVerify, onExpire, onError]);
 
     // Expose reset method to parent
     useImperativeHandle(ref, () => ({
@@ -57,127 +69,107 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
       },
     }));
 
-    // Render the widget
-    const renderWidget = useCallback(() => {
-      const turnstile = getTurnstile();
-      
-      if (!turnstile || !containerRef.current) {
-        return false;
-      }
-
-      // Remove existing widget if any
-      if (widgetIdRef.current) {
-        try {
-          turnstile.remove(widgetIdRef.current);
-          widgetIdRef.current = null;
-        } catch (e) {
-          // Widget might already be removed
-        }
-      }
-
-      // Clear container
-      containerRef.current.innerHTML = "";
-
-      try {
-        widgetIdRef.current = turnstile.render(containerRef.current, {
-          sitekey: TURNSTILE_SITE_KEY,
-          callback: (token: string) => {
-            onVerify(token);
-          },
-          "expired-callback": () => {
-            onExpire?.();
-          },
-          "error-callback": () => {
-            onError?.();
-          },
-          theme,
-        });
-        setIsLoading(false);
-        return true;
-      } catch (error) {
-        console.error("Failed to render Turnstile:", error);
-        return false;
-      }
-    }, [onVerify, onExpire, onError, theme]);
-
-    // Load script
+    // Load script and render widget - run only once on mount
     useEffect(() => {
-      const checkAndSetReady = () => {
-        if (getTurnstile()) {
-          setScriptReady(true);
-          return;
+      let cancelled = false;
+      let pollInterval: ReturnType<typeof setInterval>;
+
+      const renderWidget = () => {
+        const turnstile = getTurnstile();
+        
+        if (!turnstile || !containerRef.current || isRenderedRef.current) {
+          return false;
         }
 
-        // Retry until ready (max 10 seconds)
+        // Clear container to be safe
+        containerRef.current.innerHTML = "";
+
+        try {
+          widgetIdRef.current = turnstile.render(containerRef.current, {
+            sitekey: TURNSTILE_SITE_KEY,
+            callback: (token: string) => {
+              onVerifyRef.current(token);
+            },
+            "expired-callback": () => {
+              onExpireRef.current?.();
+            },
+            "error-callback": () => {
+              onErrorRef.current?.();
+            },
+            theme,
+          });
+          isRenderedRef.current = true;
+          setIsLoading(false);
+          return true;
+        } catch (error) {
+          console.error("Failed to render Turnstile:", error);
+          return false;
+        }
+      };
+
+      const startPolling = () => {
         let attempts = 0;
-        const checkInterval = setInterval(() => {
+        pollInterval = setInterval(() => {
+          if (cancelled) {
+            clearInterval(pollInterval);
+            return;
+          }
+          
           attempts++;
-          if (getTurnstile()) {
-            clearInterval(checkInterval);
-            setScriptReady(true);
-          } else if (attempts >= 100) {
-            clearInterval(checkInterval);
+          
+          // Try to render if container is ready
+          if (containerRef.current && renderWidget()) {
+            clearInterval(pollInterval);
+            return;
+          }
+          
+          // Give up after 10 seconds
+          if (attempts >= 100) {
+            clearInterval(pollInterval);
+            setIsLoading(false);
           }
         }, 100);
       };
 
-      // Check if script already exists
-      if (document.querySelector('script[src*="turnstile"]')) {
-        checkAndSetReady();
-        return;
+      // Check if script already loaded
+      if (getTurnstile()) {
+        // Script already loaded, just need to wait for container
+        startPolling();
+      } else if (document.querySelector('script[src*="turnstile"]')) {
+        // Script tag exists but not loaded yet
+        startPolling();
+      } else {
+        // Need to load script
+        const script = document.createElement("script");
+        script.src = TURNSTILE_SCRIPT_URL;
+        script.async = true;
+        script.onload = () => {
+          if (!cancelled) startPolling();
+        };
+        script.onerror = () => {
+          console.error("Failed to load Turnstile script");
+          if (!cancelled) setIsLoading(false);
+        };
+        document.head.appendChild(script);
       }
 
-      const script = document.createElement("script");
-      script.src = TURNSTILE_SCRIPT_URL;
-      script.async = true;
-      script.onload = checkAndSetReady;
-      script.onerror = () => {
-        console.error("Failed to load Turnstile script");
-        setIsLoading(false);
-      };
-      document.head.appendChild(script);
-    }, []);
-
-    // Render widget when script is ready and container is mounted
-    useEffect(() => {
-      if (!scriptReady) return;
-
-      let cancelled = false;
-
-      const tryRender = (attempt = 0) => {
-        if (cancelled) return;
-
-        if (containerRef.current && renderWidget()) {
-          return;
-        }
-
-        // Retry up to 50 times (2.5 seconds)
-        if (attempt < 50) {
-          setTimeout(() => tryRender(attempt + 1), 50);
-        }
-      };
-
-      // Start trying on next tick
-      setTimeout(() => tryRender(), 0);
-
+      // Cleanup on unmount
       return () => {
         cancelled = true;
-      };
-    }, [scriptReady, renderWidget]);
-
-    // Cleanup on unmount
-    useEffect(() => {
-      return () => {
+        if (pollInterval) clearInterval(pollInterval);
+        
         const turnstile = getTurnstile();
         if (widgetIdRef.current && turnstile) {
           try {
             turnstile.remove(widgetIdRef.current);
+            widgetIdRef.current = null;
+            isRenderedRef.current = false;
           } catch (e) {
             // Widget might already be removed
           }
         }
       };
-    }, []);
+    }, [theme]); // Only re-run if theme changes
 
     return (
       <div className={className}>
