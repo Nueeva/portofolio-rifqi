@@ -215,6 +215,7 @@ export default function Auth() {
     
     setIsSubmitting(true);
     try {
+      // Use Supabase's built-in password reset - it will send email with the actual reset link
       const { error } = await resetPassword(email);
       if (error) {
         toast.error("Gagal Mengirim Email", {

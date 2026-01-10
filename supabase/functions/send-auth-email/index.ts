@@ -529,36 +529,89 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const payload = await req.text();
-    console.log("Received auth email hook payload");
+    console.log("Received auth email request");
     
-    let emailData: {
-      user: { email: string };
-      email_data: {
-        token: string;
-        token_hash: string;
-        redirect_to: string;
-        email_action_type: string;
-        site_url: string;
-      };
-    };
+    let emailData: any;
+    
+    // Try to parse as JSON first (direct frontend call)
+    try {
+      emailData = JSON.parse(payload);
+    } catch {
+      console.error("Failed to parse payload as JSON");
+      return new Response(
+        JSON.stringify({ error: { http_code: 400, message: "Invalid request body" } }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
 
+    // Check if this is a direct call from frontend
+    if (emailData.type && emailData.email && emailData.redirectUrl) {
+      // Direct call from frontend - send custom styled email
+      const { type, email, redirectUrl } = emailData;
+      
+      console.log(`Processing direct ${type} email request for ${email}`);
+      
+      let subject: string;
+      let emailContent: { html: string; text: string };
+
+      switch (type) {
+        case "recovery":
+          subject = "Reset Password - Rifqi Ariansyah";
+          emailContent = generatePasswordResetEmail(redirectUrl, email);
+          break;
+        case "magiclink":
+          subject = "Magic Link Login - Rifqi Ariansyah";
+          emailContent = generateMagicLinkEmail(redirectUrl, email);
+          break;
+        case "signup":
+        case "email_confirmation":
+          subject = "Konfirmasi Email - Rifqi Ariansyah";
+          emailContent = generateSignupConfirmationEmail(redirectUrl, email);
+          break;
+        default:
+          subject = "Notifikasi - Rifqi Ariansyah";
+          emailContent = generatePasswordResetEmail(redirectUrl, email);
+      }
+
+      console.log(`Sending ${type} email to ${email}`);
+      
+      await sendEmailViaSMTP(
+        email,
+        subject,
+        emailContent.html,
+        emailContent.text
+      );
+
+      console.log(`Successfully sent ${type} email to ${email}`);
+
+      return new Response(
+        JSON.stringify({ success: true }),
+        { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Auth Hook format (from Supabase)
     // Try to verify with webhook secret if available
     if (HOOK_SECRET) {
       try {
         const headers = Object.fromEntries(req.headers);
         const wh = new Webhook(HOOK_SECRET);
-        emailData = wh.verify(payload, headers) as typeof emailData;
+        emailData = wh.verify(payload, headers) as any;
       } catch (verifyError) {
         console.error("Webhook verification failed:", verifyError);
-        // Fall back to parsing JSON directly for testing
-        emailData = JSON.parse(payload);
+        // Already parsed above, continue
       }
-    } else {
-      // No secret configured, parse directly
-      emailData = JSON.parse(payload);
     }
 
     const { user, email_data } = emailData;
+    
+    if (!user?.email || !email_data) {
+      return new Response(
+        JSON.stringify({ error: { http_code: 400, message: "Missing required fields" } }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
     const { token_hash, redirect_to, email_action_type, site_url } = email_data;
     
     console.log(`Processing ${email_action_type} email for ${user.email}`);
