@@ -194,6 +194,34 @@ export default function Auth() {
     }
   };
 
+  const checkRateLimit = async (identifier: string): Promise<{ blocked: boolean; message?: string }> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('check-rate-limit', {
+        body: { identifier, action: 'check' },
+      });
+      
+      if (error) {
+        console.error("Rate limit check error:", error);
+        return { blocked: false };
+      }
+      
+      return data || { blocked: false };
+    } catch (err) {
+      console.error("Failed to check rate limit:", err);
+      return { blocked: false };
+    }
+  };
+
+  const recordLoginAttempt = async (identifier: string, success: boolean) => {
+    try {
+      await supabase.functions.invoke('check-rate-limit', {
+        body: { identifier, action: 'record', success },
+      });
+    } catch (err) {
+      console.error("Failed to record login attempt:", err);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -212,6 +240,20 @@ export default function Auth() {
     setIsSubmitting(true);
 
     try {
+      // Check rate limit before attempting login
+      if (isLogin) {
+        const rateLimitResult = await checkRateLimit(email.toLowerCase());
+        if (rateLimitResult.blocked) {
+          toast({
+            title: "Akses Diblokir",
+            description: rateLimitResult.message || "Terlalu banyak percobaan login. Silakan coba lagi dalam 15 menit.",
+            variant: "destructive",
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       // Verify Turnstile token on server
       if (TURNSTILE_SITE_KEY && turnstileToken) {
         const isValid = await verifyTurnstile(turnstileToken);
@@ -235,6 +277,9 @@ export default function Auth() {
       if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
+          // Record failed login attempt
+          await recordLoginAttempt(email.toLowerCase(), false);
+          
           if (error.message.includes("Invalid login credentials")) {
             toast({
               title: "Login Gagal",
@@ -249,6 +294,9 @@ export default function Auth() {
             });
           }
         } else {
+          // Record successful login attempt
+          await recordLoginAttempt(email.toLowerCase(), true);
+          
           toast({
             title: "Login Berhasil",
             description: "Selamat datang kembali!",
