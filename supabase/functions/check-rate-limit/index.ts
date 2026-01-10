@@ -82,6 +82,13 @@ async function sendBruteForceAlert(
   }
 }
 
+interface GeoLocation {
+  country: string | null;
+  city: string | null;
+  region: string | null;
+  isp: string | null;
+}
+
 function getClientIP(req: Request): string {
   // Try various headers in order of preference
   const forwardedFor = req.headers.get("x-forwarded-for");
@@ -101,6 +108,38 @@ function getClientIP(req: Request): string {
   }
   
   return "unknown";
+}
+
+async function getGeoLocation(ipAddress: string): Promise<GeoLocation> {
+  if (ipAddress === "unknown" || ipAddress === "127.0.0.1" || ipAddress.startsWith("192.168.") || ipAddress.startsWith("10.")) {
+    return { country: null, city: null, region: null, isp: null };
+  }
+
+  try {
+    // Using ip-api.com free tier (no API key needed, 45 requests/minute)
+    const response = await fetch(`http://ip-api.com/json/${ipAddress}?fields=status,country,regionName,city,isp`);
+    
+    if (!response.ok) {
+      console.error("Geo-location API error:", response.status);
+      return { country: null, city: null, region: null, isp: null };
+    }
+
+    const data = await response.json();
+    
+    if (data.status === "success") {
+      return {
+        country: data.country || null,
+        city: data.city || null,
+        region: data.regionName || null,
+        isp: data.isp || null,
+      };
+    }
+    
+    return { country: null, city: null, region: null, isp: null };
+  } catch (error) {
+    console.error("Error fetching geo-location:", error);
+    return { country: null, city: null, region: null, isp: null };
+  }
 }
 
 Deno.serve(async (req) => {
@@ -206,13 +245,21 @@ Deno.serve(async (req) => {
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     } else if (action === "record") {
-      // Log IP activity
+      // Fetch geo-location in background
+      const geoLocation = await getGeoLocation(ipAddress);
+      console.log(`Geo-location for ${ipAddress}:`, geoLocation);
+
+      // Log IP activity with geo-location
       const { error: logError } = await supabase.rpc("log_ip_activity", {
         p_ip_address: ipAddress,
         p_identifier: identifier,
         p_action: "login",
         p_success: success || false,
         p_user_agent: userAgent || null,
+        p_country: geoLocation.country,
+        p_city: geoLocation.city,
+        p_region: geoLocation.region,
+        p_isp: geoLocation.isp,
       });
 
       if (logError) {

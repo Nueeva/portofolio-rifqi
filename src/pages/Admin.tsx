@@ -36,7 +36,8 @@ import {
   FileSpreadsheet,
   History,
   CheckSquare,
-  BarChart3
+  BarChart3,
+  ShieldAlert
 } from "lucide-react";
 import {
   Dialog,
@@ -80,6 +81,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { z } from "zod";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
+import { SecurityDashboard } from "@/components/admin/SecurityDashboard";
 
 interface Project {
   id: string;
@@ -912,6 +914,10 @@ export default function Admin() {
               <BarChart3 className="h-4 w-4" />
               Analytics
             </TabsTrigger>
+            <TabsTrigger value="security" className="flex items-center gap-2">
+              <ShieldAlert className="h-4 w-4" />
+              Security
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="projects">
@@ -1201,6 +1207,10 @@ export default function Admin() {
 
           <TabsContent value="analytics">
             <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="security">
+            <SecurityDashboard />
           </TabsContent>
         </Tabs>
 
