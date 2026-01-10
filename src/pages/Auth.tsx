@@ -10,7 +10,7 @@ import { Shield, LogIn, UserPlus, Loader2 } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 
-const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || "";
+const TURNSTILE_SITE_KEY = "0x4AAAAAACLFADmrVmL9XOiI";
 
 const authSchema = z.object({
   email: z.string().trim().email({ message: "Email tidak valid" }),
@@ -95,54 +95,42 @@ export default function Auth() {
     }
   }, []);
 
-  // Load Turnstile script
+  // Load Turnstile script - using same approach as Contact page for consistency
   useEffect(() => {
-    if (!TURNSTILE_SITE_KEY) {
-      console.warn("Turnstile site key not configured");
-      return;
-    }
+    const loadTurnstile = () => {
+      // Check if script already exists
+      if (document.querySelector('script[src*="turnstile"]')) {
+        checkAndSetReady();
+        return;
+      }
 
-    // Check if turnstile is already loaded
-    const turnstile = getTurnstile();
-    if (turnstile) {
-      setTurnstileReady(true);
-      return;
-    }
-
-    // Set up callback before loading script
-    (window as unknown as { onTurnstileLoad?: () => void }).onTurnstileLoad = () => {
-      console.log("Turnstile loaded successfully");
-      setTurnstileReady(true);
+      const script = document.createElement("script");
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+      script.async = true;
+      script.onload = checkAndSetReady;
+      script.onerror = () => {
+        console.error("Failed to load Turnstile script");
+      };
+      document.head.appendChild(script);
     };
 
-    // Check if script already exists
-    const existingScript = document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]');
-    if (existingScript) {
-      // Script exists, wait for it to load
-      const checkReady = setInterval(() => {
-        if (getTurnstile()) {
-          clearInterval(checkReady);
-          setTurnstileReady(true);
-        }
-      }, 100);
-      
-      // Cleanup interval after 10 seconds
-      setTimeout(() => clearInterval(checkReady), 10000);
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad&render=explicit';
-    script.async = true;
-    document.head.appendChild(script);
-
-    script.onerror = () => {
-      console.error("Failed to load Turnstile script");
+    const checkAndSetReady = () => {
+      const turnstile = getTurnstile();
+      if (turnstile) {
+        setTurnstileReady(true);
+      } else {
+        // Retry until ready (max 10 seconds)
+        const checkInterval = setInterval(() => {
+          if (getTurnstile()) {
+            clearInterval(checkInterval);
+            setTurnstileReady(true);
+          }
+        }, 100);
+        setTimeout(() => clearInterval(checkInterval), 10000);
+      }
     };
 
-    return () => {
-      delete (window as unknown as { onTurnstileLoad?: () => void }).onTurnstileLoad;
-    };
+    loadTurnstile();
   }, []);
 
   // Render widget when ready
