@@ -215,7 +215,12 @@ export default function Auth() {
   const recordLoginAttempt = async (identifier: string, success: boolean) => {
     try {
       await supabase.functions.invoke('check-rate-limit', {
-        body: { identifier, action: 'record', success },
+        body: { 
+          identifier, 
+          action: 'record', 
+          success,
+          userAgent: navigator.userAgent,
+        },
       });
     } catch (err) {
       console.error("Failed to record login attempt:", err);
