@@ -382,22 +382,132 @@ const handler = async (req: Request): Promise<Response> => {
     const port = parseInt(SMTP_PORT, 10);
     
     const htmlContent = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #00e5a0;">New Portfolio Contact</h2>
-        <div style="background: #1a1a2e; padding: 20px; border-radius: 8px; color: #fff;">
-          <p><strong style="color: #00e5a0;">Name:</strong> ${escapeHtml(name)}</p>
-          <p><strong style="color: #00e5a0;">Email:</strong> ${escapeHtml(email)}</p>
-          <p><strong style="color: #00e5a0;">Message:</strong></p>
-          <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
-        </div>
-        <p style="color: #888; font-size: 12px; margin-top: 20px;">
-          This message was sent from your portfolio contact form.
-        </p>
-      </div>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; background-color: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="width: 100%; max-width: 520px; border-collapse: collapse;">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding-bottom: 32px;">
+              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">
+                <span style="font-size: 28px; color: #0a0a0f; font-weight: bold;">✉</span>
+              </div>
+            </td>
+          </tr>
+          
+          <!-- Main Card -->
+          <tr>
+            <td style="background: linear-gradient(180deg, #1a1a2e 0%, #16162a 100%); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+              <!-- Title -->
+              <h1 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: #ffffff; text-align: center;">
+                📬 Pesan Baru Masuk!
+              </h1>
+              <p style="margin: 0 0 32px 0; font-size: 15px; color: #a1a1aa; text-align: center; line-height: 1.5;">
+                Ada yang menghubungi Anda melalui portfolio
+              </p>
+              
+              <!-- Divider -->
+              <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 229, 160, 0.3), transparent); margin: 0 0 32px 0;"></div>
+              
+              <!-- Sender Info -->
+              <div style="background: rgba(0, 229, 160, 0.1); border: 1px solid rgba(0, 229, 160, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding-bottom: 12px;">
+                      <p style="margin: 0; font-size: 11px; color: #00e5a0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                        👤 Nama Pengirim
+                      </p>
+                      <p style="margin: 6px 0 0 0; font-size: 16px; color: #ffffff; font-weight: 500;">
+                        ${escapeHtml(name)}
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p style="margin: 0; font-size: 11px; color: #00e5a0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                        📧 Email
+                      </p>
+                      <p style="margin: 6px 0 0 0; font-size: 16px; color: #ffffff;">
+                        <a href="mailto:${escapeHtml(email)}" style="color: #00e5a0; text-decoration: none;">${escapeHtml(email)}</a>
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              
+              <!-- Message Content -->
+              <div style="background: rgba(0, 0, 0, 0.3); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <p style="margin: 0 0 12px 0; font-size: 11px; color: #00e5a0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                  💬 Pesan
+                </p>
+                <p style="margin: 0; font-size: 15px; color: #e4e4e7; line-height: 1.7; white-space: pre-wrap;">
+${escapeHtml(message)}
+                </p>
+              </div>
+              
+              <!-- Reply Button -->
+              <table role="presentation" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td align="center">
+                    <a href="mailto:${escapeHtml(email)}?subject=Re: Pesan dari Portfolio" style="display: inline-block; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); color: #0a0a0f; font-size: 15px; font-weight: 600; text-decoration: none; padding: 16px 48px; border-radius: 12px; box-shadow: 0 4px 14px 0 rgba(0, 229, 160, 0.4);">
+                      Balas Pesan
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              
+              <!-- Timestamp -->
+              <p style="margin: 24px 0 0 0; font-size: 12px; color: #71717a; text-align: center;">
+                Diterima pada ${new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short', timeZone: 'Asia/Jakarta' })} WIB
+              </p>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="padding-top: 32px; text-align: center;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #71717a;">
+                Rifqi Ariansyah Portfolio
+              </p>
+              <p style="margin: 0; font-size: 12px; color: #52525b;">
+                Full-Stack Developer & UI/UX Designer
+              </p>
+              <div style="margin-top: 16px;">
+                <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
     `;
 
-    const textContent = `New Portfolio Contact\n\nName: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
-    const subject = `New Contact Form Submission from ${escapeHtml(name)}`;
+    const textContent = `
+📬 Pesan Baru dari Portfolio!
+
+👤 Nama: ${name}
+📧 Email: ${email}
+
+💬 Pesan:
+${message}
+
+---
+Diterima pada ${new Date().toLocaleString('id-ID', { dateStyle: 'full', timeStyle: 'short', timeZone: 'Asia/Jakarta' })} WIB
+
+Rifqi Ariansyah Portfolio
+https://rifqi.tech
+    `;
+    const subject = `📬 Pesan Baru dari ${escapeHtml(name)} | Portfolio Contact`;
 
     await sendEmailViaSMTP(
       SMTP_HOST,

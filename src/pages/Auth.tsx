@@ -246,6 +246,18 @@ export default function Auth() {
           icon: <XCircle className="h-5 w-5" />,
         });
       } else {
+        // Send password changed notification email
+        try {
+          await supabase.functions.invoke('send-auth-email', {
+            body: {
+              type: 'password_changed',
+              email: user?.email || '',
+            },
+          });
+        } catch (emailErr) {
+          console.log("Password change notification email skipped:", emailErr);
+        }
+        
         toast.success("Password Berhasil Diubah", {
           description: "Silakan login dengan password baru",
           icon: <CheckCircle2 className="h-5 w-5" />,

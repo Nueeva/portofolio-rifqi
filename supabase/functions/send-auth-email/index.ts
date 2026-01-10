@@ -513,6 +513,141 @@ https://rifqi.tech
   return { html, text };
 }
 
+function generatePasswordChangedEmail(userEmail: string): { html: string; text: string } {
+  const currentTime = new Date().toLocaleString('id-ID', { 
+    dateStyle: 'full', 
+    timeStyle: 'short', 
+    timeZone: 'Asia/Jakarta' 
+  });
+  
+  const html = `
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Berhasil Diubah</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table role="presentation" style="width: 100%; max-width: 520px; border-collapse: collapse;">
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding-bottom: 32px;">
+              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">
+                <span style="font-size: 28px; color: #0a0a0f; font-weight: bold;">✓</span>
+              </div>
+            </td>
+          </tr>
+          
+          <!-- Main Card -->
+          <tr>
+            <td style="background: linear-gradient(180deg, #1a1a2e 0%, #16162a 100%); border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 40px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+              <!-- Success Icon -->
+              <div style="text-align: center; margin-bottom: 24px;">
+                <div style="display: inline-block; width: 80px; height: 80px; background: linear-gradient(135deg, rgba(0, 229, 160, 0.2) 0%, rgba(0, 184, 212, 0.2) 100%); border-radius: 50%; line-height: 80px;">
+                  <span style="font-size: 40px;">🔐</span>
+                </div>
+              </div>
+              
+              <!-- Title -->
+              <h1 style="margin: 0 0 8px 0; font-size: 24px; font-weight: 700; color: #ffffff; text-align: center;">
+                Password Berhasil Diubah!
+              </h1>
+              <p style="margin: 0 0 32px 0; font-size: 15px; color: #a1a1aa; text-align: center; line-height: 1.5;">
+                Password akun Anda telah berhasil diperbarui
+              </p>
+              
+              <!-- Divider -->
+              <div style="height: 1px; background: linear-gradient(90deg, transparent, rgba(0, 229, 160, 0.3), transparent); margin: 0 0 32px 0;"></div>
+              
+              <!-- Account Info -->
+              <div style="background: rgba(0, 229, 160, 0.1); border: 1px solid rgba(0, 229, 160, 0.2); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr>
+                    <td style="padding-bottom: 12px;">
+                      <p style="margin: 0; font-size: 11px; color: #00e5a0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                        📧 Akun Email
+                      </p>
+                      <p style="margin: 6px 0 0 0; font-size: 16px; color: #ffffff;">
+                        ${userEmail}
+                      </p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <p style="margin: 0; font-size: 11px; color: #00e5a0; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                        🕐 Waktu Perubahan
+                      </p>
+                      <p style="margin: 6px 0 0 0; font-size: 16px; color: #ffffff;">
+                        ${currentTime} WIB
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              
+              <!-- Success Message -->
+              <div style="background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.2); border-radius: 12px; padding: 16px; margin-bottom: 24px; text-align: center;">
+                <p style="margin: 0; font-size: 14px; color: #22c55e; line-height: 1.5;">
+                  ✅ Anda sekarang dapat login dengan password baru
+                </p>
+              </div>
+              
+              <!-- Warning -->
+              <div style="padding: 16px; background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.2); border-radius: 12px;">
+                <p style="margin: 0; font-size: 13px; color: #fbbf24; line-height: 1.5;">
+                  ⚠️ Jika Anda tidak melakukan perubahan ini, segera hubungi kami dan amankan akun Anda.
+                </p>
+              </div>
+            </td>
+          </tr>
+          
+          <!-- Footer -->
+          <tr>
+            <td style="padding-top: 32px; text-align: center;">
+              <p style="margin: 0 0 8px 0; font-size: 14px; color: #71717a;">
+                Rifqi Ariansyah
+              </p>
+              <p style="margin: 0; font-size: 12px; color: #52525b;">
+                Full-Stack Developer & UI/UX Designer
+              </p>
+              <div style="margin-top: 16px;">
+                <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
+              </div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  const text = `
+🔐 Password Berhasil Diubah!
+
+Password akun Anda telah berhasil diperbarui.
+
+📧 Akun: ${userEmail}
+🕐 Waktu: ${currentTime} WIB
+
+✅ Anda sekarang dapat login dengan password baru.
+
+⚠️ Jika Anda tidak melakukan perubahan ini, segera hubungi kami dan amankan akun Anda.
+
+---
+Rifqi Ariansyah
+Full-Stack Developer & UI/UX Designer
+https://rifqi.tech
+  `;
+
+  return { html, text };
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -545,7 +680,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Check if this is a direct call from frontend
-    if (emailData.type && emailData.email && emailData.redirectUrl) {
+    if (emailData.type && emailData.email) {
       // Direct call from frontend - send custom styled email
       const { type, email, redirectUrl } = emailData;
       
@@ -557,20 +692,24 @@ const handler = async (req: Request): Promise<Response> => {
       switch (type) {
         case "recovery":
           subject = "Reset Password - Rifqi Ariansyah";
-          emailContent = generatePasswordResetEmail(redirectUrl, email);
+          emailContent = generatePasswordResetEmail(redirectUrl || "", email);
           break;
         case "magiclink":
           subject = "Magic Link Login - Rifqi Ariansyah";
-          emailContent = generateMagicLinkEmail(redirectUrl, email);
+          emailContent = generateMagicLinkEmail(redirectUrl || "", email);
           break;
         case "signup":
         case "email_confirmation":
           subject = "Konfirmasi Email - Rifqi Ariansyah";
-          emailContent = generateSignupConfirmationEmail(redirectUrl, email);
+          emailContent = generateSignupConfirmationEmail(redirectUrl || "", email);
+          break;
+        case "password_changed":
+          subject = "🔐 Password Berhasil Diubah - Rifqi Ariansyah";
+          emailContent = generatePasswordChangedEmail(email);
           break;
         default:
           subject = "Notifikasi - Rifqi Ariansyah";
-          emailContent = generatePasswordResetEmail(redirectUrl, email);
+          emailContent = generatePasswordChangedEmail(email);
       }
 
       console.log(`Sending ${type} email to ${email}`);
