@@ -271,7 +271,7 @@ function generatePasswordResetEmail(resetLink: string, userEmail: string): { htm
                 Rifqi Ariansyah
               </p>
               <p style="margin: 0; font-size: 12px; color: #52525b;">
-                Full-Stack Developer & UI/UX Designer
+                Cybersecurity Developer
               </p>
               <div style="margin-top: 16px;">
                 <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
@@ -300,7 +300,7 @@ Jika Anda tidak meminta reset password, abaikan email ini.
 
 ---
 Rifqi Ariansyah
-Full-Stack Developer & UI/UX Designer
+Cybersecurity Developer
 https://rifqi.tech
   `;
 
@@ -382,7 +382,7 @@ function generateMagicLinkEmail(magicLink: string, userEmail: string): { html: s
                 Rifqi Ariansyah
               </p>
               <p style="margin: 0; font-size: 12px; color: #52525b;">
-                Full-Stack Developer & UI/UX Designer
+                Cybersecurity Developer
               </p>
               <div style="margin-top: 16px;">
                 <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
@@ -409,7 +409,7 @@ Jika Anda tidak mencoba login, abaikan email ini.
 
 ---
 Rifqi Ariansyah
-Full-Stack Developer & UI/UX Designer
+Cybersecurity Developer
 https://rifqi.tech
   `;
 
@@ -483,7 +483,7 @@ function generateSignupConfirmationEmail(confirmLink: string, userEmail: string)
                 Rifqi Ariansyah
               </p>
               <p style="margin: 0; font-size: 12px; color: #52525b;">
-                Full-Stack Developer & UI/UX Designer
+                Cybersecurity Developer
               </p>
               <div style="margin-top: 16px;">
                 <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
@@ -506,7 +506,7 @@ ${confirmLink}
 
 ---
 Rifqi Ariansyah
-Full-Stack Developer & UI/UX Designer
+Cybersecurity Developer
 https://rifqi.tech
   `;
 
@@ -612,7 +612,7 @@ function generatePasswordChangedEmail(userEmail: string): { html: string; text: 
                 Rifqi Ariansyah
               </p>
               <p style="margin: 0; font-size: 12px; color: #52525b;">
-                Full-Stack Developer & UI/UX Designer
+                Cybersecurity Developer
               </p>
               <div style="margin-top: 16px;">
                 <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
@@ -641,7 +641,7 @@ Password akun Anda telah berhasil diperbarui.
 
 ---
 Rifqi Ariansyah
-Full-Stack Developer & UI/UX Designer
+Cybersecurity Developer
 https://rifqi.tech
   `;
 
