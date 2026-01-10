@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const SMTP_HOST = Deno.env.get("SMTP_HOST");
 const SMTP_PORT = Deno.env.get("SMTP_PORT");
@@ -44,7 +43,6 @@ const MAX_REQUESTS_PER_WINDOW = 5; // Max 5 emails per hour per IP
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 function getClientIP(req: Request): string {
-  // Try various headers for client IP
   const forwardedFor = req.headers.get("x-forwarded-for");
   if (forwardedFor) {
     return forwardedFor.split(",")[0].trim();
@@ -64,7 +62,6 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
   const now = Date.now();
   const record = rateLimitStore.get(ip);
 
-  // Clean up expired entries periodically
   if (rateLimitStore.size > 1000) {
     for (const [key, value] of rateLimitStore.entries()) {
       if (now > value.resetTime) {
@@ -74,7 +71,6 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
   }
 
   if (!record || now > record.resetTime) {
-    // First request or window expired
     rateLimitStore.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW_MS });
     return { allowed: true };
   }
@@ -84,20 +80,220 @@ function checkRateLimit(ip: string): { allowed: boolean; retryAfter?: number } {
     return { allowed: false, retryAfter };
   }
 
-  // Increment count
   record.count++;
   rateLimitStore.set(ip, record);
   return { allowed: true };
 }
 
+// Base64 encode for SMTP AUTH
+function base64Encode(str: string): string {
+  return btoa(str);
+}
+
+// Send email via raw SMTP using Deno.connect
+async function sendEmailViaSMTP(
+  host: string,
+  port: number,
+  username: string,
+  password: string,
+  to: string,
+  subject: string,
+  htmlContent: string,
+  textContent: string,
+  replyTo: string
+): Promise<void> {
+  const encoder = new TextEncoder();
+  const decoder = new TextDecoder();
+
+  // Connect using TLS for port 465
+  let conn: Deno.Conn;
+  
+  if (port === 465) {
+    conn = await Deno.connectTls({
+      hostname: host,
+      port: port,
+    });
+  } else {
+    conn = await Deno.connect({
+      hostname: host,
+      port: port,
+    });
+  }
+
+  const reader = conn.readable.getReader();
+  const writer = conn.writable.getWriter();
+
+  async function readResponse(): Promise<string> {
+    const { value } = await reader.read();
+    if (!value) return "";
+    return decoder.decode(value);
+  }
+
+  async function sendCommand(cmd: string): Promise<string> {
+    await writer.write(encoder.encode(cmd + "\r\n"));
+    return await readResponse();
+  }
+
+  try {
+    // Read initial greeting
+    await readResponse();
+
+    // EHLO
+    let response = await sendCommand(`EHLO localhost`);
+    console.log("EHLO response received");
+
+    // For port 587, upgrade to TLS using STARTTLS
+    if (port === 587) {
+      await sendCommand("STARTTLS");
+      
+      // Upgrade connection to TLS
+      reader.releaseLock();
+      writer.releaseLock();
+      
+      const tlsConn = await Deno.startTls(conn as Deno.TcpConn, { hostname: host });
+      const tlsReader = tlsConn.readable.getReader();
+      const tlsWriter = tlsConn.writable.getWriter();
+      
+      // Reassign for the rest of the session
+      const readTls = async (): Promise<string> => {
+        const { value } = await tlsReader.read();
+        if (!value) return "";
+        return decoder.decode(value);
+      };
+
+      const sendTls = async (cmd: string): Promise<string> => {
+        await tlsWriter.write(encoder.encode(cmd + "\r\n"));
+        return await readTls();
+      };
+
+      // EHLO again after STARTTLS
+      await sendTls(`EHLO localhost`);
+
+      // AUTH LOGIN
+      await sendTls("AUTH LOGIN");
+      await sendTls(base64Encode(username));
+      response = await sendTls(base64Encode(password));
+      
+      if (!response.startsWith("235")) {
+        throw new Error("SMTP authentication failed: " + response);
+      }
+
+      // MAIL FROM
+      await sendTls(`MAIL FROM:<${username}>`);
+      
+      // RCPT TO
+      await sendTls(`RCPT TO:<${to}>`);
+      
+      // DATA
+      await sendTls("DATA");
+
+      // Construct MIME email with both HTML and plain text
+      const boundary = "----=_Part_" + Date.now();
+      const emailContent = [
+        `From: ${username}`,
+        `To: ${to}`,
+        `Reply-To: ${replyTo}`,
+        `Subject: ${subject}`,
+        `MIME-Version: 1.0`,
+        `Content-Type: multipart/alternative; boundary="${boundary}"`,
+        ``,
+        `--${boundary}`,
+        `Content-Type: text/plain; charset=UTF-8`,
+        ``,
+        textContent,
+        ``,
+        `--${boundary}`,
+        `Content-Type: text/html; charset=UTF-8`,
+        ``,
+        htmlContent,
+        ``,
+        `--${boundary}--`,
+        `.`
+      ].join("\r\n");
+
+      response = await sendTls(emailContent);
+      
+      if (!response.startsWith("250")) {
+        throw new Error("Failed to send email: " + response);
+      }
+
+      await sendTls("QUIT");
+      tlsReader.releaseLock();
+      tlsWriter.releaseLock();
+      tlsConn.close();
+    } else {
+      // For port 465 (already TLS)
+      // AUTH LOGIN
+      await sendCommand("AUTH LOGIN");
+      await sendCommand(base64Encode(username));
+      response = await sendCommand(base64Encode(password));
+      
+      if (!response.startsWith("235")) {
+        throw new Error("SMTP authentication failed: " + response);
+      }
+
+      // MAIL FROM
+      await sendCommand(`MAIL FROM:<${username}>`);
+      
+      // RCPT TO
+      await sendCommand(`RCPT TO:<${to}>`);
+      
+      // DATA
+      await sendCommand("DATA");
+
+      // Construct MIME email
+      const boundary = "----=_Part_" + Date.now();
+      const emailContent = [
+        `From: ${username}`,
+        `To: ${to}`,
+        `Reply-To: ${replyTo}`,
+        `Subject: ${subject}`,
+        `MIME-Version: 1.0`,
+        `Content-Type: multipart/alternative; boundary="${boundary}"`,
+        ``,
+        `--${boundary}`,
+        `Content-Type: text/plain; charset=UTF-8`,
+        ``,
+        textContent,
+        ``,
+        `--${boundary}`,
+        `Content-Type: text/html; charset=UTF-8`,
+        ``,
+        htmlContent,
+        ``,
+        `--${boundary}--`,
+        `.`
+      ].join("\r\n");
+
+      response = await sendCommand(emailContent);
+      
+      if (!response.startsWith("250")) {
+        throw new Error("Failed to send email: " + response);
+      }
+
+      await sendCommand("QUIT");
+      reader.releaseLock();
+      writer.releaseLock();
+      conn.close();
+    }
+  } catch (error) {
+    try {
+      reader.releaseLock();
+      writer.releaseLock();
+      conn.close();
+    } catch {
+      // Ignore cleanup errors
+    }
+    throw error;
+  }
+}
+
 const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Check rate limit
     const clientIP = getClientIP(req);
     const { allowed, retryAfter } = checkRateLimit(clientIP);
     
@@ -119,7 +315,6 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Validate SMTP configuration
     if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
       console.error("SMTP configuration is incomplete");
       return new Response(JSON.stringify({ error: "Email service not configured" }), {
@@ -132,7 +327,6 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Received contact form submission from ${name} (${email})`);
 
-    // Validate input
     if (!name || !email || !message) {
       return new Response(JSON.stringify({ error: "All fields are required" }), {
         status: 400,
@@ -140,7 +334,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Verify Turnstile token
     if (!turnstileToken) {
       console.error("Missing Turnstile token");
       return new Response(JSON.stringify({ error: "CAPTCHA verification required" }), {
@@ -157,7 +350,6 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
-    // Verify the Turnstile token with Cloudflare
     const turnstileVerifyResponse = await fetch(
       "https://challenges.cloudflare.com/turnstile/v0/siteverify",
       {
@@ -185,28 +377,9 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Send email using SMTP
     console.log(`Connecting to SMTP server: ${SMTP_HOST}:${SMTP_PORT}`);
     
-    const client = new SmtpClient();
     const port = parseInt(SMTP_PORT, 10);
-    
-    // Connect using TLS for port 465, STARTTLS for port 587
-    if (port === 465) {
-      await client.connectTLS({
-        hostname: SMTP_HOST,
-        port: port,
-        username: SMTP_USER,
-        password: SMTP_PASS,
-      });
-    } else {
-      await client.connect({
-        hostname: SMTP_HOST,
-        port: port,
-        username: SMTP_USER,
-        password: SMTP_PASS,
-      });
-    }
     
     const htmlContent = `
       <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
@@ -223,15 +396,20 @@ const handler = async (req: Request): Promise<Response> => {
       </div>
     `;
 
-    await client.send({
-      from: SMTP_USER,
-      to: SMTP_USER, // Send to your own email
-      subject: `New Contact Form Submission from ${escapeHtml(name)} - Reply to: ${email}`,
-      content: `From: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
-      html: htmlContent,
-    });
+    const textContent = `New Portfolio Contact\n\nName: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
+    const subject = `New Contact Form Submission from ${escapeHtml(name)}`;
 
-    await client.close();
+    await sendEmailViaSMTP(
+      SMTP_HOST,
+      port,
+      SMTP_USER,
+      SMTP_PASS,
+      SMTP_USER, // Send to yourself
+      subject,
+      htmlContent,
+      textContent,
+      email // Reply-To sender's email
+    );
 
     console.log("Email sent successfully via SMTP");
 
