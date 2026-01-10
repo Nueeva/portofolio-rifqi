@@ -207,7 +207,7 @@ function generatePasswordResetEmail(resetLink: string, userEmail: string): { htm
           <tr>
             <td align="center" style="padding-bottom: 32px;">
               <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">
-                <span style="font-size: 28px; color: #0a0a0f; font-weight: bold;">R</span>
+                <span style="font-size: 28px;">🛡️</span>
               </div>
             </td>
           </tr>
@@ -325,7 +325,7 @@ function generateMagicLinkEmail(magicLink: string, userEmail: string): { html: s
           <tr>
             <td align="center" style="padding-bottom: 32px;">
               <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">
-                <span style="font-size: 28px; color: #0a0a0f; font-weight: bold;">R</span>
+                <span style="font-size: 28px;">🛡️</span>
               </div>
             </td>
           </tr>
@@ -433,7 +433,7 @@ function generateSignupConfirmationEmail(confirmLink: string, userEmail: string)
           <tr>
             <td align="center" style="padding-bottom: 32px;">
               <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">
-                <span style="font-size: 28px; color: #0a0a0f; font-weight: bold;">R</span>
+                <span style="font-size: 28px;">🛡️</span>
               </div>
             </td>
           </tr>
@@ -537,7 +537,7 @@ function generatePasswordChangedEmail(userEmail: string): { html: string; text: 
           <tr>
             <td align="center" style="padding-bottom: 32px;">
               <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">
-                <span style="font-size: 28px; color: #0a0a0f; font-weight: bold;">✓</span>
+                <span style="font-size: 28px;">🔒</span>
               </div>
             </td>
           </tr>
