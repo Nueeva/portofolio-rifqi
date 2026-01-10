@@ -4,6 +4,17 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -76,13 +87,26 @@ export function Navbar() {
                   <Settings className="h-4 w-4" />
                   Admin
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-destructive"
-                >
-                  <LogOut className="h-4 w-4" />
-                  Logout
-                </button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <button className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-destructive">
+                      <LogOut className="h-4 w-4" />
+                      Logout
+                    </button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to log out? You will need to sign in again to access admin features.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </>
             )}
             <ThemeToggle />
@@ -133,13 +157,26 @@ export function Navbar() {
                     <Settings className="h-4 w-4" />
                     Admin
                   </Link>
-                  <button
-                    onClick={handleLogout}
-                    className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-destructive"
-                  >
-                    <LogOut className="h-4 w-4" />
-                    Logout
-                  </button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <button className="flex items-center gap-1 text-sm font-medium text-muted-foreground transition-colors hover:text-destructive">
+                        <LogOut className="h-4 w-4" />
+                        Logout
+                      </button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          Are you sure you want to log out? You will need to sign in again to access admin features.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleLogout}>Logout</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
                 </>
               )}
             </div>
