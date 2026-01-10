@@ -133,12 +133,34 @@ export default function Auth() {
     loadTurnstile();
   }, []);
 
-  // Render widget when ready
+  // Render widget when ready (and after the form DOM is mounted)
   useEffect(() => {
-    if (turnstileReady) {
-      renderTurnstile();
-    }
-  }, [turnstileReady, renderTurnstile]);
+    if (!turnstileReady || loading) return;
+
+    let cancelled = false;
+
+    const tryRender = (attempt = 0) => {
+      if (cancelled) return;
+
+      // When page was still in `loading` state, the container isn't mounted yet.
+      // So we retry briefly until the ref exists.
+      if (turnstileContainerRef.current) {
+        renderTurnstile();
+        return;
+      }
+
+      if (attempt < 50) {
+        setTimeout(() => tryRender(attempt + 1), 50);
+      }
+    };
+
+    // Next tick to ensure DOM is painted
+    setTimeout(() => tryRender(), 0);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [turnstileReady, loading, renderTurnstile]);
 
   useEffect(() => {
     if (!loading && user) {
