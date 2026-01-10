@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Table,
   TableBody,
@@ -24,8 +25,24 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Shield,
   ShieldOff,
+  ShieldPlus,
   Globe,
   MapPin,
   Clock,
@@ -35,6 +52,8 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
+  Bell,
+  BellRing,
 } from "lucide-react";
 
 interface BlockedIP {
@@ -67,6 +86,18 @@ export function SecurityDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [unblockingIP, setUnblockingIP] = useState<BlockedIP | null>(null);
   const [isUnblocking, setIsUnblocking] = useState(false);
+  const [realtimeEnabled, setRealtimeEnabled] = useState(true);
+  
+  // Manual block state
+  const [isBlockDialogOpen, setIsBlockDialogOpen] = useState(false);
+  const [blockFormData, setBlockFormData] = useState({
+    ip_address: "",
+    reason: "manual",
+    hours: "24",
+  });
+  const [isBlocking, setIsBlocking] = useState(false);
+  const [blockError, setBlockError] = useState<string | null>(null);
+  
   const { toast } = useToast();
 
   const fetchBlockedIPs = async () => {
@@ -118,6 +149,63 @@ export function SecurityDashboard() {
     fetchData();
   }, []);
 
+  // Real-time subscription for blocked_ips
+  useEffect(() => {
+    if (!realtimeEnabled) return;
+
+    const channel = supabase
+      .channel('blocked-ips-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'blocked_ips'
+        },
+        (payload) => {
+          console.log('New blocked IP:', payload);
+          const newBlock = payload.new as BlockedIP;
+          
+          // Add to state
+          setBlockedIPs(prev => [newBlock, ...prev]);
+          
+          // Show notification
+          toast({
+            title: "🚨 IP Baru Diblokir!",
+            description: (
+              <div className="flex flex-col gap-1">
+                <span className="font-mono font-semibold">{newBlock.ip_address}</span>
+                <span className="text-sm text-muted-foreground">
+                  Alasan: {newBlock.reason}
+                </span>
+              </div>
+            ),
+            duration: 10000,
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'blocked_ips'
+        },
+        (payload) => {
+          console.log('IP unblocked:', payload);
+          const deletedIP = payload.old as BlockedIP;
+          
+          // Remove from state
+          setBlockedIPs(prev => prev.filter(ip => ip.id !== deletedIP.id));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [realtimeEnabled, toast]);
+
   const handleUnblock = async () => {
     if (!unblockingIP) return;
 
@@ -135,7 +223,10 @@ export function SecurityDashboard() {
       });
 
       setUnblockingIP(null);
-      fetchBlockedIPs();
+      // State will be updated via realtime subscription
+      if (!realtimeEnabled) {
+        fetchBlockedIPs();
+      }
     } catch (error) {
       console.error("Error unblocking IP:", error);
       toast({
@@ -145,6 +236,66 @@ export function SecurityDashboard() {
       });
     } finally {
       setIsUnblocking(false);
+    }
+  };
+
+  const validateIPAddress = (ip: string): boolean => {
+    // Simple IPv4 validation
+    const ipv4Regex = /^(\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipv4Regex.test(ip)) return false;
+    
+    const parts = ip.split('.');
+    return parts.every(part => {
+      const num = parseInt(part, 10);
+      return num >= 0 && num <= 255;
+    });
+  };
+
+  const handleManualBlock = async () => {
+    setBlockError(null);
+    
+    // Validate IP address
+    if (!blockFormData.ip_address.trim()) {
+      setBlockError("IP address harus diisi");
+      return;
+    }
+    
+    if (!validateIPAddress(blockFormData.ip_address.trim())) {
+      setBlockError("Format IP address tidak valid (contoh: 192.168.1.1)");
+      return;
+    }
+
+    setIsBlocking(true);
+    try {
+      const { error } = await supabase.rpc("block_ip", {
+        p_ip_address: blockFormData.ip_address.trim(),
+        p_reason: blockFormData.reason,
+        p_hours: parseInt(blockFormData.hours, 10),
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Berhasil",
+        description: `IP ${blockFormData.ip_address} berhasil diblokir selama ${blockFormData.hours} jam`,
+      });
+
+      setIsBlockDialogOpen(false);
+      setBlockFormData({ ip_address: "", reason: "manual", hours: "24" });
+      
+      // State will be updated via realtime subscription
+      if (!realtimeEnabled) {
+        fetchBlockedIPs();
+      }
+    } catch (error) {
+      console.error("Error blocking IP:", error);
+      toast({
+        title: "Error",
+        description: "Gagal memblokir IP",
+        variant: "destructive",
+      });
+    } finally {
+      setIsBlocking(false);
     }
   };
 
@@ -179,6 +330,19 @@ export function SecurityDashboard() {
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     return `${hours}h ${minutes}m`;
+  };
+
+  const getReasonLabel = (reason: string) => {
+    switch (reason) {
+      case "brute_force":
+        return "Brute Force";
+      case "manual":
+        return "Manual Block";
+      case "suspicious":
+        return "Suspicious Activity";
+      default:
+        return reason;
+    }
   };
 
   // Statistics
@@ -248,7 +412,7 @@ export function SecurityDashboard() {
         </div>
       </div>
 
-      {/* Search and Refresh */}
+      {/* Search, Refresh, and Actions */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -259,10 +423,29 @@ export function SecurityDashboard() {
             className="pl-10"
           />
         </div>
-        <Button variant="outline" onClick={fetchData}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant={realtimeEnabled ? "default" : "outline"}
+            size="sm"
+            onClick={() => setRealtimeEnabled(!realtimeEnabled)}
+            title={realtimeEnabled ? "Notifikasi real-time aktif" : "Notifikasi real-time nonaktif"}
+          >
+            {realtimeEnabled ? (
+              <BellRing className="h-4 w-4 mr-2" />
+            ) : (
+              <Bell className="h-4 w-4 mr-2" />
+            )}
+            {realtimeEnabled ? "Live" : "Paused"}
+          </Button>
+          <Button variant="outline" onClick={fetchData}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          <Button onClick={() => setIsBlockDialogOpen(true)}>
+            <ShieldPlus className="h-4 w-4 mr-2" />
+            Block IP
+          </Button>
+        </div>
       </div>
 
       {/* Tabs for Blocked IPs and Logs */}
@@ -303,7 +486,11 @@ export function SecurityDashboard() {
                     <TableRow key={ip.id}>
                       <TableCell className="font-mono font-medium">{ip.ip_address}</TableCell>
                       <TableCell>
-                        <Badge variant="destructive">{ip.reason}</Badge>
+                        <Badge 
+                          variant={ip.reason === "brute_force" ? "destructive" : "secondary"}
+                        >
+                          {getReasonLabel(ip.reason)}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {formatDate(ip.blocked_at)}
@@ -407,6 +594,90 @@ export function SecurityDashboard() {
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Manual Block IP Dialog */}
+      <Dialog open={isBlockDialogOpen} onOpenChange={setIsBlockDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShieldPlus className="h-5 w-5" />
+              Block IP Address
+            </DialogTitle>
+            <DialogDescription>
+              Blokir IP address secara manual. IP yang diblokir tidak akan bisa mengakses halaman login.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="ip_address">IP Address</Label>
+              <Input
+                id="ip_address"
+                placeholder="192.168.1.1"
+                value={blockFormData.ip_address}
+                onChange={(e) => {
+                  setBlockFormData({ ...blockFormData, ip_address: e.target.value });
+                  setBlockError(null);
+                }}
+                className={blockError ? "border-destructive" : ""}
+              />
+              {blockError && (
+                <p className="text-sm text-destructive">{blockError}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="reason">Alasan</Label>
+              <Select
+                value={blockFormData.reason}
+                onValueChange={(value) => setBlockFormData({ ...blockFormData, reason: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih alasan" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="manual">Manual Block</SelectItem>
+                  <SelectItem value="suspicious">Suspicious Activity</SelectItem>
+                  <SelectItem value="brute_force">Brute Force</SelectItem>
+                  <SelectItem value="spam">Spam</SelectItem>
+                  <SelectItem value="abuse">Abuse</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="hours">Durasi Block</Label>
+              <Select
+                value={blockFormData.hours}
+                onValueChange={(value) => setBlockFormData({ ...blockFormData, hours: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pilih durasi" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">1 Jam</SelectItem>
+                  <SelectItem value="6">6 Jam</SelectItem>
+                  <SelectItem value="12">12 Jam</SelectItem>
+                  <SelectItem value="24">24 Jam</SelectItem>
+                  <SelectItem value="48">48 Jam</SelectItem>
+                  <SelectItem value="168">1 Minggu</SelectItem>
+                  <SelectItem value="720">30 Hari</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsBlockDialogOpen(false)}>
+              Batal
+            </Button>
+            <Button onClick={handleManualBlock} disabled={isBlocking}>
+              {isBlocking && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              Block IP
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Unblock Confirmation Dialog */}
       <AlertDialog open={!!unblockingIP} onOpenChange={() => setUnblockingIP(null)}>
