@@ -477,7 +477,7 @@ ${escapeHtml(message)}
                 Rifqi Ariansyah Portfolio
               </p>
               <p style="margin: 0; font-size: 12px; color: #52525b;">
-                Full-Stack Developer & UI/UX Designer
+                Cybersecurity Developer
               </p>
               <div style="margin-top: 16px;">
                 <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
