@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, CheckCircle2 } from "lucide-react";
 
 const TURNSTILE_SITE_KEY = "0x4AAAAAACLFADmrVmL9XOiI";
 const TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
@@ -39,6 +39,7 @@ const getTurnstile = (): TurnstileInstance | undefined => {
 export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptchaProps>(
   ({ onVerify, onExpire, onError, theme = "dark", className }, ref) => {
     const [isLoading, setIsLoading] = useState(true);
+    const [isVerified, setIsVerified] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const widgetIdRef = useRef<string | null>(null);
     const isRenderedRef = useRef(false);
@@ -62,6 +63,7 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
         if (widgetIdRef.current && turnstile) {
           try {
             turnstile.reset(widgetIdRef.current);
+            setIsVerified(false);
           } catch (e) {
             // Widget might not exist
           }
@@ -88,12 +90,15 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
           widgetIdRef.current = turnstile.render(containerRef.current, {
             sitekey: TURNSTILE_SITE_KEY,
             callback: (token: string) => {
+              setIsVerified(true);
               onVerifyRef.current(token);
             },
             "expired-callback": () => {
+              setIsVerified(false);
               onExpireRef.current?.();
             },
             "error-callback": () => {
+              setIsVerified(false);
               onErrorRef.current?.();
             },
             theme,
@@ -182,9 +187,23 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
             </div>
           </div>
         )}
+        
+        {/* Success overlay */}
+        {isVerified && !isLoading && (
+          <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30 animate-fade-in">
+            <div className="relative">
+              <CheckCircle2 className="h-6 w-6 text-green-500 animate-scale-in" />
+              <div className="absolute inset-0 h-6 w-6 rounded-full bg-green-500/20 animate-ping" />
+            </div>
+            <span className="text-sm font-medium text-green-500">
+              Verifikasi berhasil
+            </span>
+          </div>
+        )}
+        
         <div 
           ref={containerRef} 
-          className={isLoading ? "hidden" : "flex justify-center"}
+          className={isLoading || isVerified ? "hidden" : "flex justify-center"}
         />
       </div>
     );
