@@ -276,8 +276,12 @@ function generatePasswordResetEmail(resetLink: string, userEmail: string): { htm
               <p style="margin: 0 0 16px 0; font-size: 11px; color: #00e5a0; letter-spacing: 2px; font-weight: 500;">
                 Secure • Reliable • Professional
               </p>
-              <div>
-                <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
+              <div style="margin-bottom: 12px;">
+                <a href="https://github.com/Nueeva" style="color: #71717a; font-size: 12px; text-decoration: none; margin: 0 8px;">GitHub</a>
+                <span style="color: #52525b;">•</span>
+                <a href="https://linkedin.com/in/rifqia" style="color: #71717a; font-size: 12px; text-decoration: none; margin: 0 8px;">LinkedIn</a>
+                <span style="color: #52525b;">•</span>
+                <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none; margin: 0 8px;">rifqi.tech</a>
               </div>
             </td>
           </tr>
@@ -390,8 +394,12 @@ function generateMagicLinkEmail(magicLink: string, userEmail: string): { html: s
               <p style="margin: 0 0 16px 0; font-size: 11px; color: #00e5a0; letter-spacing: 2px; font-weight: 500;">
                 Secure • Reliable • Professional
               </p>
-              <div>
-                <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
+              <div style="margin-bottom: 12px;">
+                <a href="https://github.com/Nueeva" style="color: #71717a; font-size: 12px; text-decoration: none; margin: 0 8px;">GitHub</a>
+                <span style="color: #52525b;">•</span>
+                <a href="https://linkedin.com/in/rifqia" style="color: #71717a; font-size: 12px; text-decoration: none; margin: 0 8px;">LinkedIn</a>
+                <span style="color: #52525b;">•</span>
+                <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none; margin: 0 8px;">rifqi.tech</a>
               </div>
             </td>
           </tr>
@@ -494,8 +502,12 @@ function generateSignupConfirmationEmail(confirmLink: string, userEmail: string)
               <p style="margin: 0 0 16px 0; font-size: 11px; color: #00e5a0; letter-spacing: 2px; font-weight: 500;">
                 Secure • Reliable • Professional
               </p>
-              <div>
-                <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
+              <div style="margin-bottom: 12px;">
+                <a href="https://github.com/Nueeva" style="color: #71717a; font-size: 12px; text-decoration: none; margin: 0 8px;">GitHub</a>
+                <span style="color: #52525b;">•</span>
+                <a href="https://linkedin.com/in/rifqia" style="color: #71717a; font-size: 12px; text-decoration: none; margin: 0 8px;">LinkedIn</a>
+                <span style="color: #52525b;">•</span>
+                <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none; margin: 0 8px;">rifqi.tech</a>
               </div>
             </td>
           </tr>
@@ -626,8 +638,12 @@ function generatePasswordChangedEmail(userEmail: string): { html: string; text: 
               <p style="margin: 0 0 16px 0; font-size: 11px; color: #00e5a0; letter-spacing: 2px; font-weight: 500;">
                 Secure • Reliable • Professional
               </p>
-              <div>
-                <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
+              <div style="margin-bottom: 12px;">
+                <a href="https://github.com/Nueeva" style="color: #71717a; font-size: 12px; text-decoration: none; margin: 0 8px;">GitHub</a>
+                <span style="color: #52525b;">•</span>
+                <a href="https://linkedin.com/in/rifqia" style="color: #71717a; font-size: 12px; text-decoration: none; margin: 0 8px;">LinkedIn</a>
+                <span style="color: #52525b;">•</span>
+                <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none; margin: 0 8px;">rifqi.tech</a>
               </div>
             </td>
           </tr>
