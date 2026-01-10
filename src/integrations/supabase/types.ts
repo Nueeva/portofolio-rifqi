@@ -50,6 +50,63 @@ export type Database = {
         }
         Relationships: []
       }
+      blocked_ips: {
+        Row: {
+          blocked_at: string
+          created_by: string | null
+          expires_at: string
+          id: string
+          ip_address: string
+          reason: string
+        }
+        Insert: {
+          blocked_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          ip_address: string
+          reason?: string
+        }
+        Update: {
+          blocked_at?: string
+          created_by?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: string
+          reason?: string
+        }
+        Relationships: []
+      }
+      ip_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          identifier: string | null
+          ip_address: string
+          success: boolean | null
+          user_agent: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          identifier?: string | null
+          ip_address: string
+          success?: boolean | null
+          user_agent?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          identifier?: string | null
+          ip_address?: string
+          success?: boolean | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       login_attempts: {
         Row: {
           attempt_type: string
@@ -175,6 +232,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      block_ip: {
+        Args: { p_hours?: number; p_ip_address: string; p_reason?: string }
+        Returns: undefined
+      }
       check_rate_limit: {
         Args: {
           p_identifier: string
@@ -183,12 +244,27 @@ export type Database = {
         }
         Returns: boolean
       }
+      count_ip_failed_attempts: {
+        Args: { p_ip_address: string; p_window_minutes?: number }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      is_ip_blocked: { Args: { p_ip_address: string }; Returns: boolean }
+      log_ip_activity: {
+        Args: {
+          p_action: string
+          p_identifier: string
+          p_ip_address: string
+          p_success?: boolean
+          p_user_agent?: string
+        }
+        Returns: undefined
       }
       record_login_attempt: {
         Args: { p_identifier: string; p_success?: boolean }
