@@ -23,7 +23,6 @@ export type Database = {
           entity_title: string | null
           entity_type: string
           id: string
-          user_email: string
           user_id: string
         }
         Insert: {
@@ -34,7 +33,6 @@ export type Database = {
           entity_title?: string | null
           entity_type: string
           id?: string
-          user_email: string
           user_id: string
         }
         Update: {
@@ -45,7 +43,6 @@ export type Database = {
           entity_title?: string | null
           entity_type?: string
           id?: string
-          user_email?: string
           user_id?: string
         }
         Relationships: []
