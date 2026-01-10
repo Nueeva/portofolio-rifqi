@@ -50,6 +50,30 @@ export type Database = {
         }
         Relationships: []
       }
+      login_attempts: {
+        Row: {
+          attempt_type: string
+          attempted_at: string
+          id: string
+          identifier: string
+          success: boolean
+        }
+        Insert: {
+          attempt_type?: string
+          attempted_at?: string
+          id?: string
+          identifier: string
+          success?: boolean
+        }
+        Update: {
+          attempt_type?: string
+          attempted_at?: string
+          id?: string
+          identifier?: string
+          success?: boolean
+        }
+        Relationships: []
+      }
       page_analytics: {
         Row: {
           country: string | null
@@ -151,12 +175,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_rate_limit: {
+        Args: {
+          p_identifier: string
+          p_max_attempts?: number
+          p_window_minutes?: number
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      record_login_attempt: {
+        Args: { p_identifier: string; p_success?: boolean }
+        Returns: undefined
       }
     }
     Enums: {
