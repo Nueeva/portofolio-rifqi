@@ -473,13 +473,16 @@ ${escapeHtml(message)}
           <!-- Footer -->
           <tr>
             <td style="padding-top: 32px; text-align: center;">
-              <p style="margin: 0 0 8px 0; font-size: 14px; color: #71717a;">
+              <p style="margin: 0 0 4px 0; font-size: 14px; color: #71717a;">
                 Rifqi Ariansyah Portfolio
               </p>
-              <p style="margin: 0; font-size: 12px; color: #52525b;">
+              <p style="margin: 0 0 12px 0; font-size: 12px; color: #52525b;">
                 Cybersecurity Developer
               </p>
-              <div style="margin-top: 16px;">
+              <p style="margin: 0 0 16px 0; font-size: 11px; color: #00e5a0; letter-spacing: 2px; font-weight: 500;">
+                Secure • Reliable • Professional
+              </p>
+              <div>
                 <a href="https://rifqi.tech" style="color: #00e5a0; font-size: 12px; text-decoration: none;">rifqi.tech</a>
               </div>
             </td>
