@@ -1,6 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
-const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
+const SMTP_HOST = Deno.env.get("SMTP_HOST");
+const SMTP_PORT = Deno.env.get("SMTP_PORT");
+const SMTP_USER = Deno.env.get("SMTP_USER");
+const SMTP_PASS = Deno.env.get("SMTP_PASS");
 const TURNSTILE_SECRET_KEY = Deno.env.get("TURNSTILE_SECRET_KEY");
 
 const corsHeaders = {
@@ -115,8 +119,9 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    if (!RESEND_API_KEY) {
-      console.error("RESEND_API_KEY is not configured");
+    // Validate SMTP configuration
+    if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
+      console.error("SMTP configuration is incomplete");
       return new Response(JSON.stringify({ error: "Email service not configured" }), {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -180,45 +185,57 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Send notification email using Resend REST API
-    const emailResponse = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: "Portfolio Contact <noreply@resend.rifqi.tech>",
-        to: ["rifqiariansyah123@gmail.com"],
-        reply_to: email,
-        subject: `New Contact Form Submission from ${name}`,
-        html: `
-          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #00e5a0;">New Portfolio Contact</h2>
-            <div style="background: #1a1a2e; padding: 20px; border-radius: 8px; color: #fff;">
-              <p><strong style="color: #00e5a0;">Name:</strong> ${escapeHtml(name)}</p>
-              <p><strong style="color: #00e5a0;">Email:</strong> ${escapeHtml(email)}</p>
-              <p><strong style="color: #00e5a0;">Message:</strong></p>
-              <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
-            </div>
-            <p style="color: #888; font-size: 12px; margin-top: 20px;">
-              This message was sent from your portfolio contact form.
-            </p>
-          </div>
-        `,
-      }),
+    // Send email using SMTP
+    console.log(`Connecting to SMTP server: ${SMTP_HOST}:${SMTP_PORT}`);
+    
+    const client = new SmtpClient();
+    const port = parseInt(SMTP_PORT, 10);
+    
+    // Connect using TLS for port 465, STARTTLS for port 587
+    if (port === 465) {
+      await client.connectTLS({
+        hostname: SMTP_HOST,
+        port: port,
+        username: SMTP_USER,
+        password: SMTP_PASS,
+      });
+    } else {
+      await client.connect({
+        hostname: SMTP_HOST,
+        port: port,
+        username: SMTP_USER,
+        password: SMTP_PASS,
+      });
+    }
+    
+    const htmlContent = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #00e5a0;">New Portfolio Contact</h2>
+        <div style="background: #1a1a2e; padding: 20px; border-radius: 8px; color: #fff;">
+          <p><strong style="color: #00e5a0;">Name:</strong> ${escapeHtml(name)}</p>
+          <p><strong style="color: #00e5a0;">Email:</strong> ${escapeHtml(email)}</p>
+          <p><strong style="color: #00e5a0;">Message:</strong></p>
+          <p style="white-space: pre-wrap;">${escapeHtml(message)}</p>
+        </div>
+        <p style="color: #888; font-size: 12px; margin-top: 20px;">
+          This message was sent from your portfolio contact form.
+        </p>
+      </div>
+    `;
+
+    await client.send({
+      from: SMTP_USER,
+      to: SMTP_USER, // Send to your own email
+      subject: `New Contact Form Submission from ${escapeHtml(name)} - Reply to: ${email}`,
+      content: `From: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,
+      html: htmlContent,
     });
 
-    const data = await emailResponse.json();
+    await client.close();
 
-    if (!emailResponse.ok) {
-      console.error("Resend API error:", data);
-      throw new Error(data.message || "Failed to send email");
-    }
+    console.log("Email sent successfully via SMTP");
 
-    console.log("Email sent successfully:", data);
-
-    return new Response(JSON.stringify({ success: true, id: data.id }), {
+    return new Response(JSON.stringify({ success: true, message: "Email sent successfully" }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
