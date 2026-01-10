@@ -1,12 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
-import { Shield, LogIn, UserPlus, Loader2, Clock, AlertTriangle, CheckCircle2, XCircle, ShieldAlert, UserCheck, ShieldX, Mail } from "lucide-react";
+import { Shield, LogIn, UserPlus, Loader2, Clock, AlertTriangle, CheckCircle2, XCircle, ShieldAlert, UserCheck, ShieldX, Mail, KeyRound, ArrowLeft } from "lucide-react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { TurnstileCaptcha, TurnstileCaptchaRef } from "@/components/TurnstileCaptcha";
@@ -17,6 +17,20 @@ const authSchema = z.object({
   password: z.string().min(6, { message: "Password minimal 6 karakter" }),
 });
 
+const emailSchema = z.object({
+  email: z.string().trim().email({ message: "Email tidak valid" }),
+});
+
+const passwordSchema = z.object({
+  password: z.string().min(6, { message: "Password minimal 6 karakter" }),
+  confirmPassword: z.string().min(6, { message: "Password minimal 6 karakter" }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Password tidak cocok",
+  path: ["confirmPassword"],
+});
+
+type AuthMode = "login" | "register" | "forgot" | "reset";
+
 interface RateLimitState {
   blocked: boolean;
   blockedType: "ip" | "email" | null;
@@ -26,10 +40,14 @@ interface RateLimitState {
 }
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true);
+  const [searchParams] = useSearchParams();
+  const isResetMode = searchParams.get("reset") === "true";
+  
+  const [mode, setMode] = useState<AuthMode>(isResetMode ? "reset" : "login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [rateLimitState, setRateLimitState] = useState<RateLimitState>({
@@ -39,11 +57,19 @@ export default function Auth() {
     message: null,
     initialSeconds: 0,
   });
+  const [resetEmailSent, setResetEmailSent] = useState(false);
   const turnstileRef = useRef<TurnstileCaptchaRef>(null);
   const countdownRef = useRef<NodeJS.Timeout | null>(null);
   
-  const { user, loading, signIn, signUp } = useAuth();
+  const { user, loading, signIn, signUp, resetPassword, updatePassword } = useAuth();
   const navigate = useNavigate();
+
+  // Check for reset mode from URL
+  useEffect(() => {
+    if (isResetMode) {
+      setMode("reset");
+    }
+  }, [isResetMode]);
 
   // Cleanup countdown on unmount
   useEffect(() => {
@@ -56,7 +82,6 @@ export default function Auth() {
 
   // Start countdown when blocked
   const startCountdown = useCallback((seconds: number) => {
-    // Clear existing countdown
     if (countdownRef.current) {
       clearInterval(countdownRef.current);
     }
@@ -88,22 +113,29 @@ export default function Auth() {
   }, []);
 
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && mode !== "reset") {
       navigate("/admin");
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, navigate, mode]);
 
   const validateForm = () => {
     try {
-      authSchema.parse({ email, password });
+      if (mode === "forgot") {
+        emailSchema.parse({ email });
+      } else if (mode === "reset") {
+        passwordSchema.parse({ password, confirmPassword });
+      } else {
+        authSchema.parse({ email, password });
+      }
       setErrors({});
       return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const newErrors: { email?: string; password?: string } = {};
+        const newErrors: { email?: string; password?: string; confirmPassword?: string } = {};
         error.errors.forEach((err) => {
           if (err.path[0] === "email") newErrors.email = err.message;
           if (err.path[0] === "password") newErrors.password = err.message;
+          if (err.path[0] === "confirmPassword") newErrors.confirmPassword = err.message;
         });
         setErrors(newErrors);
       }
@@ -178,17 +210,72 @@ export default function Auth() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
+  const handleForgotPassword = async () => {
+    if (!validateForm()) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { error } = await resetPassword(email);
+      if (error) {
+        toast.error("Gagal Mengirim Email", {
+          description: error.message,
+          icon: <XCircle className="h-5 w-5" />,
+        });
+      } else {
+        setResetEmailSent(true);
+        toast.success("Email Terkirim", {
+          description: "Silakan cek email Anda untuk link reset password",
+          icon: <Mail className="h-5 w-5" />,
+        });
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!validateForm()) return;
+    
+    setIsSubmitting(true);
+    try {
+      const { error } = await updatePassword(password);
+      if (error) {
+        toast.error("Gagal Reset Password", {
+          description: error.message,
+          icon: <XCircle className="h-5 w-5" />,
+        });
+      } else {
+        toast.success("Password Berhasil Diubah", {
+          description: "Silakan login dengan password baru",
+          icon: <CheckCircle2 className="h-5 w-5" />,
+        });
+        setMode("login");
+        navigate("/auth");
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Don't allow submission if rate limited
+    if (mode === "forgot") {
+      await handleForgotPassword();
+      return;
+    }
+    
+    if (mode === "reset") {
+      await handleResetPassword();
+      return;
+    }
+    
     if (rateLimitState.blocked) {
       return;
     }
     
     if (!validateForm()) return;
 
-    // Check Turnstile verification
     if (!turnstileToken) {
       toast.warning("Verifikasi Diperlukan", {
         description: "Silakan selesaikan verifikasi keamanan",
@@ -200,8 +287,7 @@ export default function Auth() {
     setIsSubmitting(true);
 
     try {
-      // Check rate limit before attempting login
-      if (isLogin) {
+      if (mode === "login") {
         const rateLimitResult = await checkRateLimit(email.toLowerCase());
         if (rateLimitResult.blocked) {
           setRateLimitState({
@@ -216,7 +302,6 @@ export default function Auth() {
             startCountdown(rateLimitResult.remainingSeconds);
           }
           
-          // Show blocked toast
           toast.error("Akses Diblokir", {
             description: rateLimitResult.blockedType === "ip" 
               ? "IP Anda telah diblokir sementara" 
@@ -230,7 +315,6 @@ export default function Auth() {
         }
       }
 
-      // Verify Turnstile token on server
       const isValid = await verifyTurnstile(turnstileToken);
       if (!isValid) {
         toast.error("Verifikasi Gagal", {
@@ -242,13 +326,11 @@ export default function Auth() {
         return;
       }
 
-      if (isLogin) {
+      if (mode === "login") {
         const { error } = await signIn(email, password);
         if (error) {
-          // Record failed login attempt
           await recordLoginAttempt(email.toLowerCase(), false);
           
-          // Re-check rate limit to update UI
           const updatedRateLimit = await checkRateLimit(email.toLowerCase());
           if (updatedRateLimit.blocked) {
             setRateLimitState({
@@ -263,7 +345,6 @@ export default function Auth() {
               startCountdown(updatedRateLimit.remainingSeconds);
             }
             
-            // Show blocked toast
             toast.error("Akses Diblokir", {
               description: "Terlalu banyak percobaan gagal. Silakan tunggu.",
               icon: <ShieldX className="h-5 w-5" />,
@@ -281,10 +362,8 @@ export default function Auth() {
             });
           }
         } else {
-          // Record successful login attempt
           await recordLoginAttempt(email.toLowerCase(), true);
           
-          // Clear rate limit state
           if (countdownRef.current) {
             clearInterval(countdownRef.current);
           }
@@ -301,7 +380,7 @@ export default function Auth() {
             icon: <CheckCircle2 className="h-5 w-5" />,
           });
         }
-      } else {
+      } else if (mode === "register") {
         const { error } = await signUp(email, password);
         if (error) {
           if (error.message.includes("User already registered")) {
@@ -320,7 +399,7 @@ export default function Auth() {
             description: "Akun berhasil dibuat, silakan login",
             icon: <UserCheck className="h-5 w-5" />,
           });
-          setIsLogin(true);
+          setMode("login");
         }
       }
     } finally {
@@ -343,26 +422,78 @@ export default function Auth() {
     ? ((rateLimitState.initialSeconds - rateLimitState.remainingSeconds) / rateLimitState.initialSeconds) * 100
     : 0;
 
+  const getTitle = () => {
+    switch (mode) {
+      case "login": return "Login Admin";
+      case "register": return "Registrasi";
+      case "forgot": return "Lupa Password";
+      case "reset": return "Reset Password";
+    }
+  };
+
+  const getDescription = () => {
+    switch (mode) {
+      case "login": return "Masuk untuk mengelola portofolio";
+      case "register": return "Buat akun baru";
+      case "forgot": return "Masukkan email untuk reset password";
+      case "reset": return "Masukkan password baru Anda";
+    }
+  };
+
+  const getIcon = () => {
+    switch (mode) {
+      case "login": return <Shield className="h-8 w-8 text-primary" />;
+      case "register": return <UserPlus className="h-8 w-8 text-primary" />;
+      case "forgot": return <Mail className="h-8 w-8 text-primary" />;
+      case "reset": return <KeyRound className="h-8 w-8 text-primary" />;
+    }
+  };
+
+  // Forgot password email sent success screen
+  if (mode === "forgot" && resetEmailSent) {
+    return (
+      <Layout>
+        <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
+          <div className="w-full max-w-md text-center">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+              <Mail className="h-8 w-8 text-primary" />
+            </div>
+            <h1 className="text-2xl font-bold mb-2">Cek Email Anda</h1>
+            <p className="text-muted-foreground mb-6">
+              Kami telah mengirim link reset password ke <strong>{email}</strong>. Silakan cek inbox Anda.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setMode("login");
+                setResetEmailSent(false);
+                setEmail("");
+              }}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Kembali ke Login
+            </Button>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-              <Shield className="h-8 w-8 text-primary" />
+              {getIcon()}
             </div>
-            <h1 className="text-2xl font-bold">
-              {isLogin ? "Login Admin" : "Registrasi"}
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              {isLogin 
-                ? "Masuk untuk mengelola portofolio" 
-                : "Buat akun baru"}
-            </p>
+            <h1 className="text-2xl font-bold">{getTitle()}</h1>
+            <p className="text-muted-foreground mt-2">{getDescription()}</p>
           </div>
 
           {/* Rate Limit Warning Banner */}
-          {rateLimitState.blocked && (
+          {rateLimitState.blocked && (mode === "login" || mode === "register") && (
             <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 animate-in fade-in slide-in-from-top-2 duration-300">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 mt-0.5">
@@ -405,40 +536,82 @@ export default function Auth() {
 
           <div className={`p-6 rounded-lg bg-card border border-border transition-opacity duration-300 ${rateLimitState.blocked ? 'opacity-60' : ''}`}>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="admin@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={errors.email ? "border-destructive" : ""}
-                  disabled={rateLimitState.blocked}
-                />
-                <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.email ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <p className="text-sm text-destructive">{errors.email}</p>
+              {/* Email field - shown for login, register, forgot */}
+              {(mode === "login" || mode === "register" || mode === "forgot") && (
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="admin@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={errors.email ? "border-destructive" : ""}
+                    disabled={rateLimitState.blocked}
+                  />
+                  <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.email ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <p className="text-sm text-destructive">{errors.email}</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className={errors.password ? "border-destructive" : ""}
-                  disabled={rateLimitState.blocked}
-                />
-                <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.password ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-                  <p className="text-sm text-destructive">{errors.password}</p>
+              {/* Password field - shown for login, register, reset */}
+              {(mode === "login" || mode === "register" || mode === "reset") && (
+                <div className="space-y-2">
+                  <Label htmlFor="password">
+                    {mode === "reset" ? "Password Baru" : "Password"}
+                  </Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={errors.password ? "border-destructive" : ""}
+                    disabled={rateLimitState.blocked}
+                  />
+                  <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.password ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <p className="text-sm text-destructive">{errors.password}</p>
+                  </div>
                 </div>
-              </div>
+              )}
 
-              {/* Turnstile CAPTCHA */}
-              {!rateLimitState.blocked && (
+              {/* Confirm Password field - shown for reset */}
+              {mode === "reset" && (
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className={errors.confirmPassword ? "border-destructive" : ""}
+                  />
+                  <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.confirmPassword ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
+                    <p className="text-sm text-destructive">{errors.confirmPassword}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Forgot password link - only on login */}
+              {mode === "login" && (
+                <div className="text-right">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode("forgot");
+                      setErrors({});
+                    }}
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    Lupa password?
+                  </button>
+                </div>
+              )}
+
+              {/* Turnstile CAPTCHA - only for login and register */}
+              {!rateLimitState.blocked && (mode === "login" || mode === "register") && (
                 <TurnstileCaptcha
                   ref={turnstileRef}
                   onVerify={setTurnstileToken}
@@ -451,38 +624,86 @@ export default function Auth() {
               <Button 
                 type="submit" 
                 className="w-full"
-                disabled={isSubmitting || !turnstileToken || rateLimitState.blocked}
+                disabled={
+                  isSubmitting || 
+                  ((mode === "login" || mode === "register") && (!turnstileToken || rateLimitState.blocked))
+                }
               >
-                {rateLimitState.blocked ? (
+                {rateLimitState.blocked && (mode === "login" || mode === "register") ? (
                   <>
                     <Clock className="h-4 w-4 mr-2" />
                     Tunggu {formatTime(rateLimitState.remainingSeconds)}
                   </>
                 ) : isSubmitting ? (
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : isLogin ? (
-                  <LogIn className="h-4 w-4 mr-2" />
+                ) : mode === "login" ? (
+                  <>
+                    <LogIn className="h-4 w-4 mr-2" />
+                    Login
+                  </>
+                ) : mode === "register" ? (
+                  <>
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Registrasi
+                  </>
+                ) : mode === "forgot" ? (
+                  <>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Kirim Link Reset
+                  </>
                 ) : (
-                  <UserPlus className="h-4 w-4 mr-2" />
+                  <>
+                    <KeyRound className="h-4 w-4 mr-2" />
+                    Ubah Password
+                  </>
                 )}
-                {!rateLimitState.blocked && (isLogin ? "Login" : "Registrasi")}
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLogin(!isLogin);
-                  setErrors({});
-                }}
-                className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                disabled={rateLimitState.blocked}
-              >
-                {isLogin 
-                  ? "Belum punya akun? Registrasi" 
-                  : "Sudah punya akun? Login"}
-              </button>
+            <div className="mt-6 text-center space-y-2">
+              {mode === "login" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("register");
+                    setErrors({});
+                  }}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  disabled={rateLimitState.blocked}
+                >
+                  Belum punya akun? Registrasi
+                </button>
+              )}
+              
+              {mode === "register" && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("login");
+                    setErrors({});
+                  }}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                  disabled={rateLimitState.blocked}
+                >
+                  Sudah punya akun? Login
+                </button>
+              )}
+              
+              {(mode === "forgot" || mode === "reset") && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode("login");
+                    setErrors({});
+                    setPassword("");
+                    setConfirmPassword("");
+                  }}
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1 mx-auto"
+                >
+                  <ArrowLeft className="h-3 w-3" />
+                  Kembali ke Login
+                </button>
+              )}
             </div>
           </div>
         </div>
