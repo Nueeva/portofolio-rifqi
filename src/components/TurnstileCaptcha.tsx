@@ -83,8 +83,10 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
           return false;
         }
 
-        // Clear container to be safe
-        containerRef.current.innerHTML = "";
+        // Clear container using safer DOM manipulation (avoid innerHTML)
+        while (containerRef.current.firstChild) {
+          containerRef.current.removeChild(containerRef.current.firstChild);
+        }
 
         try {
           widgetIdRef.current = turnstile.render(containerRef.current, {
