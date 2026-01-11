@@ -190,6 +190,8 @@ async function sendEmailViaSMTP(
 
 // Email template generator
 function generatePasswordResetEmail(resetLink: string, userEmail: string): { html: string; text: string } {
+  const previewText = "Klik untuk reset password akun Anda - Link berlaku 24 jam";
+  
   const html = `
 <!DOCTYPE html>
 <html lang="id">
@@ -197,8 +199,16 @@ function generatePasswordResetEmail(resetLink: string, userEmail: string): { htm
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reset Password</title>
+  <!--[if !mso]><!-->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!--<![endif]-->
 </head>
 <body style="margin: 0; padding: 0; background-color: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <!-- Preview text (preheader) -->
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    ${previewText}
+    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
@@ -315,6 +325,8 @@ https://rifqi.tech
 }
 
 function generateMagicLinkEmail(magicLink: string, userEmail: string): { html: string; text: string } {
+  const previewText = "Klik untuk login ke akun Anda - Link berlaku 1 jam";
+  
   const html = `
 <!DOCTYPE html>
 <html lang="id">
@@ -322,8 +334,16 @@ function generateMagicLinkEmail(magicLink: string, userEmail: string): { html: s
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Magic Link Login</title>
+  <!--[if !mso]><!-->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!--<![endif]-->
 </head>
 <body style="margin: 0; padding: 0; background-color: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <!-- Preview text (preheader) -->
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    ${previewText}
+    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
@@ -431,6 +451,8 @@ https://rifqi.tech
 }
 
 function generateSignupConfirmationEmail(confirmLink: string, userEmail: string): { html: string; text: string } {
+  const previewText = "Selamat datang! Konfirmasi email Anda untuk mengaktifkan akun";
+  
   const html = `
 <!DOCTYPE html>
 <html lang="id">
@@ -438,8 +460,16 @@ function generateSignupConfirmationEmail(confirmLink: string, userEmail: string)
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Konfirmasi Email</title>
+  <!--[if !mso]><!-->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!--<![endif]-->
 </head>
 <body style="margin: 0; padding: 0; background-color: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <!-- Preview text (preheader) -->
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    ${previewText}
+    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
@@ -541,6 +571,8 @@ function generatePasswordChangedEmail(userEmail: string): { html: string; text: 
     timeZone: 'Asia/Jakarta' 
   });
   
+  const previewText = "Password Anda berhasil diubah - Jika bukan Anda, segera hubungi kami";
+  
   const html = `
 <!DOCTYPE html>
 <html lang="id">
@@ -548,8 +580,16 @@ function generatePasswordChangedEmail(userEmail: string): { html: string; text: 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Password Berhasil Diubah</title>
+  <!--[if !mso]><!-->
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!--<![endif]-->
 </head>
 <body style="margin: 0; padding: 0; background-color: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+  <!-- Preview text (preheader) -->
+  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
+    ${previewText}
+    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  </div>
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
