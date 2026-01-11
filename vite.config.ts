@@ -16,36 +16,11 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "autoUpdate",
       includeAssets: ["favicon.png", "robots.txt"],
-      manifest: {
-        name: "RifqiA - Cybersecurity Developer",
-        short_name: "RifqiA",
-        description: "Rifqi Ariansyah - Cybersecurity Developer Portfolio",
-        theme_color: "#0a0a0f",
-        background_color: "#0a0a0f",
-        display: "standalone",
-        orientation: "portrait-primary",
-        scope: "/",
-        start_url: "/",
-        icons: [
-          {
-            src: "/pwa-192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "any",
-          },
-          {
-            src: "/pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "any",
-          },
-          {
-            src: "/pwa-512x512.png",
-            sizes: "512x512",
-            type: "image/png",
-            purpose: "maskable",
-          },
-        ],
+      // Disable install prompt by setting manifest to false
+      manifest: false,
+      // Disable dev warnings
+      devOptions: {
+        enabled: false,
       },
       workbox: {
         // Cache strategies for different resource types
