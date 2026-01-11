@@ -1,40 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const SMTP_HOST = Deno.env.get("SMTP_HOST");
 const SMTP_PORT = Deno.env.get("SMTP_PORT");
 const SMTP_USER = Deno.env.get("SMTP_USER");
 const SMTP_PASS = Deno.env.get("SMTP_PASS");
 const HOOK_SECRET = Deno.env.get("AUTH_EMAIL_HOOK_SECRET");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
-
-// Helper function to get preview text from database
-async function getPreviewTextFromDB(settingKey: string, defaultValue: string): Promise<string> {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    return defaultValue;
-  }
-  
-  try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const { data, error } = await supabase
-      .from("email_settings")
-      .select("setting_value")
-      .eq("setting_key", settingKey)
-      .single();
-    
-    if (error || !data) {
-      console.log(`Using default preview text for ${settingKey}`);
-      return defaultValue;
-    }
-    
-    return data.setting_value;
-  } catch (error) {
-    console.error("Error fetching preview text:", error);
-    return defaultValue;
-  }
-}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -218,8 +189,7 @@ async function sendEmailViaSMTP(
 }
 
 // Email template generator
-function generatePasswordResetEmail(resetLink: string, userEmail: string, previewText: string): { html: string; text: string } {
-  
+function generatePasswordResetEmail(resetLink: string, userEmail: string): { html: string; text: string } {
   const html = `
 <!DOCTYPE html>
 <html lang="id">
@@ -227,16 +197,8 @@ function generatePasswordResetEmail(resetLink: string, userEmail: string, previe
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Reset Password</title>
-  <!--[if !mso]><!-->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <!--<![endif]-->
 </head>
 <body style="margin: 0; padding: 0; background-color: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-  <!-- Preview text (preheader) -->
-  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
-    ${previewText}
-    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
-  </div>
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
@@ -352,8 +314,7 @@ https://rifqi.tech
   return { html, text };
 }
 
-function generateMagicLinkEmail(magicLink: string, userEmail: string, previewText: string): { html: string; text: string } {
-  
+function generateMagicLinkEmail(magicLink: string, userEmail: string): { html: string; text: string } {
   const html = `
 <!DOCTYPE html>
 <html lang="id">
@@ -361,16 +322,8 @@ function generateMagicLinkEmail(magicLink: string, userEmail: string, previewTex
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Magic Link Login</title>
-  <!--[if !mso]><!-->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <!--<![endif]-->
 </head>
 <body style="margin: 0; padding: 0; background-color: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-  <!-- Preview text (preheader) -->
-  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
-    ${previewText}
-    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
-  </div>
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
@@ -477,8 +430,7 @@ https://rifqi.tech
   return { html, text };
 }
 
-function generateSignupConfirmationEmail(confirmLink: string, userEmail: string, previewText: string): { html: string; text: string } {
-  
+function generateSignupConfirmationEmail(confirmLink: string, userEmail: string): { html: string; text: string } {
   const html = `
 <!DOCTYPE html>
 <html lang="id">
@@ -486,16 +438,8 @@ function generateSignupConfirmationEmail(confirmLink: string, userEmail: string,
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Konfirmasi Email</title>
-  <!--[if !mso]><!-->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <!--<![endif]-->
 </head>
 <body style="margin: 0; padding: 0; background-color: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-  <!-- Preview text (preheader) -->
-  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
-    ${previewText}
-    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
-  </div>
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
@@ -590,7 +534,7 @@ https://rifqi.tech
   return { html, text };
 }
 
-function generatePasswordChangedEmail(userEmail: string, previewText: string): { html: string; text: string } {
+function generatePasswordChangedEmail(userEmail: string): { html: string; text: string } {
   const currentTime = new Date().toLocaleString('id-ID', { 
     dateStyle: 'full', 
     timeStyle: 'short', 
@@ -604,16 +548,8 @@ function generatePasswordChangedEmail(userEmail: string, previewText: string): {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Password Berhasil Diubah</title>
-  <!--[if !mso]><!-->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <!--<![endif]-->
 </head>
 <body style="margin: 0; padding: 0; background-color: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-  <!-- Preview text (preheader) -->
-  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
-    ${previewText}
-    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
-  </div>
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
@@ -781,35 +717,27 @@ const handler = async (req: Request): Promise<Response> => {
       let subject: string;
       let emailContent: { html: string; text: string };
 
-      // Get preview texts from database
-      const previewTexts = {
-        recovery: await getPreviewTextFromDB("preview_password_reset", "Klik untuk reset password akun Anda - Link berlaku 24 jam"),
-        magiclink: await getPreviewTextFromDB("preview_magic_link", "Klik untuk login ke akun Anda - Link berlaku 1 jam"),
-        signup: await getPreviewTextFromDB("preview_signup_confirmation", "Selamat datang! Konfirmasi email Anda untuk mengaktifkan akun"),
-        password_changed: await getPreviewTextFromDB("preview_password_changed", "Password Anda berhasil diubah - Jika bukan Anda, segera hubungi kami"),
-      };
-
       switch (type) {
         case "recovery":
           subject = "Reset Password - Rifqi Ariansyah";
-          emailContent = generatePasswordResetEmail(redirectUrl || "", email, previewTexts.recovery);
+          emailContent = generatePasswordResetEmail(redirectUrl || "", email);
           break;
         case "magiclink":
           subject = "Magic Link Login - Rifqi Ariansyah";
-          emailContent = generateMagicLinkEmail(redirectUrl || "", email, previewTexts.magiclink);
+          emailContent = generateMagicLinkEmail(redirectUrl || "", email);
           break;
         case "signup":
         case "email_confirmation":
           subject = "Konfirmasi Email - Rifqi Ariansyah";
-          emailContent = generateSignupConfirmationEmail(redirectUrl || "", email, previewTexts.signup);
+          emailContent = generateSignupConfirmationEmail(redirectUrl || "", email);
           break;
         case "password_changed":
           subject = "🔐 Password Berhasil Diubah - Rifqi Ariansyah";
-          emailContent = generatePasswordChangedEmail(email, previewTexts.password_changed);
+          emailContent = generatePasswordChangedEmail(email);
           break;
         default:
           subject = "Notifikasi - Rifqi Ariansyah";
-          emailContent = generatePasswordChangedEmail(email, previewTexts.password_changed);
+          emailContent = generatePasswordChangedEmail(email);
       }
 
       console.log(`Sending ${type} email to ${email}`);
@@ -862,34 +790,27 @@ const handler = async (req: Request): Promise<Response> => {
     let subject: string;
     let emailContent: { html: string; text: string };
 
-    // Get preview texts from database
-    const webhookPreviewTexts = {
-      recovery: await getPreviewTextFromDB("preview_password_reset", "Klik untuk reset password akun Anda - Link berlaku 24 jam"),
-      magiclink: await getPreviewTextFromDB("preview_magic_link", "Klik untuk login ke akun Anda - Link berlaku 1 jam"),
-      signup: await getPreviewTextFromDB("preview_signup_confirmation", "Selamat datang! Konfirmasi email Anda untuk mengaktifkan akun"),
-    };
-
     switch (email_action_type) {
       case "recovery":
         subject = "Reset Password - Rifqi Ariansyah";
-        emailContent = generatePasswordResetEmail(verifyLink, user.email, webhookPreviewTexts.recovery);
+        emailContent = generatePasswordResetEmail(verifyLink, user.email);
         break;
       case "magiclink":
         subject = "Magic Link Login - Rifqi Ariansyah";
-        emailContent = generateMagicLinkEmail(verifyLink, user.email, webhookPreviewTexts.magiclink);
+        emailContent = generateMagicLinkEmail(verifyLink, user.email);
         break;
       case "signup":
       case "email_confirmation":
         subject = "Konfirmasi Email - Rifqi Ariansyah";
-        emailContent = generateSignupConfirmationEmail(verifyLink, user.email, webhookPreviewTexts.signup);
+        emailContent = generateSignupConfirmationEmail(verifyLink, user.email);
         break;
       case "invite":
         subject = "Undangan - Rifqi Ariansyah";
-        emailContent = generateSignupConfirmationEmail(verifyLink, user.email, webhookPreviewTexts.signup);
+        emailContent = generateSignupConfirmationEmail(verifyLink, user.email);
         break;
       default:
         subject = "Verifikasi Email - Rifqi Ariansyah";
-        emailContent = generatePasswordResetEmail(verifyLink, user.email, webhookPreviewTexts.recovery);
+        emailContent = generatePasswordResetEmail(verifyLink, user.email);
     }
 
     console.log(`Sending ${email_action_type} email to ${user.email}`);

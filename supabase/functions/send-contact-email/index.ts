@@ -1,39 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const SMTP_HOST = Deno.env.get("SMTP_HOST");
 const SMTP_PORT = Deno.env.get("SMTP_PORT");
 const SMTP_USER = Deno.env.get("SMTP_USER");
 const SMTP_PASS = Deno.env.get("SMTP_PASS");
 const TURNSTILE_SECRET_KEY = Deno.env.get("TURNSTILE_SECRET_KEY");
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
-
-// Helper function to get preview text from database
-async function getPreviewTextFromDB(settingKey: string, defaultValue: string): Promise<string> {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    return defaultValue;
-  }
-  
-  try {
-    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    const { data, error } = await supabase
-      .from("email_settings")
-      .select("setting_value")
-      .eq("setting_key", settingKey)
-      .single();
-    
-    if (error || !data) {
-      console.log(`Using default preview text for ${settingKey}`);
-      return defaultValue;
-    }
-    
-    return data.setting_value;
-  } catch (error) {
-    console.error("Error fetching preview text:", error);
-    return defaultValue;
-  }
-}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -410,35 +381,14 @@ const handler = async (req: Request): Promise<Response> => {
     
     const port = parseInt(SMTP_PORT, 10);
     
-    // Get preview text template from database
-    const previewTemplate = await getPreviewTextFromDB(
-      "preview_contact_email",
-      "Pesan baru dari {name} - {message_preview}"
-    );
-    
-    // Replace variables in template
-    const messagePreview = message.substring(0, 50) + (message.length > 50 ? '...' : '');
-    const previewText = previewTemplate
-      .replace("{name}", escapeHtml(name))
-      .replace("{email}", escapeHtml(email))
-      .replace("{message_preview}", escapeHtml(messagePreview));
-    
     const htmlContent = `
 <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!--[if !mso]><!-->
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <!--<![endif]-->
 </head>
 <body style="margin: 0; padding: 0; background-color: #0a0a0f; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-  <!-- Preview text (preheader) - shown in inbox before opening email -->
-  <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all;">
-    ${previewText}
-    &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
-  </div>
   <table role="presentation" style="width: 100%; border-collapse: collapse;">
     <tr>
       <td align="center" style="padding: 40px 20px;">
