@@ -206,8 +206,8 @@ function generatePasswordResetEmail(resetLink: string, userEmail: string): { htm
           <!-- Header -->
           <tr>
             <td align="center" style="padding-bottom: 32px;">
-              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">
-                <span style="font-size: 28px;">🛡️</span>
+              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; text-align: center; line-height: 64px;">
+                <span style="font-size: 32px; line-height: 64px;">🛡️</span>
               </div>
             </td>
           </tr>
@@ -331,8 +331,8 @@ function generateMagicLinkEmail(magicLink: string, userEmail: string): { html: s
           <!-- Header -->
           <tr>
             <td align="center" style="padding-bottom: 32px;">
-              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">
-                <span style="font-size: 28px;">🛡️</span>
+              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; text-align: center; line-height: 64px;">
+                <span style="font-size: 32px; line-height: 64px;">🛡️</span>
               </div>
             </td>
           </tr>
@@ -446,8 +446,8 @@ function generateSignupConfirmationEmail(confirmLink: string, userEmail: string)
         <table role="presentation" style="width: 100%; max-width: 520px; border-collapse: collapse;">
           <tr>
             <td align="center" style="padding-bottom: 32px;">
-              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">
-                <span style="font-size: 28px;">🛡️</span>
+              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; text-align: center; line-height: 64px;">
+                <span style="font-size: 32px; line-height: 64px;">🛡️</span>
               </div>
             </td>
           </tr>
@@ -557,8 +557,8 @@ function generatePasswordChangedEmail(userEmail: string): { html: string; text: 
           <!-- Header -->
           <tr>
             <td align="center" style="padding-bottom: 32px;">
-              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; display: inline-flex; align-items: center; justify-content: center;">
-                <span style="font-size: 28px;">🔒</span>
+              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; text-align: center; line-height: 64px;">
+                <span style="font-size: 32px; line-height: 64px;">🔒</span>
               </div>
             </td>
           </tr>

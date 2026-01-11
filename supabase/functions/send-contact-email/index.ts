@@ -396,25 +396,9 @@ const handler = async (req: Request): Promise<Response> => {
           <!-- Header with Shield Logo -->
           <tr>
             <td align="center" style="padding-bottom: 32px;">
-              <table role="presentation" style="border-collapse: collapse;">
-                <tr>
-                  <td align="center">
-                    <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; text-align: center; line-height: 64px;">
-                      <!--[if mso]>
-                      <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" style="height:64px;v-text-anchor:middle;width:64px;" arcsize="25%" fillcolor="#00e5a0">
-                        <w:anchorlock/>
-                        <center style="color:#0a0a0f;font-size:32px;">🛡️</center>
-                      </v:roundrect>
-                      <![endif]-->
-                      <!--[if !mso]><!-->
-                      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0a0a0f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle; margin-top: 16px;">
-                        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
-                      </svg>
-                      <!--<![endif]-->
-                    </div>
-                  </td>
-                </tr>
-              </table>
+              <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #00e5a0 0%, #00b8d4 100%); border-radius: 16px; text-align: center; line-height: 64px;">
+                <span style="font-size: 32px; line-height: 64px;">🛡️</span>
+              </div>
             </td>
           </tr>
           
