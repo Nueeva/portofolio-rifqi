@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ExternalLink, Github, Filter, Image as ImageIcon } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
+import { LazyImage } from "@/components/LazyImage";
 
 type ProjectCategory = "all" | "pentesting" | "tools" | "web-security";
 
@@ -103,15 +104,16 @@ const Projects = () => {
                   <article
                     className="relative rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full overflow-hidden"
                   >
-                    {/* Thumbnail */}
+                    {/* Thumbnail with lazy loading */}
                     {project.image_url ? (
                       <div className="relative h-48 overflow-hidden">
-                        <img
+                        <LazyImage
                           src={project.image_url}
                           alt={project.title}
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          wrapperClassName="h-full"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent pointer-events-none" />
                       </div>
                     ) : (
                       <div className="h-48 bg-muted flex items-center justify-center">
