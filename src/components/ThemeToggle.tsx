@@ -1,7 +1,7 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
@@ -11,6 +11,24 @@ export function ThemeToggle() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Smooth theme transition handler
+  const handleThemeChange = useCallback(() => {
+    const html = document.documentElement;
+    
+    // Add transitioning class for smooth animation
+    html.classList.add('theme-transitioning');
+    
+    // Change theme
+    setTheme(theme === "dark" ? "light" : "dark");
+    
+    // Remove transitioning class after animation completes
+    const timeout = setTimeout(() => {
+      html.classList.remove('theme-transitioning');
+    }, 400); // Match --theme-transition duration
+    
+    return () => clearTimeout(timeout);
+  }, [theme, setTheme]);
 
   if (!mounted) {
     return (
@@ -24,7 +42,7 @@ export function ThemeToggle() {
     <Button
       variant="ghost"
       size="icon"
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      onClick={handleThemeChange}
       className="relative overflow-hidden"
       aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
     >
