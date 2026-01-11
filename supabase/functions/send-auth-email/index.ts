@@ -1,11 +1,40 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const SMTP_HOST = Deno.env.get("SMTP_HOST");
 const SMTP_PORT = Deno.env.get("SMTP_PORT");
 const SMTP_USER = Deno.env.get("SMTP_USER");
 const SMTP_PASS = Deno.env.get("SMTP_PASS");
 const HOOK_SECRET = Deno.env.get("AUTH_EMAIL_HOOK_SECRET");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+
+// Helper function to get preview text from database
+async function getPreviewTextFromDB(settingKey: string, defaultValue: string): Promise<string> {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    return defaultValue;
+  }
+  
+  try {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data, error } = await supabase
+      .from("email_settings")
+      .select("setting_value")
+      .eq("setting_key", settingKey)
+      .single();
+    
+    if (error || !data) {
+      console.log(`Using default preview text for ${settingKey}`);
+      return defaultValue;
+    }
+    
+    return data.setting_value;
+  } catch (error) {
+    console.error("Error fetching preview text:", error);
+    return defaultValue;
+  }
+}
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -189,8 +218,7 @@ async function sendEmailViaSMTP(
 }
 
 // Email template generator
-function generatePasswordResetEmail(resetLink: string, userEmail: string): { html: string; text: string } {
-  const previewText = "Klik untuk reset password akun Anda - Link berlaku 24 jam";
+function generatePasswordResetEmail(resetLink: string, userEmail: string, previewText: string): { html: string; text: string } {
   
   const html = `
 <!DOCTYPE html>
@@ -324,8 +352,7 @@ https://rifqi.tech
   return { html, text };
 }
 
-function generateMagicLinkEmail(magicLink: string, userEmail: string): { html: string; text: string } {
-  const previewText = "Klik untuk login ke akun Anda - Link berlaku 1 jam";
+function generateMagicLinkEmail(magicLink: string, userEmail: string, previewText: string): { html: string; text: string } {
   
   const html = `
 <!DOCTYPE html>
@@ -450,8 +477,7 @@ https://rifqi.tech
   return { html, text };
 }
 
-function generateSignupConfirmationEmail(confirmLink: string, userEmail: string): { html: string; text: string } {
-  const previewText = "Selamat datang! Konfirmasi email Anda untuk mengaktifkan akun";
+function generateSignupConfirmationEmail(confirmLink: string, userEmail: string, previewText: string): { html: string; text: string } {
   
   const html = `
 <!DOCTYPE html>
@@ -564,14 +590,12 @@ https://rifqi.tech
   return { html, text };
 }
 
-function generatePasswordChangedEmail(userEmail: string): { html: string; text: string } {
+function generatePasswordChangedEmail(userEmail: string, previewText: string): { html: string; text: string } {
   const currentTime = new Date().toLocaleString('id-ID', { 
     dateStyle: 'full', 
     timeStyle: 'short', 
     timeZone: 'Asia/Jakarta' 
   });
-  
-  const previewText = "Password Anda berhasil diubah - Jika bukan Anda, segera hubungi kami";
   
   const html = `
 <!DOCTYPE html>
@@ -757,27 +781,35 @@ const handler = async (req: Request): Promise<Response> => {
       let subject: string;
       let emailContent: { html: string; text: string };
 
+      // Get preview texts from database
+      const previewTexts = {
+        recovery: await getPreviewTextFromDB("preview_password_reset", "Klik untuk reset password akun Anda - Link berlaku 24 jam"),
+        magiclink: await getPreviewTextFromDB("preview_magic_link", "Klik untuk login ke akun Anda - Link berlaku 1 jam"),
+        signup: await getPreviewTextFromDB("preview_signup_confirmation", "Selamat datang! Konfirmasi email Anda untuk mengaktifkan akun"),
+        password_changed: await getPreviewTextFromDB("preview_password_changed", "Password Anda berhasil diubah - Jika bukan Anda, segera hubungi kami"),
+      };
+
       switch (type) {
         case "recovery":
           subject = "Reset Password - Rifqi Ariansyah";
-          emailContent = generatePasswordResetEmail(redirectUrl || "", email);
+          emailContent = generatePasswordResetEmail(redirectUrl || "", email, previewTexts.recovery);
           break;
         case "magiclink":
           subject = "Magic Link Login - Rifqi Ariansyah";
-          emailContent = generateMagicLinkEmail(redirectUrl || "", email);
+          emailContent = generateMagicLinkEmail(redirectUrl || "", email, previewTexts.magiclink);
           break;
         case "signup":
         case "email_confirmation":
           subject = "Konfirmasi Email - Rifqi Ariansyah";
-          emailContent = generateSignupConfirmationEmail(redirectUrl || "", email);
+          emailContent = generateSignupConfirmationEmail(redirectUrl || "", email, previewTexts.signup);
           break;
         case "password_changed":
           subject = "🔐 Password Berhasil Diubah - Rifqi Ariansyah";
-          emailContent = generatePasswordChangedEmail(email);
+          emailContent = generatePasswordChangedEmail(email, previewTexts.password_changed);
           break;
         default:
           subject = "Notifikasi - Rifqi Ariansyah";
-          emailContent = generatePasswordChangedEmail(email);
+          emailContent = generatePasswordChangedEmail(email, previewTexts.password_changed);
       }
 
       console.log(`Sending ${type} email to ${email}`);
@@ -830,27 +862,34 @@ const handler = async (req: Request): Promise<Response> => {
     let subject: string;
     let emailContent: { html: string; text: string };
 
+    // Get preview texts from database
+    const webhookPreviewTexts = {
+      recovery: await getPreviewTextFromDB("preview_password_reset", "Klik untuk reset password akun Anda - Link berlaku 24 jam"),
+      magiclink: await getPreviewTextFromDB("preview_magic_link", "Klik untuk login ke akun Anda - Link berlaku 1 jam"),
+      signup: await getPreviewTextFromDB("preview_signup_confirmation", "Selamat datang! Konfirmasi email Anda untuk mengaktifkan akun"),
+    };
+
     switch (email_action_type) {
       case "recovery":
         subject = "Reset Password - Rifqi Ariansyah";
-        emailContent = generatePasswordResetEmail(verifyLink, user.email);
+        emailContent = generatePasswordResetEmail(verifyLink, user.email, webhookPreviewTexts.recovery);
         break;
       case "magiclink":
         subject = "Magic Link Login - Rifqi Ariansyah";
-        emailContent = generateMagicLinkEmail(verifyLink, user.email);
+        emailContent = generateMagicLinkEmail(verifyLink, user.email, webhookPreviewTexts.magiclink);
         break;
       case "signup":
       case "email_confirmation":
         subject = "Konfirmasi Email - Rifqi Ariansyah";
-        emailContent = generateSignupConfirmationEmail(verifyLink, user.email);
+        emailContent = generateSignupConfirmationEmail(verifyLink, user.email, webhookPreviewTexts.signup);
         break;
       case "invite":
         subject = "Undangan - Rifqi Ariansyah";
-        emailContent = generateSignupConfirmationEmail(verifyLink, user.email);
+        emailContent = generateSignupConfirmationEmail(verifyLink, user.email, webhookPreviewTexts.signup);
         break;
       default:
         subject = "Verifikasi Email - Rifqi Ariansyah";
-        emailContent = generatePasswordResetEmail(verifyLink, user.email);
+        emailContent = generatePasswordResetEmail(verifyLink, user.email, webhookPreviewTexts.recovery);
     }
 
     console.log(`Sending ${email_action_type} email to ${user.email}`);
