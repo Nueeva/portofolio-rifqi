@@ -287,7 +287,7 @@ const Contact = () => {
 
                 <div className="space-y-4">
                   <a
-                    href="mailto:rifqiariansyah123@gmail.com"
+                    href="mailto:contact@rifqi.tech"
                     className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group"
                   >
                     <div className="p-2 rounded-md bg-primary/10">
@@ -295,9 +295,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="font-medium group-hover:text-primary transition-colors">
-                        rifqiariansyah123@gmail.com
-                      </p>
+                      <p className="font-medium group-hover:text-primary transition-colors">contact@rifqi.tech</p>
                     </div>
                   </a>
 
