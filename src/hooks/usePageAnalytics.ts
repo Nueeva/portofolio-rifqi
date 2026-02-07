@@ -42,7 +42,17 @@ export const usePageAnalytics = (pagePath: string) => {
       }
     };
 
-    trackVisit();
+    // Defer analytics to avoid extending the critical request chain
+    const schedule = typeof requestIdleCallback === 'function'
+      ? requestIdleCallback
+      : (cb: () => void) => setTimeout(cb, 2000);
+    
+    const id = schedule(trackVisit);
+    return () => {
+      if (typeof cancelIdleCallback === 'function' && typeof id === 'number') {
+        cancelIdleCallback(id);
+      }
+    };
   }, [pagePath]);
 };
 
