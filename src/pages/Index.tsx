@@ -16,52 +16,42 @@ const Index = () => {
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
         
         <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Badge */}
-          <ScrollReveal delay={0}>
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border mb-8">
-              <Shield className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium text-muted-foreground">
-                Cybersecurity Developer
-              </span>
-            </div>
-          </ScrollReveal>
+          {/* Badge - visible immediately for LCP */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border mb-8 animate-fade-in">
+            <Shield className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium text-muted-foreground">
+              Cybersecurity Developer
+            </span>
+          </div>
 
-          {/* Name */}
-          <ScrollReveal delay={100}>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
-              Hi, I'm <span className="text-primary">Rifqi Ariansyah</span>
-            </h1>
-          </ScrollReveal>
+          {/* Name - visible immediately for LCP */}
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4 animate-fade-in" style={{ animationDelay: "100ms" }}>
+            Hi, I'm <span className="text-primary">Rifqi Ariansyah</span>
+          </h1>
           
           {/* Headline */}
-          <ScrollReveal delay={200}>
-            <p className="text-2xl sm:text-3xl font-semibold text-muted-foreground mb-6">
-              Building <span className="text-primary">Secure</span> Digital Solutions
-            </p>
-          </ScrollReveal>
+          <p className="text-2xl sm:text-3xl font-semibold text-muted-foreground mb-6 animate-fade-in" style={{ animationDelay: "200ms" }}>
+            Building <span className="text-primary">Secure</span> Digital Solutions
+          </p>
 
           {/* Tagline */}
-          <ScrollReveal delay={300}>
-            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10">
-              Specializing in penetration testing, security tools development, and 
-              web application security. Identifying vulnerabilities before they become threats.
-            </p>
-          </ScrollReveal>
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in" style={{ animationDelay: "300ms" }}>
+            Specializing in penetration testing, security tools development, and 
+            web application security. Identifying vulnerabilities before they become threats.
+          </p>
 
           {/* CTAs */}
-          <ScrollReveal delay={400}>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Button asChild size="lg" className="glow-primary">
-                <Link to="/projects">
-                  View Projects
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-              <Button asChild variant="outline" size="lg">
-                <Link to="/contact">Get in Touch</Link>
-              </Button>
-            </div>
-          </ScrollReveal>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: "400ms" }}>
+            <Button asChild size="lg" className="glow-primary">
+              <Link to="/projects">
+                View Projects
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/contact">Get in Touch</Link>
+            </Button>
+          </div>
         </div>
       </section>
 
