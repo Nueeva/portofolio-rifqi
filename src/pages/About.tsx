@@ -1,9 +1,11 @@
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { Download, Award, CheckCircle } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const securitySkills = [
   "Penetration Testing",
@@ -34,15 +36,41 @@ const tools = [
   "Hashcat",
 ];
 
-const certifications = [
+const defaultCertifications = [
   { name: "CompTIA Security+", issuer: "CompTIA", year: "2024", status: "active" },
   { name: "CEH (Certified Ethical Hacker)", issuer: "EC-Council", year: "2024", status: "active" },
   { name: "OSCP", issuer: "Offensive Security", year: "2025", status: "in-progress" },
 ];
 
+const CERTS_KEY = "portfolio_certifications";
+const RESUME_URL_KEY = "portfolio_resume_url";
+
 const About = () => {
   // Track page visit for analytics
   usePageAnalytics("/about");
+
+  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
+  const [certifications, setCertifications] = useState(defaultCertifications);
+
+  useEffect(() => {
+    // Load certifications from localStorage
+    try {
+      const stored = localStorage.getItem(CERTS_KEY);
+      if (stored) setCertifications(JSON.parse(stored));
+    } catch { /* use defaults */ }
+
+    // Load resume URL - try localStorage first, then check storage
+    const storedUrl = localStorage.getItem(RESUME_URL_KEY);
+    if (storedUrl) {
+      setResumeUrl(storedUrl);
+    } else {
+      // Fallback: build URL from storage
+      const { data: { publicUrl } } = supabase.storage
+        .from("resume")
+        .getPublicUrl("resume-rifqi-ariansyah.pdf");
+      setResumeUrl(publicUrl);
+    }
+  }, []);
 
   return (
     <Layout>
@@ -54,13 +82,7 @@ const About = () => {
               <h1 className="text-3xl sm:text-4xl font-bold mb-4">
                 About <span className="text-primary">Me</span>
               </h1>
-              <div className="w-20 h-1 bg-primary rounded-full mb-6" />
-              <Button asChild variant="outline" size="lg">
-                <a href="/resume-rifqi-ariansyah.pdf" download>
-                  <Download className="mr-2 h-4 w-4" />
-                  Download CV / Resume
-                </a>
-              </Button>
+              <div className="w-20 h-1 bg-primary rounded-full" />
             </div>
           </ScrollReveal>
 
@@ -219,6 +241,20 @@ const About = () => {
               </ScrollReveal>
             </div>
           </section>
+
+          {/* Download CV CTA */}
+          <ScrollReveal delay={100}>
+            <section className="mt-16 p-8 rounded-lg bg-card border border-border text-center">
+              <h2 className="text-2xl font-semibold mb-3">Interested in working together?</h2>
+              <p className="text-muted-foreground mb-6">Download my CV for more details about my experience and qualifications.</p>
+              <Button asChild size="lg" className="glow-primary">
+                <a href={resumeUrl || "#"} download="resume-rifqi-ariansyah.pdf">
+                  <Download className="mr-2 h-5 w-5" />
+                  Download CV / Resume
+                </a>
+              </Button>
+            </section>
+          </ScrollReveal>
         </div>
       </div>
     </Layout>

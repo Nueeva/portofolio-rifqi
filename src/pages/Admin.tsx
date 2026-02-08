@@ -37,7 +37,8 @@ import {
   History,
   CheckSquare,
   BarChart3,
-  ShieldAlert
+  ShieldAlert,
+  FileText
 } from "lucide-react";
 import {
   Dialog,
@@ -82,6 +83,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { z } from "zod";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { SecurityDashboard } from "@/components/admin/SecurityDashboard";
+import { ContentManager } from "@/components/admin/ContentManager";
 
 interface Project {
   id: string;
@@ -912,9 +914,13 @@ export default function Admin() {
               <BarChart3 className="h-4 w-4" />
               Analytics
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-2">
+             <TabsTrigger value="security" className="flex items-center gap-2">
               <ShieldAlert className="h-4 w-4" />
               Security
+            </TabsTrigger>
+            <TabsTrigger value="content" className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Content
             </TabsTrigger>
           </TabsList>
 
@@ -1209,6 +1215,10 @@ export default function Admin() {
 
           <TabsContent value="security">
             <SecurityDashboard />
+          </TabsContent>
+
+          <TabsContent value="content">
+            <ContentManager />
           </TabsContent>
         </Tabs>
 
