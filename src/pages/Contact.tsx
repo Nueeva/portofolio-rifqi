@@ -12,6 +12,7 @@ import { z } from "zod";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { TurnstileCaptcha, TurnstileCaptchaRef } from "@/components/TurnstileCaptcha";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const contactSchema = z.object({
   name: z.string().trim().min(2, "Nama minimal 2 karakter").max(50, "Nama maksimal 50 karakter"),
@@ -47,8 +48,12 @@ const EMAIL_DOMAINS = [
 ];
 
 const Contact = () => {
-  // Track page visit for analytics
   usePageAnalytics("/contact");
+  const { get } = useSiteSettings();
+
+  const contactEmail = get("contact_email", "contact@rifqi.tech");
+  const githubUrl = get("social_github", "https://github.com/Nueeva");
+  const linkedinUrl = get("social_linkedin", "https://linkedin.com/rifqia");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formData, setFormData] = useState({
@@ -287,7 +292,7 @@ const Contact = () => {
 
                 <div className="space-y-4">
                   <a
-                    href="mailto:contact@rifqi.tech"
+                    href={`mailto:${contactEmail}`}
                     className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group"
                   >
                     <div className="p-2 rounded-md bg-primary/10">
@@ -295,12 +300,12 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="font-medium group-hover:text-primary transition-colors">contact@rifqi.tech</p>
+                      <p className="font-medium group-hover:text-primary transition-colors">{contactEmail}</p>
                     </div>
                   </a>
 
                   <a
-                    href="https://github.com/Nueeva"
+                    href={githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group"
@@ -310,12 +315,12 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">GitHub</p>
-                      <p className="font-medium group-hover:text-primary transition-colors">github.com/Nueeva</p>
+                      <p className="font-medium group-hover:text-primary transition-colors">{githubUrl.replace("https://", "")}</p>
                     </div>
                   </a>
 
                   <a
-                    href="https://linkedin.com/rifqia"
+                    href={linkedinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group"
@@ -325,7 +330,7 @@ const Contact = () => {
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">LinkedIn</p>
-                      <p className="font-medium group-hover:text-primary transition-colors">linkedin.com/in/rifqia</p>
+                      <p className="font-medium group-hover:text-primary transition-colors">{linkedinUrl.replace("https://", "")}</p>
                     </div>
                   </a>
                 </div>

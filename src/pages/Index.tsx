@@ -5,6 +5,7 @@ import { Layout } from "@/components/layout/Layout";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const typingTexts = [
   "Penetration Testing",
@@ -16,7 +17,13 @@ const typingTexts = [
 
 const Index = () => {
   usePageAnalytics("/");
+  const { get } = useSiteSettings();
   const typedText = useTypingPlaceholder({ texts: typingTexts, typingSpeed: 80, deletingSpeed: 40, pauseDuration: 2500 });
+
+  const heroName = get("hero_name", "Rifqi Ariansyah");
+  const heroTitle = get("hero_title", "Cybersecurity Developer");
+  const heroHeadline = get("hero_headline", "Building Secure Digital Solutions");
+  const heroDescription = get("hero_description", "Identifying vulnerabilities before they become threats.");
 
   return (
     <Layout>
@@ -30,18 +37,20 @@ const Index = () => {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border mb-8 animate-fade-in">
             <Shield className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-muted-foreground">
-              Cybersecurity Developer
+              {heroTitle}
             </span>
           </div>
 
           {/* Name - visible immediately for LCP */}
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4 animate-fade-in" style={{ animationDelay: "100ms" }}>
-            Hi, I'm <span className="text-primary">Rifqi Ariansyah</span>
+            Hi, I'm <span className="text-primary">{heroName}</span>
           </h1>
           
           {/* Headline */}
           <p className="text-2xl sm:text-3xl font-semibold text-muted-foreground mb-6 animate-fade-in" style={{ animationDelay: "200ms" }}>
-            Building <span className="text-primary">Secure</span> Digital Solutions
+            {heroHeadline.includes("Secure") ? (
+              <>Building <span className="text-primary">Secure</span> Digital Solutions</>
+            ) : heroHeadline}
           </p>
 
           {/* Typed tagline */}
@@ -50,7 +59,7 @@ const Index = () => {
             <span className="inline-block w-0.5 h-5 bg-primary ml-0.5 animate-pulse align-middle" />
           </p>
           <p className="text-base text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in" style={{ animationDelay: "350ms" }}>
-            Identifying vulnerabilities before they become threats.
+            {heroDescription}
           </p>
 
           {/* CTAs */}

@@ -38,7 +38,8 @@ import {
   CheckSquare,
   BarChart3,
   ShieldAlert,
-  FileText
+  FileText,
+  Settings
 } from "lucide-react";
 import {
   Dialog,
@@ -84,6 +85,7 @@ import { z } from "zod";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { SecurityDashboard } from "@/components/admin/SecurityDashboard";
 import { ContentManager } from "@/components/admin/ContentManager";
+import { SiteSettingsManager } from "@/components/admin/SiteSettingsManager";
 
 interface Project {
   id: string;
@@ -922,6 +924,10 @@ export default function Admin() {
               <FileText className="h-4 w-4" />
               Content
             </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="projects">
@@ -1219,6 +1225,10 @@ export default function Admin() {
 
           <TabsContent value="content">
             <ContentManager />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <SiteSettingsManager />
           </TabsContent>
         </Tabs>
 
