@@ -1,65 +1,57 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { Button } from "@/components/ui/button";
 import { useEffect, useState, useCallback } from "react";
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
-  // Avoid hydration mismatch
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Smooth theme transition handler
   const handleThemeChange = useCallback(() => {
     const html = document.documentElement;
-    
-    // Add transitioning class for smooth animation
     html.classList.add('theme-transitioning');
-    
-    // Change theme
     setTheme(theme === "dark" ? "light" : "dark");
-    
-    // Remove transitioning class after animation completes
     const timeout = setTimeout(() => {
       html.classList.remove('theme-transitioning');
-    }, 400); // Match --theme-transition duration
-    
+    }, 400);
     return () => clearTimeout(timeout);
   }, [theme, setTheme]);
 
+  const isDark = theme === "dark";
+
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="relative">
-        <div className="h-5 w-5" />
-      </Button>
+      <div className="relative w-14 h-7 rounded-full bg-muted" />
     );
   }
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
+    <button
       onClick={handleThemeChange}
-      className="relative overflow-hidden"
-      aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+      className={`relative w-14 h-7 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${
+        isDark
+          ? "bg-primary/20 border border-primary/40"
+          : "bg-secondary border border-border"
+      }`}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
     >
-      <Sun
-        className={`h-5 w-5 transition-all duration-300 ${
-          theme === "dark"
-            ? "rotate-90 scale-0 opacity-0"
-            : "rotate-0 scale-100 opacity-100"
+      {/* Sliding knob */}
+      <span
+        className={`absolute top-0.5 flex items-center justify-center w-6 h-6 rounded-full shadow-md transition-all duration-300 ${
+          isDark
+            ? "translate-x-7 bg-primary text-primary-foreground"
+            : "translate-x-0.5 bg-background text-foreground"
         }`}
-      />
-      <Moon
-        className={`absolute h-5 w-5 transition-all duration-300 ${
-          theme === "dark"
-            ? "rotate-0 scale-100 opacity-100"
-            : "-rotate-90 scale-0 opacity-0"
-        }`}
-      />
-    </Button>
+      >
+        {isDark ? (
+          <Moon className="h-3.5 w-3.5" />
+        ) : (
+          <Sun className="h-3.5 w-3.5" />
+        )}
+      </span>
+    </button>
   );
 }
