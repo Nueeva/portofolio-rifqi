@@ -190,14 +190,15 @@ export const ErrorPage = ({ statusCode = "404" }: ErrorPageProps) => {
     let i = 0;
     const interval = setInterval(() => {
       if (i < lines.length) {
-        setLogLines((prev) => [...prev, lines[i]]);
+        const currentLine = lines[i];
+        setLogLines((prev) => [...prev, currentLine]);
         i++;
       } else {
         clearInterval(interval);
       }
     }, 120);
     return () => clearInterval(interval);
-  }, [location.pathname, config]);
+  }, [location.pathname, statusCode]);
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
