@@ -53,11 +53,30 @@ const Index = () => {
             ) : heroHeadline}
           </p>
 
-          {/* Typed tagline */}
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 animate-fade-in font-mono" style={{ animationDelay: "300ms" }}>
-            <span className="text-primary">$</span> specializing_in: <span className="text-primary">{typedText}</span>
-            <span className="inline-block w-0.5 h-5 bg-primary ml-0.5 animate-pulse align-middle" />
-          </p>
+          {/* Terminal-style typing animation */}
+          <div className="max-w-2xl mx-auto mb-4 animate-fade-in" style={{ animationDelay: "300ms" }}>
+            <div className="relative rounded-lg border border-border bg-card/80 backdrop-blur-sm overflow-hidden">
+              {/* Terminal header */}
+              <div className="flex items-center gap-1.5 px-3 py-2 bg-muted/60 border-b border-border">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                <span className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+                <span className="ml-2 text-[10px] text-muted-foreground font-mono tracking-wider uppercase">terminal</span>
+              </div>
+              {/* Terminal body */}
+              <div className="px-4 py-3 font-mono text-sm sm:text-base">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <span className="text-primary">➜</span>
+                  <span className="text-primary/70">~</span>
+                  <span className="text-muted-foreground">specializing_in</span>
+                </div>
+                <div className="flex items-center mt-1">
+                  <span className="text-primary font-semibold">{typedText}</span>
+                  <span className="inline-block w-2 h-5 bg-primary ml-0.5 animate-pulse" />
+                </div>
+              </div>
+            </div>
+          </div>
           <p className="text-base text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in" style={{ animationDelay: "350ms" }}>
             {heroDescription}
           </p>
