@@ -6,35 +6,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { Download, Award, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-
-const securitySkills = [
-  "Penetration Testing",
-  "Vulnerability Assessment",
-  "Web Application Security",
-  "Network Security",
-  "Secure Code Review",
-  "Threat Modeling",
-];
-
-const devSkills = [
-  "TypeScript",
-  "React",
-  "Python",
-  "Node.js",
-  "Go",
-  "Bash",
-];
-
-const tools = [
-  "Burp Suite",
-  "Wireshark",
-  "Nmap",
-  "OWASP ZAP",
-  "Metasploit",
-  "Ghidra",
-  "sqlmap",
-  "Hashcat",
-];
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const defaultCertifications = [
   { name: "CompTIA Security+", issuer: "CompTIA", year: "2024", status: "active" },
@@ -45,26 +17,31 @@ const defaultCertifications = [
 const CERTS_KEY = "portfolio_certifications";
 const RESUME_URL_KEY = "portfolio_resume_url";
 
+const defaultSecuritySkills = ["Penetration Testing", "Vulnerability Assessment", "Web Application Security", "Network Security", "Secure Code Review", "Threat Modeling"];
+const defaultDevSkills = ["TypeScript", "React", "Python", "Node.js", "Go", "Bash"];
+const defaultTools = ["Burp Suite", "Wireshark", "Nmap", "OWASP ZAP", "Metasploit", "Ghidra", "sqlmap", "Hashcat"];
+
 const About = () => {
-  // Track page visit for analytics
   usePageAnalytics("/about");
+  const { getList } = useSiteSettings();
+
+  const securitySkills = getList("skills_security", defaultSecuritySkills);
+  const devSkills = getList("skills_dev", defaultDevSkills);
+  const tools = getList("skills_tools", defaultTools);
 
   const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [certifications, setCertifications] = useState(defaultCertifications);
 
   useEffect(() => {
-    // Load certifications from localStorage
     try {
       const stored = localStorage.getItem(CERTS_KEY);
       if (stored) setCertifications(JSON.parse(stored));
     } catch { /* use defaults */ }
 
-    // Load resume URL - try localStorage first, then check storage
     const storedUrl = localStorage.getItem(RESUME_URL_KEY);
     if (storedUrl) {
       setResumeUrl(storedUrl);
     } else {
-      // Fallback: build URL from storage
       const { data: { publicUrl } } = supabase.storage
         .from("resume")
         .getPublicUrl("resume-rifqi-ariansyah.pdf");
