@@ -3,14 +3,16 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
+import { AnimatePresence } from "framer-motion";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
+import { PageTransition } from "@/components/PageTransition";
 
 // Eagerly loaded - critical for first paint
 import Index from "./pages/Index";
 
-// Lazy loaded pages - reduces initial bundle size
+// Lazy loaded pages
 const About = lazy(() => import("./pages/About"));
 const Projects = lazy(() => import("./pages/Projects"));
 const Contact = lazy(() => import("./pages/Contact"));
@@ -25,7 +27,6 @@ const TooManyRequests = lazy(() => import("./pages/TooManyRequests"));
 
 const queryClient = new QueryClient();
 
-// Loading fallback component
 const PageLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-background">
     <div className="flex flex-col items-center gap-4">
@@ -35,11 +36,35 @@ const PageLoader = () => (
   </div>
 );
 
+function AnimatedRoutes() {
+  const location = useLocation();
+
+  return (
+    <AnimatePresence mode="wait">
+      <Suspense fallback={<PageLoader />} key={location.pathname}>
+        <Routes location={location} key={location.pathname}>
+          <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+          <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+          <Route path="/projects" element={<PageTransition><Projects /></PageTransition>} />
+          <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
+          <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
+          <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />
+          <Route path="/403" element={<PageTransition><Forbidden /></PageTransition>} />
+          <Route path="/500" element={<PageTransition><ServerError /></PageTransition>} />
+          <Route path="/502" element={<PageTransition><BadGateway /></PageTransition>} />
+          <Route path="/503" element={<PageTransition><ServiceUnavailable /></PageTransition>} />
+          <Route path="/429" element={<PageTransition><TooManyRequests /></PageTransition>} />
+          <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
+        </Routes>
+      </Suspense>
+    </AnimatePresence>
+  );
+}
+
 const App = () => {
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
-    // Check if welcome screen has been shown this session
     const hasSeenWelcome = sessionStorage.getItem("hasSeenWelcome");
     if (!hasSeenWelcome) {
       setShowWelcome(true);
@@ -59,22 +84,7 @@ const App = () => {
           <Sonner />
           {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
           <BrowserRouter>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/projects" element={<Projects />} />
-                <Route path="/contact" element={<Contact />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/admin" element={<Admin />} />
-                <Route path="/403" element={<Forbidden />} />
-                <Route path="/500" element={<ServerError />} />
-                <Route path="/502" element={<BadGateway />} />
-                <Route path="/503" element={<ServiceUnavailable />} />
-                <Route path="/429" element={<TooManyRequests />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
+            <AnimatedRoutes />
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>
