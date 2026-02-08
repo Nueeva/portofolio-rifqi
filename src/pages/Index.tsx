@@ -4,10 +4,20 @@ import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
+import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
+
+const typingTexts = [
+  "Penetration Testing",
+  "Security Tools Development",
+  "Web Application Security",
+  "Vulnerability Assessment",
+  "Secure Code Review",
+];
 
 const Index = () => {
-  // Track page visit for analytics
   usePageAnalytics("/");
+  const typedText = useTypingPlaceholder({ texts: typingTexts, typingSpeed: 80, deletingSpeed: 40, pauseDuration: 2500 });
+
   return (
     <Layout>
       {/* Hero Section */}
@@ -34,10 +44,13 @@ const Index = () => {
             Building <span className="text-primary">Secure</span> Digital Solutions
           </p>
 
-          {/* Tagline */}
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in" style={{ animationDelay: "300ms" }}>
-            Specializing in penetration testing, security tools development, and 
-            web application security. Identifying vulnerabilities before they become threats.
+          {/* Typed tagline */}
+          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-4 animate-fade-in font-mono" style={{ animationDelay: "300ms" }}>
+            <span className="text-primary">$</span> specializing_in: <span className="text-primary">{typedText}</span>
+            <span className="inline-block w-0.5 h-5 bg-primary ml-0.5 animate-pulse align-middle" />
+          </p>
+          <p className="text-base text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in" style={{ animationDelay: "350ms" }}>
+            Identifying vulnerabilities before they become threats.
           </p>
 
           {/* CTAs */}

@@ -1,7 +1,9 @@
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
+import { Download, Award, CheckCircle } from "lucide-react";
 
 const securitySkills = [
   "Penetration Testing",
@@ -32,6 +34,12 @@ const tools = [
   "Hashcat",
 ];
 
+const certifications = [
+  { name: "CompTIA Security+", issuer: "CompTIA", year: "2024", status: "active" },
+  { name: "CEH (Certified Ethical Hacker)", issuer: "EC-Council", year: "2024", status: "active" },
+  { name: "OSCP", issuer: "Offensive Security", year: "2025", status: "in-progress" },
+];
+
 const About = () => {
   // Track page visit for analytics
   usePageAnalytics("/about");
@@ -46,7 +54,13 @@ const About = () => {
               <h1 className="text-3xl sm:text-4xl font-bold mb-4">
                 About <span className="text-primary">Me</span>
               </h1>
-              <div className="w-20 h-1 bg-primary rounded-full" />
+              <div className="w-20 h-1 bg-primary rounded-full mb-6" />
+              <Button asChild variant="outline" size="lg">
+                <a href="/resume-rifqi-ariansyah.pdf" download>
+                  <Download className="mr-2 h-4 w-4" />
+                  Download CV / Resume
+                </a>
+              </Button>
             </div>
           </ScrollReveal>
 
@@ -131,6 +145,37 @@ const About = () => {
                 </div>
               </div>
             </ScrollReveal>
+          </section>
+
+          {/* Certifications Section */}
+          <section className="mb-16">
+            <ScrollReveal>
+              <h2 className="text-2xl font-semibold mb-8 flex items-center gap-2">
+                <Award className="h-6 w-6 text-primary" />
+                Certifications
+              </h2>
+            </ScrollReveal>
+
+            <div className="grid gap-4">
+              {certifications.map((cert, index) => (
+                <ScrollReveal key={cert.name} delay={index * 100}>
+                  <div className="relative p-5 rounded-lg bg-card border border-border flex items-center justify-between gap-4 hover:border-primary/50 transition-colors">
+                    <div className="line-accent" />
+                    <div className="flex-1 ml-2">
+                      <h3 className="font-medium">{cert.name}</h3>
+                      <p className="text-sm text-muted-foreground">{cert.issuer} · {cert.year}</p>
+                    </div>
+                    {cert.status === "active" ? (
+                      <Badge className="bg-primary/10 text-primary border-primary/30">
+                        <CheckCircle className="h-3 w-3 mr-1" /> Active
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary">In Progress</Badge>
+                    )}
+                  </div>
+                </ScrollReveal>
+              ))}
+            </div>
           </section>
 
           {/* Approach Section */}
