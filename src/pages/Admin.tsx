@@ -772,26 +772,48 @@ export default function Admin() {
     <Layout>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-primary/10">
-              <Shield className="h-6 w-6 text-primary" />
+        <div className="flex flex-col gap-4 mb-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Shield className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold">Admin Dashboard</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate max-w-[180px] sm:max-w-none">{user?.email}</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
-            </div>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" className="shrink-0">
+                  <LogOut className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Logout</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Konfirmasi Logout</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Apakah kamu yakin ingin logout? Kamu perlu login lagi untuk mengakses fitur admin.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Batal</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleSignOut}>Logout</AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
           <div className="flex gap-2 flex-wrap">
             {/* Activity Log Sheet */}
             <Sheet>
               <SheetTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <History className="h-4 w-4 mr-2" />
-                  Activity Log
+                  <History className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Activity Log</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+              <SheetContent className="w-[320px] sm:w-[400px] md:w-[540px] overflow-y-auto">
                 <SheetHeader>
                   <SheetTitle className="flex items-center gap-2">
                     <History className="h-5 w-5" />
@@ -813,7 +835,7 @@ export default function Admin() {
                         className="p-3 rounded-lg border border-border bg-card"
                       >
                         <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1">
+                          <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <span
                                 className={`px-2 py-0.5 rounded text-xs font-medium ${getActionColor(log.action)}`}
@@ -825,7 +847,7 @@ export default function Admin() {
                               </span>
                             </div>
                             {log.entity_title && (
-                              <p className="font-medium text-sm">{log.entity_title}</p>
+                              <p className="font-medium text-sm truncate">{log.entity_title}</p>
                             )}
                             {log.details && (
                               <p className="text-xs text-muted-foreground mt-1">
@@ -837,7 +859,7 @@ export default function Admin() {
                               </p>
                             )}
                           </div>
-                          <div className="text-right">
+                          <div className="text-right shrink-0">
                             <p className="text-xs text-muted-foreground">
                               {new Date(log.created_at).toLocaleDateString("id-ID", {
                                 day: "numeric",
@@ -845,9 +867,6 @@ export default function Admin() {
                                 hour: "2-digit",
                                 minute: "2-digit",
                               })}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate max-w-[120px]">
-                              Admin
                             </p>
                           </div>
                         </div>
@@ -862,8 +881,8 @@ export default function Admin() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
+                  <Download className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Export</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
@@ -878,55 +897,35 @@ export default function Admin() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button onClick={openCreateDialog}>
-              <Plus className="h-4 w-4 mr-2" />
-              Tambah Project
+            <Button onClick={openCreateDialog} size="sm">
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Tambah Project</span>
             </Button>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="outline">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Konfirmasi Logout</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    Apakah kamu yakin ingin logout? Kamu perlu login lagi untuk mengakses fitur admin.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Batal</AlertDialogCancel>
-                  <AlertDialogAction onClick={handleSignOut}>Logout</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
           </div>
         </div>
 
         {/* Main Tabs */}
         <Tabs defaultValue="projects" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="projects" className="flex items-center gap-2">
-              <LayoutGrid className="h-4 w-4" />
-              Projects
+          <TabsList className="mb-6 w-full flex overflow-x-auto no-scrollbar">
+            <TabsTrigger value="projects" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <LayoutGrid className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Projects</span>
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Analytics
+            <TabsTrigger value="analytics" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <BarChart3 className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
-             <TabsTrigger value="security" className="flex items-center gap-2">
-              <ShieldAlert className="h-4 w-4" />
-              Security
+            <TabsTrigger value="security" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <ShieldAlert className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Security</span>
             </TabsTrigger>
-            <TabsTrigger value="content" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Content
+            <TabsTrigger value="content" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <FileText className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Content</span>
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Settings
+            <TabsTrigger value="settings" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+              <Settings className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">Settings</span>
             </TabsTrigger>
           </TabsList>
 
