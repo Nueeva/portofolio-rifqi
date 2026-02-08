@@ -17,6 +17,11 @@ const Contact = lazy(() => import("./pages/Contact"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
 const NotFound = lazy(() => import("./pages/NotFound"));
+const Forbidden = lazy(() => import("./pages/Forbidden"));
+const ServerError = lazy(() => import("./pages/ServerError"));
+const BadGateway = lazy(() => import("./pages/BadGateway"));
+const ServiceUnavailable = lazy(() => import("./pages/ServiceUnavailable"));
+const TooManyRequests = lazy(() => import("./pages/TooManyRequests"));
 
 const queryClient = new QueryClient();
 
@@ -62,6 +67,11 @@ const App = () => {
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/admin" element={<Admin />} />
+                <Route path="/403" element={<Forbidden />} />
+                <Route path="/500" element={<ServerError />} />
+                <Route path="/502" element={<BadGateway />} />
+                <Route path="/503" element={<ServiceUnavailable />} />
+                <Route path="/429" element={<TooManyRequests />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
