@@ -81,6 +81,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { z } from "zod";
 import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { SecurityDashboard } from "@/components/admin/SecurityDashboard";
@@ -770,6 +771,7 @@ export default function Admin() {
 
   return (
     <Layout>
+      <TooltipProvider delayDuration={300}>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex flex-col gap-4 mb-8">
@@ -785,10 +787,15 @@ export default function Admin() {
             </div>
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="sm" className="shrink-0">
-                  <LogOut className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Logout</span>
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="sm" className="shrink-0">
+                      <LogOut className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Logout</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="sm:hidden"><p>Logout</p></TooltipContent>
+                </Tooltip>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -808,10 +815,15 @@ export default function Admin() {
             {/* Activity Log Sheet */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <History className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Activity Log</span>
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <History className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Activity Log</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="sm:hidden"><p>Activity Log</p></TooltipContent>
+                </Tooltip>
               </SheetTrigger>
               <SheetContent className="w-[320px] sm:w-[400px] md:w-[540px] overflow-y-auto">
                 <SheetHeader>
@@ -880,10 +892,15 @@ export default function Admin() {
             {/* Export Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 sm:mr-2" />
-                  <span className="hidden sm:inline">Export</span>
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Export</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent className="sm:hidden"><p>Export</p></TooltipContent>
+                </Tooltip>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={exportToJSON}>
@@ -897,36 +914,66 @@ export default function Admin() {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button onClick={openCreateDialog} size="sm">
-              <Plus className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Tambah Project</span>
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button onClick={openCreateDialog} size="sm">
+                  <Plus className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Tambah Project</span>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent className="sm:hidden"><p>Tambah Project</p></TooltipContent>
+            </Tooltip>
           </div>
         </div>
 
         {/* Main Tabs */}
         <Tabs defaultValue="projects" className="w-full">
           <TabsList className="mb-6 w-full flex overflow-x-auto no-scrollbar">
-            <TabsTrigger value="projects" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
-              <LayoutGrid className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:inline">Projects</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
-              <BarChart3 className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:inline">Analytics</span>
-            </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
-              <ShieldAlert className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:inline">Security</span>
-            </TabsTrigger>
-            <TabsTrigger value="content" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
-              <FileText className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:inline">Content</span>
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
-              <Settings className="h-4 w-4 shrink-0" />
-              <span className="hidden sm:inline">Settings</span>
-            </TabsTrigger>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="projects" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <LayoutGrid className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">Projects</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent className="sm:hidden"><p>Projects</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="analytics" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <BarChart3 className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">Analytics</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent className="sm:hidden"><p>Analytics</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="security" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <ShieldAlert className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">Security</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent className="sm:hidden"><p>Security</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="content" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <FileText className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">Content</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent className="sm:hidden"><p>Content</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="settings" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <Settings className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">Settings</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent className="sm:hidden"><p>Settings</p></TooltipContent>
+            </Tooltip>
           </TabsList>
 
           <TabsContent value="projects">
@@ -1497,6 +1544,7 @@ export default function Admin() {
           </AlertDialogContent>
         </AlertDialog>
       </div>
+      </TooltipProvider>
     </Layout>
   );
 }
