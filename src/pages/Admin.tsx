@@ -816,6 +816,9 @@ export default function Admin() {
             </AlertDialog>
           </div>
           <div className="flex gap-2 flex-wrap">
+            {/* Notification Center */}
+            <NotificationCenter />
+
             {/* Activity Log Sheet */}
             <Sheet>
               <SheetTrigger asChild>
