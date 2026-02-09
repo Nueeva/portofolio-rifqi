@@ -1312,6 +1312,18 @@ export default function Admin() {
           <TabsContent value="settings">
             <SiteSettingsManager />
           </TabsContent>
+
+          <TabsContent value="certifications">
+            <CertificationsManager />
+          </TabsContent>
+
+          <TabsContent value="export">
+            <DataExporter />
+          </TabsContent>
+
+          <TabsContent value="theme">
+            <ThemeCustomizer />
+          </TabsContent>
         </Tabs>
 
         {/* Create/Edit Dialog */}
