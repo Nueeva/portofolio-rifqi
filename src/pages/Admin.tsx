@@ -39,7 +39,9 @@ import {
   BarChart3,
   ShieldAlert,
   FileText,
-  Settings
+  Settings,
+  Award,
+  Palette
 } from "lucide-react";
 import {
   Dialog,
