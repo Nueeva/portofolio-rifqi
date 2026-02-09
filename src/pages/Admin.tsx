@@ -87,6 +87,10 @@ import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { SecurityDashboard } from "@/components/admin/SecurityDashboard";
 import { ContentManager } from "@/components/admin/ContentManager";
 import { SiteSettingsManager } from "@/components/admin/SiteSettingsManager";
+import { CertificationsManager } from "@/components/admin/CertificationsManager";
+import { DataExporter } from "@/components/admin/DataExporter";
+import { NotificationCenter } from "@/components/admin/NotificationCenter";
+import { ThemeCustomizer } from "@/components/admin/ThemeCustomizer";
 
 interface Project {
   id: string;
