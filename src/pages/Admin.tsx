@@ -39,7 +39,9 @@ import {
   BarChart3,
   ShieldAlert,
   FileText,
-  Settings
+  Settings,
+  Award,
+  Palette
 } from "lucide-react";
 import {
   Dialog,
@@ -87,6 +89,10 @@ import { AnalyticsDashboard } from "@/components/admin/AnalyticsDashboard";
 import { SecurityDashboard } from "@/components/admin/SecurityDashboard";
 import { ContentManager } from "@/components/admin/ContentManager";
 import { SiteSettingsManager } from "@/components/admin/SiteSettingsManager";
+import { CertificationsManager } from "@/components/admin/CertificationsManager";
+import { DataExporter } from "@/components/admin/DataExporter";
+import { NotificationCenter } from "@/components/admin/NotificationCenter";
+import { ThemeCustomizer } from "@/components/admin/ThemeCustomizer";
 
 interface Project {
   id: string;
@@ -812,6 +818,9 @@ export default function Admin() {
             </AlertDialog>
           </div>
           <div className="flex gap-2 flex-wrap">
+            {/* Notification Center */}
+            <NotificationCenter />
+
             {/* Activity Log Sheet */}
             <Sheet>
               <SheetTrigger asChild>
@@ -973,6 +982,33 @@ export default function Admin() {
                 </TabsTrigger>
               </TooltipTrigger>
               <TooltipContent className="sm:hidden"><p>Settings</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="certifications" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <Award className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">Sertifikasi</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent className="sm:hidden"><p>Sertifikasi</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="export" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <Download className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">Backup</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent className="sm:hidden"><p>Backup & Export</p></TooltipContent>
+            </Tooltip>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <TabsTrigger value="theme" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                  <Palette className="h-4 w-4 shrink-0" />
+                  <span className="hidden sm:inline">Tema</span>
+                </TabsTrigger>
+              </TooltipTrigger>
+              <TooltipContent className="sm:hidden"><p>Kustomisasi Tema</p></TooltipContent>
             </Tooltip>
           </TabsList>
 
@@ -1275,6 +1311,18 @@ export default function Admin() {
 
           <TabsContent value="settings">
             <SiteSettingsManager />
+          </TabsContent>
+
+          <TabsContent value="certifications">
+            <CertificationsManager />
+          </TabsContent>
+
+          <TabsContent value="export">
+            <DataExporter />
+          </TabsContent>
+
+          <TabsContent value="theme">
+            <ThemeCustomizer />
           </TabsContent>
         </Tabs>
 
