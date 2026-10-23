@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Shield, Terminal, ArrowLeft, Home, LucideIcon, ShieldOff, ServerCrash, AlertTriangle, Clock, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MatrixRain } from "@/components/MatrixRain";
@@ -72,7 +72,7 @@ const errorConfigs: Record<string, ErrorConfig> = {
       "",
       ">> CRITICAL: Unhandled exception in server process",
       `>> PATH: ${pathname}`,
-      ">> STATUS: INTERNAL_FAILURE",
+      ">> STATUS: INTERNAL_SERVER_ERROR",
       "",
       ">> Stack trace: [REDACTED]",
       ">> Process PID 31337 terminated unexpectedly",
@@ -118,7 +118,7 @@ const errorConfigs: Record<string, ErrorConfig> = {
       "",
       ">> WARNING: Service temporarily offline",
       `>> PATH: ${pathname}`,
-      ">> STATUS: MAINTENANCE_MODE",
+      ">> STATUS: SERVICE_UNAVAILABLE",
       "",
       ">> Active maintenance window detected",
       ">> Estimated downtime: ~15 minutes",
@@ -161,7 +161,14 @@ export const ErrorPage = ({ statusCode = "404" }: ErrorPageProps) => {
   const config = errorConfigs[statusCode] || errorConfigs["404"];
   const [glitchText, setGlitchText] = useState(config.code);
   const [logLines, setLogLines] = useState<string[]>([]);
+  const logRef = useRef<HTMLDivElement>(null);
   const IconComponent = config.icon;
+
+  // Keep the streaming log pinned to the latest line
+  useEffect(() => {
+    const el = logRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [logLines]);
 
   useEffect(() => {
     console.error(`${config.code} Error:`, location.pathname);
@@ -247,7 +254,7 @@ export const ErrorPage = ({ statusCode = "404" }: ErrorPageProps) => {
               <span>error_{config.code} — bash</span>
             </div>
           </div>
-          <div className="p-4 font-mono text-xs sm:text-sm space-y-0.5 max-h-64 overflow-y-auto">
+          <div ref={logRef} className="p-4 font-mono text-xs sm:text-sm space-y-0.5 max-h-64 overflow-y-auto">
             {logLines.map((line, i) => (
               <div
                 key={i}
