@@ -17,6 +17,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { Hero3D } from "@/components/Hero3D";
 import { CursorTrail } from "@/components/CursorTrail";
 import { GlitchText } from "@/components/GlitchText";
+import { KineticBackdrop } from "@/components/KineticBackdrop";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -169,7 +170,7 @@ const Index = () => {
         <motion.div className="absolute inset-x-0 -inset-y-24 bg-grid" style={{ y: heroGridY }} />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
-        {/* 3D network constellation (three.js), faded on the left for the headline */}
+        {/* ThreatGlobe (three.js): dot globe + live attack arcs, left faded for the headline */}
         <Hero3D className="absolute inset-0 z-[1] pointer-events-none [mask-image:linear-gradient(to_right,transparent_0%,black_45%)]" />
         {/* After-effect: cursor light-trail */}
         <CursorTrail className="absolute inset-0 z-[2] h-full w-full pointer-events-none" />
@@ -288,8 +289,9 @@ const Index = () => {
       </section>
 
       {/* Quick Overview Section */}
-      <section className="py-20 bg-card/30">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden py-20 bg-card/30">
+        <KineticBackdrop word="SECURITY" />
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
             {/* Card 1 */}
             <ScrollReveal delay={0}>

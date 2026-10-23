@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Lenis from "lenis";
 import {
   AnimatePresence,
   motion,
@@ -10,6 +11,8 @@ import { ArrowUp } from "lucide-react";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { RivaAgent } from "@/components/RivaAgent";
+import { CustomCursor } from "@/components/CustomCursor";
+import { GrainOverlay } from "@/components/GrainOverlay";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -25,6 +28,23 @@ export function Layout({ children }: LayoutProps) {
 
   const [showBackToTop, setShowBackToTop] = useState(false);
   useMotionValueEvent(scrollY, "change", (v) => setShowBackToTop(v > 600));
+
+  // Buttery smooth scrolling (Lenis) — skipped for reduced motion.
+  // Lenis drives the real window scroll, so motion's useScroll keeps working.
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const lenis = new Lenis({ lerp: 0.1 });
+    let rafId = 0;
+    const raf = (time: number) => {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    };
+    rafId = requestAnimationFrame(raf);
+    return () => {
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+    };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -57,6 +77,8 @@ export function Layout({ children }: LayoutProps) {
         )}
       </AnimatePresence>
       <RivaAgent />
+      <CustomCursor />
+      <GrainOverlay />
     </div>
   );
 }

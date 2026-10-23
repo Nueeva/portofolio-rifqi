@@ -160,6 +160,7 @@ const Projects = () => {
                     viewport={{ once: true, margin: "-40px" }}
                     transition={{ duration: 0.45, delay: (index % 2) * 0.08, ease: EASE }}
                     whileHover={{ y: -4 }}
+                    data-cursor="VIEW"
                     className="relative rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full overflow-hidden"
                   >
                     {/* Thumbnail with lazy loading */}
