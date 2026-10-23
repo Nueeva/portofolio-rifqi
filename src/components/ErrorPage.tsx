@@ -39,7 +39,7 @@ const errorConfigs: Record<string, ErrorConfig> = {
   },
   "404": {
     code: "404",
-    title: "Access Denied",
+    title: "Page Not Found",
     subtitle: "Page not found in the system",
     icon: Shield,
     httpStatus: "HTTP/1.1 404 Not Found",
@@ -51,7 +51,7 @@ const errorConfigs: Record<string, ErrorConfig> = {
       "",
       ">> ERROR: Route not found in routing table",
       `>> PATH: ${pathname}`,
-      ">> STATUS: ACCESS_DENIED",
+      ">> STATUS: NOT_FOUND",
       "",
       ">> Scanning alternative routes...",
       ">> No matching endpoint detected.",
