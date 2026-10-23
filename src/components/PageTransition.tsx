@@ -5,25 +5,29 @@ interface PageTransitionProps {
   children: ReactNode;
 }
 
+const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+
+// Terminal curtain: the new page wipes in top-to-bottom (clip-path),
+// the old one wipes out upward. One continuous Bézier, no bounce.
 const pageVariants = {
   initial: {
     opacity: 0,
-    y: 12,
+    clipPath: "inset(0 0 100% 0)",
   },
   enter: {
     opacity: 1,
-    y: 0,
+    clipPath: "inset(0 0 0% 0)",
     transition: {
-      duration: 0.35,
-      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+      duration: 0.45,
+      ease: EASE,
     },
   },
   exit: {
     opacity: 0,
-    y: -8,
+    clipPath: "inset(100% 0 0 0)",
     transition: {
-      duration: 0.2,
-      ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+      duration: 0.25,
+      ease: EASE,
     },
   },
 };

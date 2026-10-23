@@ -10,6 +10,7 @@ import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { ScrambleText } from "@/components/ScrambleText";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { TurnstileCaptcha, TurnstileCaptchaRef } from "@/components/TurnstileCaptcha";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -274,7 +275,7 @@ const Contact = () => {
           <ScrollReveal>
             <div className="mb-12">
               <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-                Get in <span className="text-primary">Touch</span>
+                <ScrambleText parts={[{ text: "Get in " }, { text: "Touch", className: "text-primary" }]} />
               </h1>
               <p className="text-muted-foreground max-w-2xl">
                 Interested in working together or have a security question? Feel free to reach out. I'm always open to

@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Shield, Terminal, ArrowLeft, Home, LucideIcon, ShieldOff, ServerCrash, AlertTriangle, Clock, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MatrixRain } from "@/components/MatrixRain";
 
 interface ErrorConfig {
   code: string;
@@ -202,6 +203,8 @@ export const ErrorPage = ({ statusCode = "404" }: ErrorPageProps) => {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Matrix rain — 404 only */}
+      {statusCode === "404" && <MatrixRain />}
       {/* Background grid */}
       <div className="absolute inset-0 opacity-[0.03]" style={{
         backgroundImage: `linear-gradient(hsl(var(--primary)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--primary)) 1px, transparent 1px)`,

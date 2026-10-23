@@ -6,6 +6,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { ScrambleText } from "@/components/ScrambleText";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { LazyImage } from "@/components/LazyImage";
 import { curatedProjects, type Project } from "@/data/projects";
@@ -100,7 +101,7 @@ const Projects = () => {
           <ScrollReveal>
             <div className="mb-12">
               <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-                <span className="text-primary">Projects</span>
+                <ScrambleText parts={[{ text: "Projects", className: "text-primary" }]} />
               </h1>
               <p className="text-muted-foreground max-w-2xl">
                 A selection of security research, tools, and applications I've worked on.

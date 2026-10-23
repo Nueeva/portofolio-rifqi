@@ -4,6 +4,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { ScrambleText } from "@/components/ScrambleText";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { Download, Award, CheckCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,7 +79,7 @@ const About = () => {
           <ScrollReveal>
             <div className="mb-16">
               <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-                About <span className="text-primary">Me</span>
+                <ScrambleText parts={[{ text: "About " }, { text: "Me", className: "text-primary" }]} />
               </h1>
               <div className="w-20 h-1 bg-primary rounded-full" />
             </div>
