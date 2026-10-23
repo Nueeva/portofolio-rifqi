@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "motion/react";
 import { ExternalLink, Github, Filter, ShieldCheck, Terminal, Wrench } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
@@ -111,21 +110,34 @@ const Projects = () => {
             </div>
           </ScrollReveal>
 
-          {/* Category Filter */}
+          {/* Category Filter — active pill glides between categories (layoutId) */}
           <ScrollReveal delay={100}>
             <div className="flex flex-wrap items-center gap-2 mb-10">
               <Filter className="h-4 w-4 text-muted-foreground" />
-              {(Object.keys(categoryLabels) as ProjectCategory[]).map((category) => (
-                <Button
-                  key={category}
-                  variant={activeCategory === category ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setActiveCategory(category)}
-                  className={activeCategory === category ? "glow-primary" : ""}
-                >
-                  {categoryLabels[category]}
-                </Button>
-              ))}
+              {(Object.keys(categoryLabels) as ProjectCategory[]).map((category) => {
+                const isActive = activeCategory === category;
+                return (
+                  <button
+                    key={category}
+                    type="button"
+                    onClick={() => setActiveCategory(category)}
+                    className={`relative h-9 rounded-md px-3 text-sm font-medium transition-colors ${
+                      isActive
+                        ? "text-primary-foreground"
+                        : "border border-input bg-background text-muted-foreground hover:text-primary hover:border-primary/50"
+                    }`}
+                  >
+                    {isActive && (
+                      <motion.span
+                        layoutId="filter-pill"
+                        className="absolute inset-0 rounded-md bg-primary glow-primary"
+                        transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                      />
+                    )}
+                    <span className="relative z-10">{categoryLabels[category]}</span>
+                  </button>
+                );
+              })}
             </div>
           </ScrollReveal>
 

@@ -5,6 +5,7 @@ import {
   motion,
   useInView,
   useMotionValue,
+  useScroll,
   useSpring,
   useTransform,
   type Variants,
@@ -63,6 +64,30 @@ function Tilt({ children }: { children: ReactNode }) {
   );
 }
 
+/** Magnetic pull — the element leans toward the cursor and springs back on leave */
+function Magnetic({ children }: { children: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useSpring(useMotionValue(0), { stiffness: 180, damping: 14, mass: 0.2 });
+  const y = useSpring(useMotionValue(0), { stiffness: 180, damping: 14, mass: 0.2 });
+
+  const onMove = (e: React.MouseEvent) => {
+    const r = ref.current?.getBoundingClientRect();
+    if (!r) return;
+    x.set((e.clientX - (r.left + r.width / 2)) * 0.3);
+    y.set((e.clientY - (r.top + r.height / 2)) * 0.3);
+  };
+  const onLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div ref={ref} onMouseMove={onMove} onMouseLeave={onLeave} style={{ x, y }}>
+      {children}
+    </motion.div>
+  );
+}
+
 /** Animated counter that counts up once when it scrolls into view */
 function Stat({ value, suffix = "", label }: { value: number; suffix?: string; label: string }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -118,6 +143,16 @@ const Index = () => {
   const { get } = useSiteSettings();
   const typedText = useTypingPlaceholder({ texts: typingTexts, typingSpeed: 80, deletingSpeed: 40, pauseDuration: 2500 });
 
+  // Scroll parallax: grid drifts down slowly, content rises and fades away
+  const heroRef = useRef<HTMLElement>(null);
+  const { scrollYProgress: heroProgress } = useScroll({
+    target: heroRef,
+    offset: ["start start", "end start"],
+  });
+  const heroGridY = useTransform(heroProgress, [0, 1], [0, 70]);
+  const heroContentY = useTransform(heroProgress, [0, 1], [0, -60]);
+  const heroContentOpacity = useTransform(heroProgress, [0, 0.85], [1, 0]);
+
   const heroName = get("hero_name", "Rifqi Ariansyah");
   const heroTitle = get("hero_title", "Cybersecurity Developer");
   const heroHeadline = get("hero_headline", "Building Secure Digital Solutions");
@@ -126,15 +161,18 @@ const Index = () => {
   return (
     <Layout>
       {/* Hero Section */}
-      <section className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center bg-grid">
+      <section ref={heroRef} className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
+        {/* Parallax grid layer — drifts slower than the content scrolls */}
+        <motion.div className="absolute inset-x-0 -inset-y-24 bg-grid" style={{ y: heroGridY }} />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
-        
+
         <motion.div
           className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
           variants={heroContainer}
           initial="hidden"
           animate="visible"
+          style={{ y: heroContentY, opacity: heroContentOpacity }}
         >
           {/* Badge */}
           <motion.div variants={heroItem} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border mb-8">
@@ -188,27 +226,31 @@ const Index = () => {
 
           {/* CTAs — spring micro-interactions */}
           <motion.div variants={heroItem} className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <motion.div
-              whileHover={{ scale: 1.03, y: -1 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
-              <Button asChild size="lg" className="glow-primary">
-                <Link to="/projects">
-                  View Projects
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
-            </motion.div>
-            <motion.div
-              whileHover={{ scale: 1.03, y: -1 }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
-              <Button asChild variant="outline" size="lg">
-                <Link to="/contact">Get in Touch</Link>
-              </Button>
-            </motion.div>
+            <Magnetic>
+              <motion.div
+                whileHover={{ scale: 1.03, y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button asChild size="lg" className="glow-primary">
+                  <Link to="/projects">
+                    View Projects
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </motion.div>
+            </Magnetic>
+            <Magnetic>
+              <motion.div
+                whileHover={{ scale: 1.03, y: -1 }}
+                whileTap={{ scale: 0.97 }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <Button asChild variant="outline" size="lg">
+                  <Link to="/contact">Get in Touch</Link>
+                </Button>
+              </motion.div>
+            </Magnetic>
           </motion.div>
 
           {/* Stats — animated counters */}

@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { motion, useScroll, useSpring, type Variants } from "motion/react";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +15,18 @@ const defaultCertifications = [
   { name: "Open-Source Security Tooling — xssscope & CTF-Toolkit", issuer: "GitHub", year: "2026", status: "active" },
 ];
 
+const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+
+const badgeContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.05 } },
+};
+
+const badgeItem: Variants = {
+  hidden: { opacity: 0, scale: 0.85, y: 8 },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
+};
+
 const CERTS_KEY = "portfolio_certifications";
 const RESUME_URL_KEY = "portfolio_resume_url";
 
@@ -24,6 +37,14 @@ const defaultTools = ["Burp Suite", "Wireshark", "Nmap", "OWASP ZAP", "Metasploi
 const About = () => {
   usePageAnalytics("/about");
   const { getList } = useSiteSettings();
+
+  // Approach timeline rail fills as the section scrolls through view
+  const approachRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress: approachProgress } = useScroll({
+    target: approachRef,
+    offset: ["start 0.85", "end 0.55"],
+  });
+  const approachScaleY = useSpring(approachProgress, { stiffness: 90, damping: 25 });
 
   const securitySkills = getList("skills_security", defaultSecuritySkills);
   const devSkills = getList("skills_dev", defaultDevSkills);
@@ -90,17 +111,21 @@ const About = () => {
               <ScrollReveal delay={100}>
                 <div className="p-6 rounded-lg bg-card border border-border h-full">
                   <h3 className="text-lg font-medium text-primary mb-4">Security</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <motion.div
+                    className="flex flex-wrap gap-2"
+                    variants={badgeContainer}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-60px" }}
+                  >
                     {securitySkills.map((skill) => (
-                      <Badge 
-                        key={skill} 
-                        variant="secondary"
-                        className="font-normal"
-                      >
-                        {skill}
-                      </Badge>
+                      <motion.span key={skill} variants={badgeItem} className="inline-flex">
+                        <Badge variant="secondary" className="font-normal">
+                          {skill}
+                        </Badge>
+                      </motion.span>
                     ))}
-                  </div>
+                  </motion.div>
                 </div>
               </ScrollReveal>
 
@@ -108,17 +133,21 @@ const About = () => {
               <ScrollReveal delay={200}>
                 <div className="p-6 rounded-lg bg-card border border-border h-full">
                   <h3 className="text-lg font-medium text-primary mb-4">Development</h3>
-                  <div className="flex flex-wrap gap-2">
+                  <motion.div
+                    className="flex flex-wrap gap-2"
+                    variants={badgeContainer}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-60px" }}
+                  >
                     {devSkills.map((skill) => (
-                      <Badge 
-                        key={skill} 
-                        variant="secondary"
-                        className="font-normal"
-                      >
-                        {skill}
-                      </Badge>
+                      <motion.span key={skill} variants={badgeItem} className="inline-flex">
+                        <Badge variant="secondary" className="font-normal">
+                          {skill}
+                        </Badge>
+                      </motion.span>
                     ))}
-                  </div>
+                  </motion.div>
                 </div>
               </ScrollReveal>
             </div>
@@ -132,16 +161,23 @@ const About = () => {
             
             <ScrollReveal delay={100}>
               <div className="p-6 rounded-lg bg-card border border-border">
-                <div className="flex flex-wrap gap-3">
-                  {tools.map((tool, index) => (
-                    <div 
+                <motion.div
+                  className="flex flex-wrap gap-3"
+                  variants={badgeContainer}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: "-60px" }}
+                >
+                  {tools.map((tool) => (
+                    <motion.div
                       key={tool}
+                      variants={badgeItem}
                       className="px-4 py-2 rounded-md bg-secondary/50 border border-border font-mono text-sm"
                     >
                       {tool}
-                    </div>
+                    </motion.div>
                   ))}
-                </div>
+                </motion.div>
               </div>
             </ScrollReveal>
           </section>
@@ -183,9 +219,16 @@ const About = () => {
               <h2 className="text-2xl font-semibold mb-8">My Approach</h2>
             </ScrollReveal>
             
-            <div className="grid gap-6">
-              <ScrollReveal delay={0}>
+            <div ref={approachRef} className="relative grid gap-6 pl-10">
+              {/* Timeline rail — fills with scroll progress */}
+              <div className="absolute left-[7px] top-2 bottom-2 w-px bg-border" />
+              <motion.div
+                className="absolute left-[7px] top-2 bottom-2 w-px bg-primary origin-top"
+                style={{ scaleY: approachScaleY }}
+              />
+              <ScrollReveal delay={0} direction="right">
                 <div className="relative p-6 rounded-lg bg-card border border-border">
+                  <span className="absolute -left-10 top-7 h-[15px] w-[15px] rounded-full border-2 border-primary bg-background" />
                   <div className="line-accent" />
                   <h3 className="text-lg font-medium mb-2">1. Reconnaissance</h3>
                   <p className="text-muted-foreground">
@@ -195,8 +238,9 @@ const About = () => {
                 </div>
               </ScrollReveal>
 
-              <ScrollReveal delay={100}>
+              <ScrollReveal delay={100} direction="right">
                 <div className="relative p-6 rounded-lg bg-card border border-border">
+                  <span className="absolute -left-10 top-7 h-[15px] w-[15px] rounded-full border-2 border-primary bg-background" />
                   <div className="line-accent" />
                   <h3 className="text-lg font-medium mb-2">2. Analysis</h3>
                   <p className="text-muted-foreground">
@@ -206,8 +250,9 @@ const About = () => {
                 </div>
               </ScrollReveal>
 
-              <ScrollReveal delay={200}>
+              <ScrollReveal delay={200} direction="right">
                 <div className="relative p-6 rounded-lg bg-card border border-border">
+                  <span className="absolute -left-10 top-7 h-[15px] w-[15px] rounded-full border-2 border-primary bg-background" />
                   <div className="line-accent" />
                   <h3 className="text-lg font-medium mb-2">3. Documentation</h3>
                   <p className="text-muted-foreground">

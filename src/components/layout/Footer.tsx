@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import { Shield, Github, Linkedin, Mail, Twitter } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -25,45 +26,49 @@ export function Footer() {
           {/* Social Links */}
           <div className="flex items-center gap-4">
             {githubUrl && (
-              <a
+              <motion.a
                 href={githubUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
+                whileHover={{ y: -3, scale: 1.12 }} whileTap={{ scale: 0.92 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="text-muted-foreground hover:text-primary transition-colors inline-block"
                 aria-label="GitHub"
               >
                 <Github className="h-5 w-5" />
-              </a>
+              </motion.a>
             )}
             {linkedinUrl && (
-              <a
+              <motion.a
                 href={linkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
+                whileHover={{ y: -3, scale: 1.12 }} whileTap={{ scale: 0.92 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="text-muted-foreground hover:text-primary transition-colors inline-block"
                 aria-label="LinkedIn"
               >
                 <Linkedin className="h-5 w-5" />
-              </a>
+              </motion.a>
             )}
             {twitterUrl && (
-              <a
+              <motion.a
                 href={twitterUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-primary transition-colors"
+                whileHover={{ y: -3, scale: 1.12 }} whileTap={{ scale: 0.92 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}
+                className="text-muted-foreground hover:text-primary transition-colors inline-block"
                 aria-label="Twitter"
               >
                 <Twitter className="h-5 w-5" />
-              </a>
+              </motion.a>
             )}
-            <a
+            <motion.a
               href={`mailto:${email}`}
-              className="text-muted-foreground hover:text-primary transition-colors"
+              whileHover={{ y: -3, scale: 1.12 }} whileTap={{ scale: 0.92 }} transition={{ type: "spring", stiffness: 400, damping: 15 }}
+              className="text-muted-foreground hover:text-primary transition-colors inline-block"
               aria-label="Email"
             >
               <Mail className="h-5 w-5" />
-            </a>
+            </motion.a>
           </div>
 
           {/* Copyright */}
