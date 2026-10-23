@@ -1,43 +1,98 @@
 import { useEffect, useRef } from "react";
 
 /**
- * ThreatGlobe — a "live attack map" hero backdrop in vanilla three.js.
+ * Living network — the hero backdrop, final form.
  *
- * A dot-matrix globe (fibonacci sphere, points dimmed by facing so the far
- * side fades) slowly rotates on the right side of the hero. Brighter city
- * nodes on its surface are linked by animated attack arcs: a glowing head
- * travels a lifted bezier between two cities, trailing a fading arc, and
- * lands with an expanding ripple ring — the Kaspersky threat-map language.
+ * No 3D object at all: an emerald aurora shader (fbm noise, mouse-reactive
+ * glow) breathes behind a network of drifting nodes. The net feels alive
+ * rather than hollow because things HAPPEN in it:
+ *  - data pulses travel the links node-to-node and flash their target
+ *  - the cursor links itself to the nearest nodes and gently pushes them
+ *  - nodes sit at different depths, so mouse parallax separates the layers
  *
- * Performance chassis (same discipline as before):
- *  - ~6 draw calls, additive blending instead of post-processing
- *  - DPR capped at 1.5, no antialiasing, loop pauses off-screen
- *  - adaptive DPR step-down if sustained FPS < 45
- *  - reduced motion renders one static frame with a few frozen arcs
+ * Performance chassis: 5 draw calls, DPR capped at 1.5 with adaptive
+ * step-down, render loop pauses off-screen, reduced motion = one frame.
  */
 
-const ARC_SEGS = 42;
-const MAX_ARCS = 12;
-const MAX_RIPPLES = 6;
+const LINK_DIST = 1.75;
+const MAX_PULSES = 10;
 
-interface City {
-  p: import("three").Vector3;
+interface NodeDef {
+  bx: number;
+  by: number;
+  bz: number;
+  phase: number;
+  speed: number;
+  base: number; // depth brightness 0.45..1
+  flash: number;
 }
 
-interface Arc {
-  a: import("three").Vector3;
-  b: import("three").Vector3;
-  ctrl: import("three").Vector3;
+interface Pulse {
+  a: number;
+  b: number;
   start: number;
   dur: number;
-  done: boolean;
 }
 
-interface Ripple {
-  mesh: import("three").Mesh;
-  start: number;
-  active: boolean;
-}
+const VERT = /* glsl */ `
+  varying vec2 vUv;
+  void main() {
+    vUv = uv;
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  }
+`;
+
+const FRAG = /* glsl */ `
+  precision highp float;
+  varying vec2 vUv;
+  uniform float uTime;
+  uniform vec2 uMouse;
+
+  float hash(vec2 p) {
+    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+  }
+  float noise(vec2 p) {
+    vec2 i = floor(p);
+    vec2 f = fract(p);
+    vec2 u = f * f * (3.0 - 2.0 * f);
+    return mix(
+      mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+      mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x),
+      u.y
+    );
+  }
+  float fbm(vec2 p) {
+    float v = 0.0;
+    float a = 0.5;
+    for (int i = 0; i < 4; i++) {
+      v += a * noise(p);
+      p = p * 2.03 + vec2(17.3, 9.1);
+      a *= 0.5;
+    }
+    return v;
+  }
+
+  void main() {
+    vec2 uv = vUv;
+    float t = uTime * 0.045;
+    float n = fbm(uv * vec2(3.0, 2.2) + vec2(t, t * 0.6));
+    float n2 = fbm(uv * vec2(5.5, 4.0) - vec2(t * 0.7, 0.0));
+    float nebula = smoothstep(0.42, 0.95, n * 0.75 + n2 * 0.45);
+
+    vec3 deep = vec3(0.012, 0.027, 0.031);
+    vec3 emeraldGlow = vec3(0.015, 0.135, 0.088);
+    vec3 col = mix(deep, emeraldGlow, nebula * 0.85);
+
+    // Cursor glow — a soft emerald bloom that follows the pointer
+    vec2 m = uMouse;
+    float d = distance(vec2(uv.x * 1.6, uv.y), vec2(m.x * 1.6, m.y));
+    col += vec3(0.02, 0.16, 0.10) * exp(-d * 3.2) * 0.55;
+
+    // Keep the left (headline) side calmer
+    col *= 0.72 + 0.28 * uv.x;
+    gl_FragColor = vec4(col, 1.0);
+  }
+`;
 
 export function Hero3D({ className }: { className?: string }) {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -53,6 +108,7 @@ export function Hero3D({ className }: { className?: string }) {
 
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       const small = window.innerWidth < 768;
+      const NODE_COUNT = small ? 85 : 150;
 
       const renderer = new THREE.WebGLRenderer({
         antialias: false,
@@ -71,96 +127,91 @@ export function Hero3D({ className }: { className?: string }) {
         0.1,
         100
       );
-      camera.position.set(0, 1.05, 7);
+      camera.position.set(0, 0, 7);
 
       const viewH = 2 * Math.tan(THREE.MathUtils.degToRad(25)) * 7;
       const viewW = viewH * camera.aspect;
 
-      const group = new THREE.Group();
-      const globeX = viewW * (small ? 0.1 : 0.235);
-      group.position.set(globeX, viewH * 0.02, 0);
-      scene.add(group);
-      camera.lookAt(globeX, 0, 0);
-
-      const globe = new THREE.Group();
-      group.add(globe);
-
-      const R = Math.min(viewH * 0.335, viewW * (small ? 0.42 : 0.3));
-
       const emerald = new THREE.Color("hsl(160, 84%, 50%)");
-      const arcColor = new THREE.Color("hsl(158, 95%, 58%)");
 
-      // --- Dot-matrix sphere (fibonacci) with per-point facing brightness ---
-      const dotCount = small ? 650 : 1200;
-      const dotPos = new Float32Array(dotCount * 3);
-      const dotCol = new Float32Array(dotCount * 3);
-      const golden = Math.PI * (3 - Math.sqrt(5));
-      for (let i = 0; i < dotCount; i++) {
-        const y = 1 - (i / (dotCount - 1)) * 2;
-        const rad = Math.sqrt(Math.max(0, 1 - y * y));
-        const th = golden * i;
-        dotPos[i * 3] = Math.cos(th) * rad * R;
-        dotPos[i * 3 + 1] = y * R;
-        dotPos[i * 3 + 2] = Math.sin(th) * rad * R;
-      }
-      const dotGeo = new THREE.BufferGeometry();
-      dotGeo.setAttribute("position", new THREE.BufferAttribute(dotPos, 3));
-      dotGeo.setAttribute("color", new THREE.BufferAttribute(dotCol, 3));
-      const dots = new THREE.Points(
-        dotGeo,
-        new THREE.PointsMaterial({
-          size: 0.05,
-          sizeAttenuation: true,
-          vertexColors: true,
-          transparent: true,
-          opacity: 0.9,
-          depthWrite: false,
-          blending: THREE.AdditiveBlending,
-        })
+      // --- Aurora shader backdrop ---
+      const auroraMat = new THREE.ShaderMaterial({
+        vertexShader: VERT,
+        fragmentShader: FRAG,
+        uniforms: {
+          uTime: { value: 0 },
+          uMouse: { value: new THREE.Vector2(0.72, 0.55) },
+        },
+        depthWrite: false,
+        depthTest: false,
+      });
+      const aurora = new THREE.Mesh(
+        new THREE.PlaneGeometry(viewW * 1.8, viewH * 1.8),
+        auroraMat
       );
-      globe.add(dots);
+      aurora.position.z = -3.5;
+      aurora.renderOrder = -1;
+      scene.add(aurora);
 
-      // --- Cities: brighter nodes, the arc endpoints ---
-      const cities: City[] = [];
-      const cityStride = Math.floor(dotCount / 30);
-      for (let i = 0; i < dotCount && cities.length < 30; i += cityStride) {
-        cities.push({
-          p: new THREE.Vector3(dotPos[i * 3], dotPos[i * 3 + 1], dotPos[i * 3 + 2]),
+      const group = new THREE.Group();
+      scene.add(group);
+
+      // --- Nodes at varied depths ---
+      const nodes: NodeDef[] = [];
+      for (let i = 0; i < NODE_COUNT; i++) {
+        const right = Math.random() < 0.62;
+        const x = right
+          ? viewW * (Math.random() * 0.58 - 0.06)
+          : viewW * (Math.random() * 0.46 - 0.5);
+        const z = (Math.random() - 0.5) * 2.4;
+        nodes.push({
+          bx: x,
+          by: (Math.random() - 0.5) * viewH * 0.98,
+          bz: z,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.1 + Math.random() * 0.22,
+          base: 0.45 + ((z + 1.2) / 2.4) * 0.55,
+          flash: 0,
         });
       }
-      const cityPos = new Float32Array(cities.length * 3);
-      const cityCol = new Float32Array(cities.length * 3);
-      cities.forEach((c, i) => {
-        cityPos[i * 3] = c.p.x;
-        cityPos[i * 3 + 1] = c.p.y;
-        cityPos[i * 3 + 2] = c.p.z;
-      });
-      const cityGeo = new THREE.BufferGeometry();
-      cityGeo.setAttribute("position", new THREE.BufferAttribute(cityPos, 3));
-      cityGeo.setAttribute("color", new THREE.BufferAttribute(cityCol, 3));
-      const cityPts = new THREE.Points(
-        cityGeo,
+
+      const nodePos = new Float32Array(NODE_COUNT * 3);
+      const nodeCol = new Float32Array(NODE_COUNT * 3);
+      const nodeGeo = new THREE.BufferGeometry();
+      nodeGeo.setAttribute("position", new THREE.BufferAttribute(nodePos, 3));
+      nodeGeo.setAttribute("color", new THREE.BufferAttribute(nodeCol, 3));
+      const nodePts = new THREE.Points(
+        nodeGeo,
         new THREE.PointsMaterial({
-          size: 0.11,
+          size: 0.065,
           sizeAttenuation: true,
           vertexColors: true,
           transparent: true,
-          opacity: 1,
+          opacity: 0.95,
           depthWrite: false,
           blending: THREE.AdditiveBlending,
         })
       );
-      globe.add(cityPts);
+      group.add(nodePts);
 
-      // --- Arc pool: one LineSegments for every arc ---
-      const arcVertCount = MAX_ARCS * ARC_SEGS * 2;
-      const arcPos = new Float32Array(arcVertCount * 3);
-      const arcCol = new Float32Array(arcVertCount * 3);
-      const arcGeo = new THREE.BufferGeometry();
-      arcGeo.setAttribute("position", new THREE.BufferAttribute(arcPos, 3));
-      arcGeo.setAttribute("color", new THREE.BufferAttribute(arcCol, 3));
-      const arcLines = new THREE.LineSegments(
-        arcGeo,
+      // --- Links between near nodes ---
+      const pairs: Array<[number, number]> = [];
+      for (let i = 0; i < NODE_COUNT; i++) {
+        for (let j = i + 1; j < NODE_COUNT; j++) {
+          const a = nodes[i];
+          const b = nodes[j];
+          if (Math.hypot(a.bx - b.bx, a.by - b.by, a.bz - b.bz) < LINK_DIST) {
+            pairs.push([i, j]);
+          }
+        }
+      }
+      const linkPos = new Float32Array(pairs.length * 6);
+      const linkCol = new Float32Array(pairs.length * 6);
+      const linkGeo = new THREE.BufferGeometry();
+      linkGeo.setAttribute("position", new THREE.BufferAttribute(linkPos, 3));
+      linkGeo.setAttribute("color", new THREE.BufferAttribute(linkCol, 3));
+      const linkLines = new THREE.LineSegments(
+        linkGeo,
         new THREE.LineBasicMaterial({
           vertexColors: true,
           transparent: true,
@@ -168,18 +219,19 @@ export function Hero3D({ className }: { className?: string }) {
           blending: THREE.AdditiveBlending,
         })
       );
-      globe.add(arcLines);
+      group.add(linkLines);
 
-      // Arc heads: one Points cloud, one vertex per arc
-      const headPos = new Float32Array(MAX_ARCS * 3);
-      const headCol = new Float32Array(MAX_ARCS * 3);
-      const headGeo = new THREE.BufferGeometry();
-      headGeo.setAttribute("position", new THREE.BufferAttribute(headPos, 3));
-      headGeo.setAttribute("color", new THREE.BufferAttribute(headCol, 3));
-      const heads = new THREE.Points(
-        headGeo,
+      // --- Data pulses travelling the links ---
+      const pulses: Pulse[] = [];
+      const pulsePos = new Float32Array(MAX_PULSES * 3);
+      const pulseCol = new Float32Array(MAX_PULSES * 3);
+      const pulseGeo = new THREE.BufferGeometry();
+      pulseGeo.setAttribute("position", new THREE.BufferAttribute(pulsePos, 3));
+      pulseGeo.setAttribute("color", new THREE.BufferAttribute(pulseCol, 3));
+      const pulsePts = new THREE.Points(
+        pulseGeo,
         new THREE.PointsMaterial({
-          size: 0.16,
+          size: 0.15,
           sizeAttenuation: true,
           vertexColors: true,
           transparent: true,
@@ -187,188 +239,50 @@ export function Hero3D({ className }: { className?: string }) {
           blending: THREE.AdditiveBlending,
         })
       );
-      globe.add(heads);
+      group.add(pulsePts);
 
-      // --- Ripple pool ---
-      const ripples: Ripple[] = [];
-      const rippleGeo = new THREE.RingGeometry(0.86, 1, 40);
-      for (let i = 0; i < MAX_RIPPLES; i++) {
-        const mesh = new THREE.Mesh(
-          rippleGeo,
-          new THREE.MeshBasicMaterial({
-            color: arcColor,
-            transparent: true,
-            opacity: 0,
-            side: THREE.DoubleSide,
-            depthWrite: false,
-            blending: THREE.AdditiveBlending,
-          })
-        );
-        mesh.visible = false;
-        globe.add(mesh);
-        ripples.push({ mesh, start: 0, active: false });
-      }
-      const fireRipple = (at: import("three").Vector3, now: number) => {
-        const r = ripples.find((x) => !x.active);
-        if (!r) return;
-        r.active = true;
-        r.start = now;
-        r.mesh.visible = true;
-        r.mesh.position.copy(at);
-        const normal = at.clone().normalize();
-        r.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), normal);
-      };
+      // --- Cursor link lines (cursor -> 3 nearest nodes) ---
+      const CURSOR_LINKS = 3;
+      const clPos = new Float32Array(CURSOR_LINKS * 6);
+      const clCol = new Float32Array(CURSOR_LINKS * 6);
+      const clGeo = new THREE.BufferGeometry();
+      clGeo.setAttribute("position", new THREE.BufferAttribute(clPos, 3));
+      clGeo.setAttribute("color", new THREE.BufferAttribute(clCol, 3));
+      const clLines = new THREE.LineSegments(
+        clGeo,
+        new THREE.LineBasicMaterial({
+          vertexColors: true,
+          transparent: true,
+          depthWrite: false,
+          blending: THREE.AdditiveBlending,
+        })
+      );
+      group.add(clLines);
 
-      // --- Arc lifecycle ---
-      const arcs: Arc[] = [];
-      const bezier = (
-        arc: Arc,
-        s: number,
-        out: import("three").Vector3
-      ) => {
-        const u = 1 - s;
-        out.set(
-          u * u * arc.a.x + 2 * u * s * arc.ctrl.x + s * s * arc.b.x,
-          u * u * arc.a.y + 2 * u * s * arc.ctrl.y + s * s * arc.b.y,
-          u * u * arc.a.z + 2 * u * s * arc.ctrl.z + s * s * arc.b.z
-        );
-        return out;
-      };
-      const spawnArc = (now: number) => {
-        if (arcs.length >= MAX_ARCS) return;
-        for (let tries = 0; tries < 8; tries++) {
-          const a = cities[Math.floor(Math.random() * cities.length)].p;
-          const b = cities[Math.floor(Math.random() * cities.length)].p;
-          if (a === b) continue;
-          const chord = a.distanceTo(b);
-          if (chord < R * 0.75 || chord > R * 1.9) continue;
-          const ctrl = a
-            .clone()
-            .add(b)
-            .multiplyScalar(0.5)
-            .normalize()
-            .multiplyScalar(R + R * 0.16 + chord * 0.22);
-          arcs.push({ a, b, ctrl, start: now, dur: 2.1 + Math.random() * 0.9, done: false });
-          return;
-        }
-      };
-
-      // Facing factor for a globe-local point given current Y rotation
-      const facing = (x: number, z: number, sin: number, cos: number) => {
-        const zr = -x * sin + z * cos;
-        return 0.12 + 0.88 * Math.min(1, Math.max(0, zr / R * 0.5 + 0.5));
-      };
-
-      const tmpV = new THREE.Vector3();
-      const update = (t: number) => {
-        const rot = t * 0.05;
-        globe.rotation.y = rot;
-        const sin = Math.sin(rot);
-        const cos = Math.cos(rot);
-
-        for (let i = 0; i < dotCount; i++) {
-          const f = facing(dotPos[i * 3], dotPos[i * 3 + 2], sin, cos) * 0.55;
-          dotCol[i * 3] = emerald.r * f;
-          dotCol[i * 3 + 1] = emerald.g * f;
-          dotCol[i * 3 + 2] = emerald.b * f;
-        }
-        dotGeo.attributes.color.needsUpdate = true;
-
-        cities.forEach((c, i) => {
-          const f = facing(c.p.x, c.p.z, sin, cos);
-          const pulse = 0.8 + 0.2 * Math.sin(t * 2 + i * 1.7);
-          cityCol[i * 3] = emerald.r * f * pulse;
-          cityCol[i * 3 + 1] = emerald.g * f * pulse;
-          cityCol[i * 3 + 2] = emerald.b * f * pulse;
-        });
-        cityGeo.attributes.color.needsUpdate = true;
-
-        // Arcs
-        arcCol.fill(0);
-        for (let ai = 0; ai < MAX_ARCS; ai++) {
-          const arc = arcs[ai];
-          headCol[ai * 3] = 0;
-          headCol[ai * 3 + 1] = 0;
-          headCol[ai * 3 + 2] = 0;
-          if (!arc) continue;
-          const p = Math.min(1, (t - arc.start) / arc.dur);
-          if (p >= 1 && !arc.done) {
-            arc.done = true;
-            fireRipple(arc.b, t);
-          }
-          const fade = p > 0.82 ? Math.max(0, (1 - p) / 0.18) : 1;
-          const base = ai * ARC_SEGS * 2;
-          for (let s = 0; s < ARC_SEGS; s++) {
-            const s0 = s / ARC_SEGS;
-            const s1 = (s + 1) / ARC_SEGS;
-            const vi = (base + s * 2) * 3;
-            bezier(arc, s0, tmpV);
-            arcPos[vi] = tmpV.x;
-            arcPos[vi + 1] = tmpV.y;
-            arcPos[vi + 2] = tmpV.z;
-            const f0 = facing(tmpV.x, tmpV.z, sin, cos);
-            bezier(arc, s1, tmpV);
-            arcPos[vi + 3] = tmpV.x;
-            arcPos[vi + 4] = tmpV.y;
-            arcPos[vi + 5] = tmpV.z;
-            const f1 = facing(tmpV.x, tmpV.z, sin, cos);
-            const lit = (ss: number) => (ss <= p ? (0.15 + 0.85 * (p > 0 ? ss / p : 1)) * fade : 0);
-            const c0 = lit(s0) * f0;
-            const c1 = lit(s1) * f1;
-            arcCol[vi] = arcColor.r * c0;
-            arcCol[vi + 1] = arcColor.g * c0;
-            arcCol[vi + 2] = arcColor.b * c0;
-            arcCol[vi + 3] = arcColor.r * c1;
-            arcCol[vi + 4] = arcColor.g * c1;
-            arcCol[vi + 5] = arcColor.b * c1;
-          }
-          if (p < 1) {
-            bezier(arc, p, tmpV);
-            headPos[ai * 3] = tmpV.x;
-            headPos[ai * 3 + 1] = tmpV.y;
-            headPos[ai * 3 + 2] = tmpV.z;
-            const hf = facing(tmpV.x, tmpV.z, sin, cos);
-            headCol[ai * 3] = arcColor.r * hf;
-            headCol[ai * 3 + 1] = arcColor.g * hf;
-            headCol[ai * 3 + 2] = arcColor.b * hf;
-          }
-        }
-        arcGeo.attributes.position.needsUpdate = true;
-        arcGeo.attributes.color.needsUpdate = true;
-        headGeo.attributes.position.needsUpdate = true;
-        headGeo.attributes.color.needsUpdate = true;
-
-        // Ripples
-        for (const r of ripples) {
-          if (!r.active) continue;
-          const rp = (t - r.start) / 0.9;
-          if (rp >= 1) {
-            r.active = false;
-            r.mesh.visible = false;
-            continue;
-          }
-          const s = 0.12 + rp * 0.5;
-          r.mesh.scale.set(s, s, s);
-          (r.mesh.material as import("three").MeshBasicMaterial).opacity =
-            0.75 * (1 - rp);
-        }
-
-        // Retire finished arcs
-        for (let i = arcs.length - 1; i >= 0; i--) {
-          if ((t - arcs[i].start) / arcs[i].dur >= 1.15) arcs.splice(i, 1);
-        }
-      };
-
-      // Mouse parallax (position drift of the whole rig, very slight)
+      // --- Interaction state ---
+      let mouseX = 9999;
+      let mouseY = 9999;
       let parX = 0;
       let parY = 0;
       let parTX = 0;
       let parTY = 0;
       const onMove = (e: MouseEvent) => {
-        parTX = (e.clientX / window.innerWidth - 0.5) * 0.22;
-        parTY = (e.clientY / window.innerHeight - 0.5) * 0.14;
+        const r = mount.getBoundingClientRect();
+        if (r.height === 0) return;
+        const nx = (e.clientX - r.left) / r.width;
+        const ny = (e.clientY - r.top) / r.height;
+        mouseX = (nx - 0.5) * viewW;
+        mouseY = -(ny - 0.5) * viewH;
+        parTX = (e.clientX / window.innerWidth - 0.5) * 2;
+        parTY = (e.clientY / window.innerHeight - 0.5) * 2;
+        (auroraMat.uniforms.uMouse.value as import("three").Vector2).set(nx, 1 - ny);
+      };
+      const onLeave = () => {
+        mouseX = 9999;
+        mouseY = 9999;
       };
       window.addEventListener("mousemove", onMove);
+      document.documentElement.addEventListener("mouseleave", onLeave);
 
       const onResize = () => {
         if (!mount.clientWidth) return;
@@ -378,10 +292,137 @@ export function Hero3D({ className }: { className?: string }) {
       };
       window.addEventListener("resize", onResize);
 
+      const spawnPulse = (t: number) => {
+        if (pulses.length >= MAX_PULSES || pairs.length === 0) return;
+        const [a, b] = pairs[Math.floor(Math.random() * pairs.length)];
+        pulses.push({
+          a: Math.random() < 0.5 ? a : b,
+          b: Math.random() < 0.5 ? b : a,
+          start: t,
+          dur: 0.9 + Math.random() * 0.7,
+        });
+      };
+
+      const update = (t: number) => {
+        auroraMat.uniforms.uTime.value = t;
+
+        // Nodes: drift + cursor repulsion + flash decay + twinkle
+        for (let i = 0; i < NODE_COUNT; i++) {
+          const n = nodes[i];
+          let x = n.bx + Math.sin(t * n.speed + n.phase) * 0.13;
+          let y = n.by + Math.cos(t * n.speed * 0.8 + n.phase) * 0.13;
+          const dx = x - mouseX;
+          const dy = y - mouseY;
+          const d2 = dx * dx + dy * dy;
+          const R = 1.35;
+          if (d2 < R * R && d2 > 0.0001) {
+            const d = Math.sqrt(d2);
+            const push = ((R - d) / R) * 0.38;
+            x += (dx / d) * push;
+            y += (dy / d) * push;
+          }
+          nodePos[i * 3] = x;
+          nodePos[i * 3 + 1] = y;
+          nodePos[i * 3 + 2] = n.bz;
+
+          n.flash *= 0.94;
+          const twinkle = 0.82 + 0.18 * Math.sin(t * 1.4 + n.phase * 3);
+          const bright = n.base * twinkle * (1 + n.flash * 1.7) * 0.6;
+          nodeCol[i * 3] = emerald.r * bright;
+          nodeCol[i * 3 + 1] = emerald.g * bright;
+          nodeCol[i * 3 + 2] = emerald.b * bright;
+        }
+        nodeGeo.attributes.position.needsUpdate = true;
+        nodeGeo.attributes.color.needsUpdate = true;
+
+        // Links
+        for (let p = 0; p < pairs.length; p++) {
+          const a = pairs[p][0];
+          const b = pairs[p][1];
+          const vi = p * 6;
+          linkPos[vi] = nodePos[a * 3];
+          linkPos[vi + 1] = nodePos[a * 3 + 1];
+          linkPos[vi + 2] = nodePos[a * 3 + 2];
+          linkPos[vi + 3] = nodePos[b * 3];
+          linkPos[vi + 4] = nodePos[b * 3 + 1];
+          linkPos[vi + 5] = nodePos[b * 3 + 2];
+          const ba = nodes[a].base * 0.16;
+          const bb = nodes[b].base * 0.16;
+          linkCol[vi] = emerald.r * ba;
+          linkCol[vi + 1] = emerald.g * ba;
+          linkCol[vi + 2] = emerald.b * ba;
+          linkCol[vi + 3] = emerald.r * bb;
+          linkCol[vi + 4] = emerald.g * bb;
+          linkCol[vi + 5] = emerald.b * bb;
+        }
+        linkGeo.attributes.position.needsUpdate = true;
+        linkGeo.attributes.color.needsUpdate = true;
+
+        // Pulses
+        pulseCol.fill(0);
+        for (let i = pulses.length - 1; i >= 0; i--) {
+          const pu = pulses[i];
+          const p = (t - pu.start) / pu.dur;
+          if (p >= 1) {
+            nodes[pu.b].flash = 1;
+            pulses.splice(i, 1);
+            continue;
+          }
+          const ax = nodePos[pu.a * 3];
+          const ay = nodePos[pu.a * 3 + 1];
+          const az = nodePos[pu.a * 3 + 2];
+          pulsePos[i * 3] = ax + (nodePos[pu.b * 3] - ax) * p;
+          pulsePos[i * 3 + 1] = ay + (nodePos[pu.b * 3 + 1] - ay) * p;
+          pulsePos[i * 3 + 2] = az + (nodePos[pu.b * 3 + 2] - az) * p;
+          const env = Math.sin(p * Math.PI);
+          pulseCol[i * 3] = emerald.r * env;
+          pulseCol[i * 3 + 1] = emerald.g * env;
+          pulseCol[i * 3 + 2] = emerald.b * env;
+        }
+        pulseGeo.attributes.position.needsUpdate = true;
+        pulseGeo.attributes.color.needsUpdate = true;
+
+        // Cursor links: nearest nodes within reach
+        clCol.fill(0);
+        if (mouseX < 9000) {
+          const near: Array<{ i: number; d: number }> = [];
+          for (let i = 0; i < NODE_COUNT; i++) {
+            const d = Math.hypot(nodePos[i * 3] - mouseX, nodePos[i * 3 + 1] - mouseY);
+            if (d < 2.1) near.push({ i, d });
+          }
+          near.sort((a, b) => a.d - b.d);
+          near.slice(0, CURSOR_LINKS).forEach((n, k) => {
+            const vi = k * 6;
+            clPos[vi] = mouseX;
+            clPos[vi + 1] = mouseY;
+            clPos[vi + 2] = 0.4;
+            clPos[vi + 3] = nodePos[n.i * 3];
+            clPos[vi + 4] = nodePos[n.i * 3 + 1];
+            clPos[vi + 5] = nodePos[n.i * 3 + 2];
+            const fade = (1 - n.d / 2.1) * 0.55;
+            clCol[vi] = emerald.r * fade;
+            clCol[vi + 1] = emerald.g * fade;
+            clCol[vi + 2] = emerald.b * fade;
+            clCol[vi + 3] = emerald.r * fade * 0.6;
+            clCol[vi + 4] = emerald.g * fade * 0.6;
+            clCol[vi + 5] = emerald.b * fade * 0.6;
+          });
+        }
+        clGeo.attributes.position.needsUpdate = true;
+        clGeo.attributes.color.needsUpdate = true;
+
+        // Depth parallax
+        parX += (parTX - parX) * 0.04;
+        parY += (parTY - parY) * 0.04;
+        group.rotation.y = parX * 0.05;
+        group.rotation.x = -parY * 0.035;
+      };
+
+      // --- Loop chassis: visibility pause + adaptive quality ---
       let raf = 0;
       let running = false;
       const clock = new THREE.Clock();
-      let nextSpawn = 0.4;
+      let nextPulse = 0.3;
       let frames = 0;
       let windowStart = performance.now();
       let dprSteps = 0;
@@ -390,14 +431,10 @@ export function Hero3D({ className }: { className?: string }) {
         if (!running) return;
         raf = requestAnimationFrame(tick);
         const t = clock.getElapsedTime();
-        if (t >= nextSpawn) {
-          spawnArc(t);
-          nextSpawn = t + 0.55 + Math.random() * 0.85;
+        if (t >= nextPulse) {
+          spawnPulse(t);
+          nextPulse = t + 0.45 + Math.random() * 0.7;
         }
-        parX += (parTX - parX) * 0.03;
-        parY += (parTY - parY) * 0.03;
-        group.position.x = globeX + parX;
-        group.position.y = viewH * 0.02 - parY;
         update(t);
         renderer.render(scene, camera);
 
@@ -435,11 +472,7 @@ export function Hero3D({ className }: { className?: string }) {
       io.observe(mount);
 
       if (reduced) {
-        for (let i = 0; i < 5; i++) spawnArc(0);
-        arcs.forEach((a, i) => {
-          a.start = -a.dur * (0.25 + i * 0.13);
-        });
-        update(1.4);
+        update(1.6);
         renderer.render(scene, camera);
       } else {
         start();
@@ -450,18 +483,17 @@ export function Hero3D({ className }: { className?: string }) {
         io.disconnect();
         window.removeEventListener("mousemove", onMove);
         window.removeEventListener("resize", onResize);
-        dotGeo.dispose();
-        cityGeo.dispose();
-        arcGeo.dispose();
-        headGeo.dispose();
-        rippleGeo.dispose();
-        (dots.material as import("three").Material).dispose();
-        (cityPts.material as import("three").Material).dispose();
-        (arcLines.material as import("three").Material).dispose();
-        (heads.material as import("three").Material).dispose();
-        ripples.forEach((r) =>
-          (r.mesh.material as import("three").Material).dispose()
-        );
+        document.documentElement.removeEventListener("mouseleave", onLeave);
+        nodeGeo.dispose();
+        linkGeo.dispose();
+        pulseGeo.dispose();
+        clGeo.dispose();
+        aurora.geometry.dispose();
+        auroraMat.dispose();
+        (nodePts.material as import("three").Material).dispose();
+        (linkLines.material as import("three").Material).dispose();
+        (pulsePts.material as import("three").Material).dispose();
+        (clLines.material as import("three").Material).dispose();
         renderer.dispose();
         if (renderer.domElement.parentElement === mount) {
           mount.removeChild(renderer.domElement);

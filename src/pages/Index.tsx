@@ -170,7 +170,7 @@ const Index = () => {
         <motion.div className="absolute inset-x-0 -inset-y-24 bg-grid" style={{ y: heroGridY }} />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
-        {/* ThreatGlobe (three.js): dot globe + live attack arcs, left faded for the headline */}
+        {/* Living network + aurora shader (three.js), left faded for the headline */}
         <Hero3D className="absolute inset-0 z-[1] pointer-events-none [mask-image:linear-gradient(to_right,transparent_0%,black_45%)]" />
         {/* After-effect: cursor light-trail */}
         <CursorTrail className="absolute inset-0 z-[2] h-full w-full pointer-events-none" />
