@@ -18,6 +18,7 @@ import { Hero3D } from "@/components/Hero3D";
 import { CursorTrail } from "@/components/CursorTrail";
 import { GlitchText } from "@/components/GlitchText";
 import { KineticBackdrop } from "@/components/KineticBackdrop";
+import { HeroFeed } from "@/components/HeroFeed";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -174,6 +175,8 @@ const Index = () => {
         <Hero3D className="absolute inset-0 z-[1] pointer-events-none [mask-image:linear-gradient(to_right,transparent_0%,black_45%)]" />
         {/* After-effect: cursor light-trail */}
         <CursorTrail className="absolute inset-0 z-[2] h-full w-full pointer-events-none" />
+        {/* Live ops ticker — the hero's living content line */}
+        <HeroFeed />
 
         <motion.div
           className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center"

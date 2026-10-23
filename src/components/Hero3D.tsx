@@ -34,6 +34,13 @@ interface Pulse {
   dur: number;
 }
 
+interface Ping {
+  x: number;
+  y: number;
+  z: number;
+  start: number;
+}
+
 const VERT = /* glsl */ `
   varying vec2 vUv;
   void main() {
@@ -81,12 +88,12 @@ const FRAG = /* glsl */ `
 
     vec3 deep = vec3(0.012, 0.027, 0.031);
     vec3 emeraldGlow = vec3(0.015, 0.135, 0.088);
-    vec3 col = mix(deep, emeraldGlow, nebula * 0.85);
+    vec3 col = mix(deep, emeraldGlow, nebula * 1.0);
 
     // Cursor glow — a soft emerald bloom that follows the pointer
     vec2 m = uMouse;
     float d = distance(vec2(uv.x * 1.6, uv.y), vec2(m.x * 1.6, m.y));
-    col += vec3(0.02, 0.16, 0.10) * exp(-d * 3.2) * 0.55;
+    col += vec3(0.02, 0.16, 0.10) * exp(-d * 3.2) * 0.7;
 
     // Keep the left (headline) side calmer
     col *= 0.72 + 0.28 * uv.x;
@@ -284,6 +291,33 @@ export function Hero3D({ className }: { className?: string }) {
       window.addEventListener("mousemove", onMove);
       document.documentElement.addEventListener("mouseleave", onLeave);
 
+      // Sonar pings: waves that flash nodes as the front passes. Fired
+      // periodically from a random node, and from any click in the hero.
+      const pings: Ping[] = [];
+      let lastT = 0;
+      const firePing = (x: number, y: number, z: number, at: number) => {
+        pings.push({ x, y, z, start: at });
+        if (pings.length > 3) pings.shift();
+      };
+      const onTap = (e: PointerEvent) => {
+        if (reduced) return;
+        const r = mount.getBoundingClientRect();
+        if (
+          e.clientX < r.left ||
+          e.clientX > r.right ||
+          e.clientY < r.top ||
+          e.clientY > r.bottom
+        )
+          return;
+        firePing(
+          ((e.clientX - r.left) / r.width - 0.5) * viewW,
+          -((e.clientY - r.top) / r.height - 0.5) * viewH,
+          0,
+          lastT
+        );
+      };
+      window.addEventListener("pointerdown", onTap);
+
       const onResize = () => {
         if (!mount.clientWidth) return;
         camera.aspect = mount.clientWidth / Math.max(mount.clientHeight, 1);
@@ -326,8 +360,18 @@ export function Hero3D({ className }: { className?: string }) {
           nodePos[i * 3 + 2] = n.bz;
 
           n.flash *= 0.94;
+          let effFlash = n.flash;
+          for (const pg of pings) {
+            const age = t - pg.start;
+            if (age < 0 || age > 2.8) continue;
+            const radius = age * 3.4;
+            const dd = Math.hypot(x - pg.x, y - pg.y, n.bz - pg.z);
+            const band = Math.exp(-((dd - radius) * (dd - radius)) / 0.3);
+            const g = band * Math.max(0, 1 - age / 2.8);
+            if (g > effFlash) effFlash = g;
+          }
           const twinkle = 0.82 + 0.18 * Math.sin(t * 1.4 + n.phase * 3);
-          const bright = n.base * twinkle * (1 + n.flash * 1.7) * 0.6;
+          const bright = n.base * twinkle * (1 + effFlash * 1.9) * 0.6;
           nodeCol[i * 3] = emerald.r * bright;
           nodeCol[i * 3 + 1] = emerald.g * bright;
           nodeCol[i * 3 + 2] = emerald.b * bright;
@@ -423,6 +467,7 @@ export function Hero3D({ className }: { className?: string }) {
       let running = false;
       const clock = new THREE.Clock();
       let nextPulse = 0.3;
+      let nextPing = 2.2;
       let frames = 0;
       let windowStart = performance.now();
       let dprSteps = 0;
@@ -431,9 +476,18 @@ export function Hero3D({ className }: { className?: string }) {
         if (!running) return;
         raf = requestAnimationFrame(tick);
         const t = clock.getElapsedTime();
+        lastT = t;
         if (t >= nextPulse) {
           spawnPulse(t);
           nextPulse = t + 0.45 + Math.random() * 0.7;
+        }
+        if (t >= nextPing) {
+          const src = nodes[Math.floor(Math.random() * nodes.length)];
+          firePing(src.bx, src.by, src.bz, t);
+          nextPing = t + 4.5 + Math.random() * 2.5;
+        }
+        for (let i = pings.length - 1; i >= 0; i--) {
+          if (t - pings[i].start > 2.8) pings.splice(i, 1);
         }
         update(t);
         renderer.render(scene, camera);
@@ -483,6 +537,7 @@ export function Hero3D({ className }: { className?: string }) {
         io.disconnect();
         window.removeEventListener("mousemove", onMove);
         window.removeEventListener("resize", onResize);
+        window.removeEventListener("pointerdown", onTap);
         document.documentElement.removeEventListener("mouseleave", onLeave);
         nodeGeo.dispose();
         linkGeo.dispose();
