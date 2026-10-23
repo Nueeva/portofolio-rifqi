@@ -14,6 +14,9 @@ import { ArrowRight, Shield, Lock, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { Hero3D } from "@/components/Hero3D";
+import { CursorTrail } from "@/components/CursorTrail";
+import { GlitchText } from "@/components/GlitchText";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -166,6 +169,10 @@ const Index = () => {
         <motion.div className="absolute inset-x-0 -inset-y-24 bg-grid" style={{ y: heroGridY }} />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+        {/* Interactive 3D wireframe scene (three.js) */}
+        <Hero3D className="absolute inset-0 z-[1] pointer-events-none" />
+        {/* After-effect: cursor light-trail */}
+        <CursorTrail className="absolute inset-0 z-[2] h-full w-full pointer-events-none" />
 
         <motion.div
           className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
@@ -184,7 +191,7 @@ const Index = () => {
 
           {/* Name */}
           <motion.h1 variants={heroItem} className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
-            Hi, I'm <span className="text-primary">{heroName}</span>
+            Hi, I'm <span className="text-primary"><GlitchText text={heroName} /></span>
           </motion.h1>
 
           {/* Headline */}

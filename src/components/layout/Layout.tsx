@@ -9,6 +9,7 @@ import {
 import { ArrowUp } from "lucide-react";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
+import { RivaAgent } from "@/components/RivaAgent";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -49,12 +50,13 @@ export function Layout({ children }: LayoutProps) {
             whileTap={{ scale: 0.94 }}
             transition={{ type: "spring", stiffness: 400, damping: 22 }}
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="fixed bottom-6 right-6 z-[60] flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+            className="fixed bottom-24 right-6 z-[60] flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25"
           >
             <ArrowUp className="h-5 w-5" />
           </motion.button>
         )}
       </AnimatePresence>
+      <RivaAgent />
     </div>
   );
 }
