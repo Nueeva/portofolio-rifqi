@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { motion } from "motion/react";
 import { Shield, Menu, X, Settings, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -65,13 +66,20 @@ export function Navbar() {
               <Link
                 key={link.href}
                 to={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
+                className={`relative text-sm font-medium transition-colors hover:text-primary ${
                   location.pathname === link.href
                     ? "text-primary"
                     : "text-muted-foreground"
                 }`}
               >
                 {link.label}
+                {location.pathname === link.href && (
+                  <motion.span
+                    layoutId="nav-underline"
+                    className="absolute left-0 right-0 -bottom-1.5 h-0.5 rounded-full bg-primary"
+                    transition={{ type: "spring", stiffness: 500, damping: 40 }}
+                  />
+                )}
               </Link>
             ))}
             {isLoggedIn && (

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { ExternalLink, Github, Filter, Image as ImageIcon } from "lucide-react";
+import { ExternalLink, Github, Filter, ShieldCheck, Terminal, Wrench } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,43 @@ const categoryLabels: Record<ProjectCategory, string> = {
 };
 
 const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+
+const coverGradients = [
+  "from-emerald-950 via-teal-950 to-black",
+  "from-zinc-950 via-emerald-950 to-black",
+  "from-slate-950 via-cyan-950 to-black",
+  "from-neutral-950 via-green-950 to-black",
+];
+
+const categoryIcons = {
+  pentesting: Terminal,
+  tools: Wrench,
+  "web-security": ShieldCheck,
+} as const;
+
+/** Designed cover for projects without a screenshot: gradient + grid + category mark */
+function ProjectCover({ project }: { project: Project }) {
+  let hash = 0;
+  for (const ch of project.title) hash = (hash * 31 + ch.charCodeAt(0)) % 997;
+  const gradient = coverGradients[hash % coverGradients.length];
+  const Icon = categoryIcons[project.category as keyof typeof categoryIcons] ?? Terminal;
+
+  return (
+    <div className={`relative h-48 overflow-hidden bg-gradient-to-br ${gradient}`}>
+      <div className="absolute inset-0 bg-grid opacity-50" />
+      <Icon className="absolute -right-5 -bottom-5 h-36 w-36 text-primary/10 -rotate-12 transition-transform duration-500 group-hover:scale-110 group-hover:-rotate-6" />
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full border border-primary/30 bg-background/40 backdrop-blur-sm">
+          <Icon className="h-7 w-7 text-primary" />
+        </div>
+        <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-foreground/70">
+          {categoryLabels[project.category as ProjectCategory]}
+        </span>
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent pointer-events-none" />
+    </div>
+  );
+}
 
 const Projects = () => {
   const [activeCategory, setActiveCategory] = useState<ProjectCategory>("all");
@@ -124,9 +161,7 @@ const Projects = () => {
                         <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent pointer-events-none" />
                       </div>
                     ) : (
-                      <div className="h-48 bg-muted flex items-center justify-center">
-                        <ImageIcon className="h-12 w-12 text-muted-foreground/50" />
-                      </div>
+                      <ProjectCover project={project} />
                     )}
 
                     <div className="p-6">
