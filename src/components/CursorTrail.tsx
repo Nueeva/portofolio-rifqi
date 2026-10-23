@@ -42,21 +42,12 @@ export function CursorTrail({ className }: { className?: string }) {
     const dots: Dot[] = [];
     let lastX = -999;
     let lastY = -999;
-    const onMove = (e: MouseEvent) => {
-      const r = canvas.getBoundingClientRect();
-      const x = e.clientX - r.left;
-      const y = e.clientY - r.top;
-      if (Math.hypot(x - lastX, y - lastY) < MIN_DIST) return;
-      lastX = x;
-      lastY = y;
-      dots.push({ x, y, born: performance.now() });
-      if (dots.length > MAX_DOTS) dots.splice(0, dots.length - MAX_DOTS);
-    };
-    parent.addEventListener("mousemove", onMove);
-
     let raf = 0;
+    let loopRunning = false;
+
+    // The render loop only runs while a trail is alive — an idle hero
+    // costs zero frames.
     const frame = (now: number) => {
-      raf = requestAnimationFrame(frame);
       ctx.clearRect(0, 0, w, h);
       for (let i = dots.length - 1; i >= 0; i--) {
         const d = dots[i];
@@ -71,8 +62,29 @@ export function CursorTrail({ className }: { className?: string }) {
         ctx.fillStyle = `hsla(160, 84%, 45%, ${(1 - age) * 0.5})`;
         ctx.fill();
       }
+      if (dots.length > 0) {
+        raf = requestAnimationFrame(frame);
+      } else {
+        loopRunning = false;
+        ctx.clearRect(0, 0, w, h);
+      }
     };
-    raf = requestAnimationFrame(frame);
+
+    const onMove = (e: MouseEvent) => {
+      const r = canvas.getBoundingClientRect();
+      const x = e.clientX - r.left;
+      const y = e.clientY - r.top;
+      if (Math.hypot(x - lastX, y - lastY) < MIN_DIST) return;
+      lastX = x;
+      lastY = y;
+      dots.push({ x, y, born: performance.now() });
+      if (dots.length > MAX_DOTS) dots.splice(0, dots.length - MAX_DOTS);
+      if (!loopRunning) {
+        loopRunning = true;
+        raf = requestAnimationFrame(frame);
+      }
+    };
+    parent.addEventListener("mousemove", onMove);
 
     return () => {
       cancelAnimationFrame(raf);
