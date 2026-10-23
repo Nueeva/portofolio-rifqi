@@ -9,9 +9,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const defaultCertifications = [
-  { name: "CompTIA Security+", issuer: "CompTIA", year: "2024", status: "active" },
-  { name: "CEH (Certified Ethical Hacker)", issuer: "EC-Council", year: "2024", status: "active" },
-  { name: "OSCP", issuer: "Offensive Security", year: "2025", status: "in-progress" },
+  { name: "Founder & Lead Developer — Apexsions Plugin Ecosystem (9 plugins, full security audit)", issuer: "Personal Project", year: "2025", status: "active" },
+  { name: "Lead Developer — Portfolio 71, Student Portfolio Platform of SMKN 71 Jakarta", issuer: "School Project", year: "2026", status: "active" },
+  { name: "Open-Source Security Tooling — xssscope & CTF-Toolkit", issuer: "GitHub", year: "2026", status: "active" },
 ];
 
 const CERTS_KEY = "portfolio_certifications";
@@ -151,7 +151,7 @@ const About = () => {
             <ScrollReveal>
               <h2 className="text-2xl font-semibold mb-8 flex items-center gap-2">
                 <Award className="h-6 w-6 text-primary" />
-                Certifications
+                Certifications & Milestones
               </h2>
             </ScrollReveal>
 

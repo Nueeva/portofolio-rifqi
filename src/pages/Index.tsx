@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { motion, type Variants } from "motion/react";
 import { ArrowRight, Shield, Lock, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
@@ -6,6 +7,19 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+
+// One continuous hero entrance: staggered Bézier reveal, no bounce
+const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+
+const heroContainer: Variants = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.09 } },
+};
+
+const heroItem: Variants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
+};
 
 const typingTexts = [
   "Penetration Testing",
@@ -32,29 +46,34 @@ const Index = () => {
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
         
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          {/* Badge - visible immediately for LCP */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border mb-8 animate-fade-in">
+        <motion.div
+          className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center"
+          variants={heroContainer}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Badge */}
+          <motion.div variants={heroItem} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border mb-8">
             <Shield className="h-4 w-4 text-primary" />
             <span className="text-sm font-medium text-muted-foreground">
               {heroTitle}
             </span>
-          </div>
+          </motion.div>
 
-          {/* Name - visible immediately for LCP */}
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4 animate-fade-in" style={{ animationDelay: "100ms" }}>
+          {/* Name */}
+          <motion.h1 variants={heroItem} className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
             Hi, I'm <span className="text-primary">{heroName}</span>
-          </h1>
-          
+          </motion.h1>
+
           {/* Headline */}
-          <p className="text-2xl sm:text-3xl font-semibold text-muted-foreground mb-6 animate-fade-in" style={{ animationDelay: "200ms" }}>
+          <motion.p variants={heroItem} className="text-2xl sm:text-3xl font-semibold text-muted-foreground mb-6">
             {heroHeadline.includes("Secure") ? (
               <>Building <span className="text-primary">Secure</span> Digital Solutions</>
             ) : heroHeadline}
-          </p>
+          </motion.p>
 
           {/* Terminal-style typing animation */}
-          <div className="max-w-2xl mx-auto mb-4 animate-fade-in" style={{ animationDelay: "300ms" }}>
+          <motion.div variants={heroItem} className="max-w-2xl mx-auto mb-4">
             <div className="relative rounded-lg border border-border bg-card/80 backdrop-blur-sm overflow-hidden">
               {/* Terminal header */}
               <div className="flex items-center gap-1.5 px-3 py-2 bg-muted/60 border-b border-border">
@@ -76,24 +95,36 @@ const Index = () => {
                 </div>
               </div>
             </div>
-          </div>
-          <p className="text-base text-muted-foreground max-w-2xl mx-auto mb-10 animate-fade-in" style={{ animationDelay: "350ms" }}>
+          </motion.div>
+          <motion.p variants={heroItem} className="text-base text-muted-foreground max-w-2xl mx-auto mb-10">
             {heroDescription}
-          </p>
+          </motion.p>
 
-          {/* CTAs */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in" style={{ animationDelay: "400ms" }}>
-            <Button asChild size="lg" className="glow-primary">
-              <Link to="/projects">
-                View Projects
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link to="/contact">Get in Touch</Link>
-            </Button>
-          </div>
-        </div>
+          {/* CTAs — spring micro-interactions */}
+          <motion.div variants={heroItem} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <motion.div
+              whileHover={{ scale: 1.03, y: -1 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <Button asChild size="lg" className="glow-primary">
+                <Link to="/projects">
+                  View Projects
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </motion.div>
+            <motion.div
+              whileHover={{ scale: 1.03, y: -1 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 17 }}
+            >
+              <Button asChild variant="outline" size="lg">
+                <Link to="/contact">Get in Touch</Link>
+              </Button>
+            </motion.div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Quick Overview Section */}

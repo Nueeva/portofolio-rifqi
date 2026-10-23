@@ -1,73 +1,56 @@
-# Welcome to your Lovable project
+# Portofolio — Rifqi Ariansyah
 
-## Project info
+Personal portfolio of **Rifqi Ariansyah**, a cybersecurity-focused developer based in Jakarta, Indonesia. It showcases security research, open-source tooling, and production projects — including the Apexsions plugin ecosystem and Portfolio 71, the student portfolio platform of SMKN 71 Jakarta.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+**Live:** https://rifqi.apexsions.com
 
-## How can I edit this code?
+## Highlights
 
-There are several ways of editing your application.
+- **Motion-driven UI** — built with [Motion](https://motion.dev) (`motion/react`): staggered hero entrance with precise Bézier easing, `whileInView` scroll reveals, spring micro-interactions, an animated scroll-progress bar, and layout-animated project filtering with `AnimatePresence`.
+- **Real content, database-backed** — projects, site settings, and certifications are served from Supabase and can be managed from the built-in admin panel; a curated list of real projects ships in code as the always-available base layer.
+- **Contact form** with validation and Cloudflare Turnstile protection.
+- **PWA** — installable, with offline precaching.
+- Dark, terminal-inspired design (Inter + JetBrains Mono), fully responsive.
 
-**Use Lovable**
+## Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- React 18 + TypeScript + Vite
+- Tailwind CSS + shadcn/ui (Radix)
+- Motion (formerly Framer Motion) for animation
+- Supabase (database, auth, storage) + TanStack Query
+- React Router, next-themes, Recharts (admin analytics)
 
-Changes made via Lovable will be committed automatically to this repo.
+## Run Locally
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
+npm install
+cp .env.example .env   # fill in your Supabase + Turnstile keys
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Required environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_TURNSTILE_SITE_KEY`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Scripts
 
-**Use GitHub Codespaces**
+| Command         | Description                     |
+| --------------- | ------------------------------- |
+| `npm run dev`   | Start the dev server            |
+| `npm run build` | Production build into `dist/`  |
+| `npm run preview` | Preview the production build  |
+| `npm run lint`  | Run ESLint                      |
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Structure
 
-## What technologies are used for this project?
+```
+src/
+  pages/        Index, About, Projects, Contact, Auth, Admin, error pages
+  components/   layout (Navbar/Footer/Layout), ScrollReveal, admin panels, ui (shadcn)
+  data/         curated real projects (base layer for the Projects page)
+  hooks/        auth, site settings, analytics, scroll reveal
+  integrations/ Supabase client + generated types
+supabase/       config, migrations, edge functions
+```
 
-This project is built with:
+## Deployment
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+The production build (`dist/`) is served as a static site behind nginx on a VPS, exposed through a Cloudflare Tunnel at `rifqi.apexsions.com`. SPA fallback (`try_files … /index.html`) is required for client-side routing.

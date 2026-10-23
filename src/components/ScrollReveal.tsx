@@ -1,43 +1,53 @@
 import { ReactNode } from "react";
-import { useScrollReveal } from "@/hooks/useScrollReveal";
+import { motion, type Variants } from "motion/react";
 
 interface ScrollRevealProps {
   children: ReactNode;
   className?: string;
+  /** delay in milliseconds, kept for compatibility with existing call sites */
   delay?: number;
   direction?: "up" | "down" | "left" | "right";
 }
 
-export function ScrollReveal({ 
-  children, 
-  className = "", 
-  delay = 0,
-  direction = "up" 
-}: ScrollRevealProps) {
-  const { ref, isVisible } = useScrollReveal({ threshold: 0.1 });
+const OFFSET = 30;
 
-  const getTransform = () => {
-    if (isVisible) return "translate(0, 0)";
-    switch (direction) {
-      case "up": return "translateY(30px)";
-      case "down": return "translateY(-30px)";
-      case "left": return "translateX(30px)";
-      case "right": return "translateX(-30px)";
-      default: return "translateY(30px)";
-    }
+// Precise Bézier curve — no bounce, no glow, one continuous reveal
+const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+
+const offsets: Record<NonNullable<ScrollRevealProps["direction"]>, { x: number; y: number }> = {
+  up: { x: 0, y: OFFSET },
+  down: { x: 0, y: -OFFSET },
+  left: { x: OFFSET, y: 0 },
+  right: { x: -OFFSET, y: 0 },
+};
+
+export function ScrollReveal({
+  children,
+  className = "",
+  delay = 0,
+  direction = "up",
+}: ScrollRevealProps) {
+  const { x, y } = offsets[direction];
+
+  const variants: Variants = {
+    hidden: { opacity: 0, x, y },
+    visible: {
+      opacity: 1,
+      x: 0,
+      y: 0,
+      transition: { duration: 0.6, delay: delay / 1000, ease: EASE },
+    },
   };
 
   return (
-    <div
-      ref={ref}
+    <motion.div
       className={className}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: getTransform(),
-        transition: `opacity 0.6s ease-out ${delay}ms, transform 0.6s ease-out ${delay}ms`,
-      }}
+      variants={variants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-80px" }}
     >
       {children}
-    </div>
+    </motion.div>
   );
 }

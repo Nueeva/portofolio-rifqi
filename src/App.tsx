@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "motion/react";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { PageTransition } from "@/components/PageTransition";
 

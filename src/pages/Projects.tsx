@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { AnimatePresence, motion } from "motion/react";
 import { ExternalLink, Github, Filter, Image as ImageIcon } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { ScrollReveal } from "@/components/ScrollReveal";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { LazyImage } from "@/components/LazyImage";
+import { curatedProjects, type Project } from "@/data/projects";
 
 type ProjectCategory = "all" | "pentesting" | "tools" | "web-security";
 
@@ -18,26 +20,39 @@ const categoryLabels: Record<ProjectCategory, string> = {
   "web-security": "Web Security",
 };
 
+const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+
 const Projects = () => {
   const [activeCategory, setActiveCategory] = useState<ProjectCategory>("all");
-  
+
   // Track page visit for analytics
   usePageAnalytics("/projects");
 
-  const { data: projects, isLoading, error } = useQuery({
+  const { data: dbProjects } = useQuery({
     queryKey: ["projects"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("projects")
         .select("*")
         .order("created_at", { ascending: false });
-      
+
       if (error) throw error;
       return data;
     },
   });
 
-  const filteredProjects = projects?.filter(
+  // Curated real projects always render first; admin-managed rows from
+  // Supabase are appended (deduplicated by title). If the database is
+  // unreachable the curated list keeps the page complete on its own.
+  const curatedTitles = new Set(curatedProjects.map((p) => p.title.toLowerCase()));
+  const projects: Project[] = [
+    ...curatedProjects,
+    ...((dbProjects ?? []) as Project[]).filter(
+      (p) => !curatedTitles.has(p.title.toLowerCase())
+    ),
+  ];
+
+  const filteredProjects = projects.filter(
     (project) => activeCategory === "all" || project.category === activeCategory
   );
 
@@ -52,7 +67,7 @@ const Projects = () => {
                 <span className="text-primary">Projects</span>
               </h1>
               <p className="text-muted-foreground max-w-2xl">
-                A selection of security research, tools, and applications I've worked on. 
+                A selection of security research, tools, and applications I've worked on.
                 Each project addresses real security challenges with practical solutions.
               </p>
               <div className="w-20 h-1 bg-primary rounded-full mt-4" />
@@ -77,31 +92,24 @@ const Projects = () => {
             </div>
           </ScrollReveal>
 
-          {/* Projects Grid */}
-          {isLoading ? (
-            <div className="grid md:grid-cols-2 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="p-6 rounded-lg bg-card border border-border animate-pulse">
-                  <div className="h-40 bg-secondary rounded mb-4" />
-                  <div className="h-6 bg-secondary rounded w-3/4 mb-4" />
-                  <div className="h-4 bg-secondary rounded w-full mb-2" />
-                  <div className="h-4 bg-secondary rounded w-2/3" />
-                </div>
-              ))}
-            </div>
-          ) : error ? (
-            <div className="text-center py-12">
-              <p className="text-destructive">Failed to load projects. Please try again.</p>
-            </div>
-          ) : filteredProjects?.length === 0 ? (
+          {/* Projects Grid — Motion layout + AnimatePresence filter transitions */}
+          {filteredProjects.length === 0 ? (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No projects found in this category.</p>
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-6">
-              {filteredProjects?.map((project, index) => (
-                <ScrollReveal key={project.id} delay={index * 100}>
-                  <article
+            <motion.div layout className="grid md:grid-cols-2 gap-6">
+              <AnimatePresence mode="popLayout">
+                {filteredProjects.map((project, index) => (
+                  <motion.article
+                    key={project.id}
+                    layout
+                    initial={{ opacity: 0, y: 24 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.96 }}
+                    viewport={{ once: true, margin: "-40px" }}
+                    transition={{ duration: 0.45, delay: (index % 2) * 0.08, ease: EASE }}
+                    whileHover={{ y: -4 }}
                     className="relative rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full overflow-hidden"
                   >
                     {/* Thumbnail with lazy loading */}
@@ -123,7 +131,7 @@ const Projects = () => {
 
                     <div className="p-6">
                       <div className="line-accent" />
-                      
+
                       {/* Category Badge */}
                       <Badge variant="outline" className="mb-4 text-xs">
                         {categoryLabels[project.category as ProjectCategory]}
@@ -188,10 +196,10 @@ const Projects = () => {
                         )}
                       </div>
                     </div>
-                  </article>
-                </ScrollReveal>
-              ))}
-            </div>
+                  </motion.article>
+                ))}
+              </AnimatePresence>
+            </motion.div>
           )}
         </div>
       </div>
