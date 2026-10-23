@@ -222,3 +222,8 @@ html {
 .has-custom-cursor select {
   cursor: auto;
 }
+
+/* Light theme: deepen the kinetic word's outline so it survives on white */
+.light .kinetic-word {
+  -webkit-text-stroke-color: hsl(160 84% 30% / 0.22);
+}

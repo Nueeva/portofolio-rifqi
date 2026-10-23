@@ -54,6 +54,7 @@ const FRAG = /* glsl */ `
   varying vec2 vUv;
   uniform float uTime;
   uniform vec2 uMouse;
+  uniform float uLight;
 
   float hash(vec2 p) {
     return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
@@ -86,18 +87,20 @@ const FRAG = /* glsl */ `
     float n2 = fbm(uv * vec2(5.5, 4.0) - vec2(t * 0.7, 0.0));
     float nebula = smoothstep(0.42, 0.95, n * 0.75 + n2 * 0.45);
 
-    vec3 deep = vec3(0.012, 0.027, 0.031);
-    vec3 emeraldGlow = vec3(0.015, 0.135, 0.088);
-    vec3 col = mix(deep, emeraldGlow, nebula * 1.0);
+    float d = distance(vec2(uv.x * 1.6, uv.y), vec2(uMouse.x * 1.6, uMouse.y));
+    float glow = exp(-d * 3.2);
 
-    // Cursor glow — a soft emerald bloom that follows the pointer
-    vec2 m = uMouse;
-    float d = distance(vec2(uv.x * 1.6, uv.y), vec2(m.x * 1.6, m.y));
-    col += vec3(0.02, 0.16, 0.10) * exp(-d * 3.2) * 0.7;
+    // Dark theme: near-black depth with an emerald nebula
+    vec3 darkCol = mix(vec3(0.012, 0.027, 0.031), vec3(0.015, 0.135, 0.088), nebula);
+    darkCol += vec3(0.02, 0.16, 0.10) * glow * 0.7;
+    darkCol *= 0.72 + 0.28 * uv.x;
 
-    // Keep the left (headline) side calmer
-    col *= 0.72 + 0.28 * uv.x;
-    gl_FragColor = vec4(col, 1.0);
+    // Light theme: pale paper with a soft mint nebula and a gentle tint
+    vec3 lightCol = mix(vec3(0.945, 0.972, 0.955), vec3(0.80, 0.92, 0.855), nebula * 0.65);
+    lightCol = mix(lightCol, vec3(0.62, 0.85, 0.72), glow * 0.22);
+    lightCol *= 0.97 + 0.03 * uv.x;
+
+    gl_FragColor = vec4(mix(darkCol, lightCol, uLight), 1.0);
   }
 `;
 
@@ -140,6 +143,16 @@ export function Hero3D({ className }: { className?: string }) {
       const viewW = viewH * camera.aspect;
 
       const emerald = new THREE.Color("hsl(160, 84%, 50%)");
+      const deepEmerald = new THREE.Color("hsl(160, 85%, 27%)");
+      const pale = new THREE.Color("hsl(155, 32%, 90%)");
+
+      // Theme awareness: next-themes toggles .dark on <html>. The whole
+      // scene re-skins on toggle — shader mixes to a pale variant and the
+      // additive glow (invisible on white) becomes normal blending with
+      // deep emerald ink on a pale ground.
+      const theme = {
+        light: !document.documentElement.classList.contains("dark"),
+      };
 
       // --- Aurora shader backdrop ---
       const auroraMat = new THREE.ShaderMaterial({
@@ -148,6 +161,7 @@ export function Hero3D({ className }: { className?: string }) {
         uniforms: {
           uTime: { value: 0 },
           uMouse: { value: new THREE.Vector2(0.72, 0.55) },
+          uLight: { value: theme.light ? 1 : 0 },
         },
         depthWrite: false,
         depthTest: false,
@@ -266,6 +280,38 @@ export function Hero3D({ className }: { className?: string }) {
       );
       group.add(clLines);
 
+      // --- Theme switching (shader variant + blending mode) ---
+      const applyTheme = () => {
+        const blending = theme.light
+          ? THREE.NormalBlending
+          : THREE.AdditiveBlending;
+        for (const m of [
+          nodePts.material,
+          linkLines.material,
+          pulsePts.material,
+          clLines.material,
+        ] as import("three").Material[]) {
+          m.blending = blending;
+          m.needsUpdate = true;
+        }
+        auroraMat.uniforms.uLight.value = theme.light ? 1 : 0;
+      };
+      applyTheme();
+      const themeObserver = new MutationObserver(() => {
+        const light = !document.documentElement.classList.contains("dark");
+        if (light === theme.light) return;
+        theme.light = light;
+        applyTheme();
+        if (reduced) {
+          update(1.6);
+          renderer.render(scene, camera);
+        }
+      });
+      themeObserver.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
+
       // --- Interaction state ---
       let mouseX = 9999;
       let mouseY = 9999;
@@ -337,6 +383,26 @@ export function Hero3D({ className }: { className?: string }) {
         });
       };
 
+      // Palette writer: dark theme scales emerald toward black (additive
+      // glow); light theme lerps pale ground toward deep emerald ink.
+      const put = (
+        arr: Float32Array,
+        o: number,
+        darkScale: number,
+        lightF: number
+      ) => {
+        if (theme.light) {
+          const f = Math.max(0, Math.min(1, lightF));
+          arr[o] = pale.r + (deepEmerald.r - pale.r) * f;
+          arr[o + 1] = pale.g + (deepEmerald.g - pale.g) * f;
+          arr[o + 2] = pale.b + (deepEmerald.b - pale.b) * f;
+        } else {
+          arr[o] = emerald.r * darkScale;
+          arr[o + 1] = emerald.g * darkScale;
+          arr[o + 2] = emerald.b * darkScale;
+        }
+      };
+
       const update = (t: number) => {
         auroraMat.uniforms.uTime.value = t;
 
@@ -372,9 +438,7 @@ export function Hero3D({ className }: { className?: string }) {
           }
           const twinkle = 0.82 + 0.18 * Math.sin(t * 1.4 + n.phase * 3);
           const bright = n.base * twinkle * (1 + effFlash * 1.9) * 0.6;
-          nodeCol[i * 3] = emerald.r * bright;
-          nodeCol[i * 3 + 1] = emerald.g * bright;
-          nodeCol[i * 3 + 2] = emerald.b * bright;
+          put(nodeCol, i * 3, bright, bright * 1.3);
         }
         nodeGeo.attributes.position.needsUpdate = true;
         nodeGeo.attributes.color.needsUpdate = true;
@@ -390,14 +454,8 @@ export function Hero3D({ className }: { className?: string }) {
           linkPos[vi + 3] = nodePos[b * 3];
           linkPos[vi + 4] = nodePos[b * 3 + 1];
           linkPos[vi + 5] = nodePos[b * 3 + 2];
-          const ba = nodes[a].base * 0.16;
-          const bb = nodes[b].base * 0.16;
-          linkCol[vi] = emerald.r * ba;
-          linkCol[vi + 1] = emerald.g * ba;
-          linkCol[vi + 2] = emerald.b * ba;
-          linkCol[vi + 3] = emerald.r * bb;
-          linkCol[vi + 4] = emerald.g * bb;
-          linkCol[vi + 5] = emerald.b * bb;
+          put(linkCol, vi, nodes[a].base * 0.16, nodes[a].base * 0.55);
+          put(linkCol, vi + 3, nodes[b].base * 0.16, nodes[b].base * 0.55);
         }
         linkGeo.attributes.position.needsUpdate = true;
         linkGeo.attributes.color.needsUpdate = true;
@@ -419,9 +477,7 @@ export function Hero3D({ className }: { className?: string }) {
           pulsePos[i * 3 + 1] = ay + (nodePos[pu.b * 3 + 1] - ay) * p;
           pulsePos[i * 3 + 2] = az + (nodePos[pu.b * 3 + 2] - az) * p;
           const env = Math.sin(p * Math.PI);
-          pulseCol[i * 3] = emerald.r * env;
-          pulseCol[i * 3 + 1] = emerald.g * env;
-          pulseCol[i * 3 + 2] = emerald.b * env;
+          put(pulseCol, i * 3, env, 0.3 + env * 0.7);
         }
         pulseGeo.attributes.position.needsUpdate = true;
         pulseGeo.attributes.color.needsUpdate = true;
@@ -444,12 +500,8 @@ export function Hero3D({ className }: { className?: string }) {
             clPos[vi + 4] = nodePos[n.i * 3 + 1];
             clPos[vi + 5] = nodePos[n.i * 3 + 2];
             const fade = (1 - n.d / 2.1) * 0.55;
-            clCol[vi] = emerald.r * fade;
-            clCol[vi + 1] = emerald.g * fade;
-            clCol[vi + 2] = emerald.b * fade;
-            clCol[vi + 3] = emerald.r * fade * 0.6;
-            clCol[vi + 4] = emerald.g * fade * 0.6;
-            clCol[vi + 5] = emerald.b * fade * 0.6;
+            put(clCol, vi, fade, fade * 1.6);
+            put(clCol, vi + 3, fade * 0.6, fade * 1.1);
           });
         }
         clGeo.attributes.position.needsUpdate = true;
@@ -535,6 +587,7 @@ export function Hero3D({ className }: { className?: string }) {
       cleanup = () => {
         stop();
         io.disconnect();
+        themeObserver.disconnect();
         window.removeEventListener("mousemove", onMove);
         window.removeEventListener("resize", onResize);
         window.removeEventListener("pointerdown", onTap);
