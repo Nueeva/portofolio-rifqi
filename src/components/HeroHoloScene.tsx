@@ -503,7 +503,7 @@ export function HeroHoloScene({ className = "" }: { className?: string }) {
     <div
       ref={hostRef}
       aria-hidden="true"
-      className={`pointer-events-none absolute bottom-24 right-4 z-10 hidden h-[380px] w-[300px] lg:right-16 lg:block ${className}`}
+      className={`pointer-events-none absolute bottom-32 right-10 z-10 hidden h-[380px] w-[300px] lg:right-28 lg:block ${className}`}
     />
   );
 }
