@@ -9,6 +9,10 @@ import { useEffect, useRef } from "react";
  * three + the model only load after first paint (idle callback), so the
  * hero's initial load is untouched. If the model fails to load, this
  * renders nothing — never a broken frame.
+ *
+ * The GLB embeds an "Idle_Loop" clip (Quaternius Universal Animation
+ * Library, also CC0, retargeted onto this rig and merged into mascot.glb),
+ * so the mascot stands in a relaxed idle instead of the T-pose bind pose.
  */
 
 export function HeroMascot({ className = "" }: { className?: string }) {
@@ -57,7 +61,15 @@ export function HeroMascot({ className = "" }: { className?: string }) {
         scene.add(group);
 
         const loader = new GLTFLoader();
-        const gltf = await loader.loadAsync("/models/mascot.glb");
+        let gltf;
+        try {
+          gltf = await loader.loadAsync("/models/mascot.glb");
+        } catch (firstErr) {
+          console.warn("HeroMascot: first load attempt failed, retrying once.", firstErr);
+          await new Promise((r) => setTimeout(r, 600));
+          if (disposed) return;
+          gltf = await loader.loadAsync("/models/mascot.glb");
+        }
         if (disposed) return;
         const model = gltf.scene;
         // Normalize: feet on the ground, ~1.8 units tall, centered.
@@ -76,6 +88,7 @@ export function HeroMascot({ className = "" }: { className?: string }) {
           }
         });
         group.add(model);
+        host.dataset.mascotState = "ready";
 
         if (gltf.animations && gltf.animations.length > 0) {
           clock = new THREE.Clock();
@@ -83,6 +96,9 @@ export function HeroMascot({ className = "" }: { className?: string }) {
           const idle =
             gltf.animations.find((c: any) => /idle/i.test(c.name)) || gltf.animations[0];
           mixer.clipAction(idle).play();
+          // Apply the idle pose at t=0 right away, so even the first frame —
+          // and the reduced-motion static frame — is never the T-pose bind.
+          mixer.update(0);
         }
 
         const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -97,9 +113,10 @@ export function HeroMascot({ className = "" }: { className?: string }) {
           if (disposed) return;
           if (visible) {
             const s = t / 1000;
-            // Gentle companion sway: slow turn toward the headline + float.
-            group.rotation.y = Math.sin(s * 0.22) * 0.28 + mouseX * 0.08;
-            group.position.y = Math.sin(s * 1.1) * 0.03;
+            // The idle clip carries the body now; the group only adds a
+            // whisper of turn toward the headline + a gentle float.
+            group.rotation.y = Math.sin(s * 0.22) * 0.12 + mouseX * 0.08;
+            group.position.y = Math.sin(s * 1.1) * 0.015;
             if (mixer && clock) mixer.update(clock.getDelta());
             camera.lookAt(0, 0.95, 0);
             renderer.render(scene, camera);
@@ -126,7 +143,8 @@ export function HeroMascot({ className = "" }: { className?: string }) {
         io.observe(host);
         render(0);
       } catch (e) {
-        console.warn("HeroMascot: model failed to load, hiding mascot.", e);
+        host.dataset.mascotState = "error";
+        console.error("HeroMascot: MASCOT_LOAD_FAILED — hiding mascot.", e);
       }
     };
 
@@ -158,6 +176,7 @@ export function HeroMascot({ className = "" }: { className?: string }) {
     <div
       ref={hostRef}
       aria-hidden="true"
+      data-mascot-state="loading"
       className={`pointer-events-none absolute bottom-24 right-4 z-10 hidden h-[380px] w-[300px] lg:right-16 lg:block ${className}`}
     />
   );
