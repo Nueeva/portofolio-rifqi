@@ -19,7 +19,7 @@ import { CursorTrail } from "@/components/CursorTrail";
 import { GlitchText } from "@/components/GlitchText";
 import { KineticBackdrop } from "@/components/KineticBackdrop";
 import { HeroFeed } from "@/components/HeroFeed";
-import { HeroMascot } from "@/components/HeroMascot";
+import { HeroHoloScene } from "@/components/HeroHoloScene";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -178,8 +178,8 @@ const Index = () => {
         <CursorTrail className="absolute inset-0 z-[2] h-full w-full pointer-events-none" />
         {/* Live ops ticker — the hero's living content line */}
         <HeroFeed />
-        {/* Preview: Quaternius mascot (CC0) — bottom-right companion */}
-        <HeroMascot />
+        {/* Hologram scene: server-rack diorama projecting an emerald shield */}
+        <HeroHoloScene />
 
         <motion.div
           className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center"

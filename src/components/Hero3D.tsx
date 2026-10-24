@@ -7,7 +7,9 @@ import { useEffect, useRef } from "react";
  * glow) breathes behind a network of drifting nodes. The net feels alive
  * rather than hollow because things HAPPEN in it:
  *  - data pulses travel the links node-to-node and flash their target
- *  - the cursor links itself to the nearest nodes and gently pushes them
+ *  - the cursor links itself to the nearest nodes, swells the net with
+ *    light around it (nodes and links brighten near the pointer) and
+ *    gently pushes the nodes away
  *  - nodes sit at different depths, so mouse parallax separates the layers
  *
  * Performance chassis: 5 draw calls, DPR capped at 1.5 with adaptive
@@ -15,7 +17,7 @@ import { useEffect, useRef } from "react";
  */
 
 const LINK_DIST = 1.75;
-const MAX_PULSES = 10;
+const MAX_PULSES = 16;
 
 interface NodeDef {
   bx: number;
@@ -262,8 +264,8 @@ export function Hero3D({ className }: { className?: string }) {
       );
       group.add(pulsePts);
 
-      // --- Cursor link lines (cursor -> 3 nearest nodes) ---
-      const CURSOR_LINKS = 3;
+      // --- Cursor link lines (cursor -> 4 nearest nodes) ---
+      const CURSOR_LINKS = 4;
       const clPos = new Float32Array(CURSOR_LINKS * 6);
       const clCol = new Float32Array(CURSOR_LINKS * 6);
       const clGeo = new THREE.BufferGeometry();
@@ -437,7 +439,15 @@ export function Hero3D({ className }: { className?: string }) {
             if (g > effFlash) effFlash = g;
           }
           const twinkle = 0.82 + 0.18 * Math.sin(t * 1.4 + n.phase * 3);
-          const bright = n.base * twinkle * (1 + effFlash * 1.9) * 0.6;
+          // Cursor aura: nodes near the pointer swell with light, so
+          // the net visibly leans toward the visitor's hand.
+          let cursorGlow = 0;
+          if (mouseX < 9000) {
+            const cd = Math.hypot(x - mouseX, y - mouseY);
+            if (cd < 1.7) cursorGlow = (1 - cd / 1.7) ** 2;
+          }
+          const bright =
+            n.base * twinkle * (1 + effFlash * 1.9) * 0.6 * (1 + cursorGlow * 1.5);
           put(nodeCol, i * 3, bright, bright * 1.3);
         }
         nodeGeo.attributes.position.needsUpdate = true;
@@ -454,8 +464,16 @@ export function Hero3D({ className }: { className?: string }) {
           linkPos[vi + 3] = nodePos[b * 3];
           linkPos[vi + 4] = nodePos[b * 3 + 1];
           linkPos[vi + 5] = nodePos[b * 3 + 2];
-          put(linkCol, vi, nodes[a].base * 0.16, nodes[a].base * 0.55);
-          put(linkCol, vi + 3, nodes[b].base * 0.16, nodes[b].base * 0.55);
+          // Links near the cursor light up, tracing the net's attention.
+          let linkBoost = 1;
+          if (mouseX < 9000) {
+            const mxp = (linkPos[vi] + linkPos[vi + 3]) / 2;
+            const myp = (linkPos[vi + 1] + linkPos[vi + 4]) / 2;
+            const cd = Math.hypot(mxp - mouseX, myp - mouseY);
+            if (cd < 1.9) linkBoost = 1 + (1 - cd / 1.9) * 2.2;
+          }
+          put(linkCol, vi, nodes[a].base * 0.16 * linkBoost, nodes[a].base * 0.55);
+          put(linkCol, vi + 3, nodes[b].base * 0.16 * linkBoost, nodes[b].base * 0.55);
         }
         linkGeo.attributes.position.needsUpdate = true;
         linkGeo.attributes.color.needsUpdate = true;
@@ -488,7 +506,7 @@ export function Hero3D({ className }: { className?: string }) {
           const near: Array<{ i: number; d: number }> = [];
           for (let i = 0; i < NODE_COUNT; i++) {
             const d = Math.hypot(nodePos[i * 3] - mouseX, nodePos[i * 3 + 1] - mouseY);
-            if (d < 2.1) near.push({ i, d });
+            if (d < 2.3) near.push({ i, d });
           }
           near.sort((a, b) => a.d - b.d);
           near.slice(0, CURSOR_LINKS).forEach((n, k) => {
@@ -499,7 +517,7 @@ export function Hero3D({ className }: { className?: string }) {
             clPos[vi + 3] = nodePos[n.i * 3];
             clPos[vi + 4] = nodePos[n.i * 3 + 1];
             clPos[vi + 5] = nodePos[n.i * 3 + 2];
-            const fade = (1 - n.d / 2.1) * 0.55;
+            const fade = (1 - n.d / 2.3) * 0.6;
             put(clCol, vi, fade, fade * 1.6);
             put(clCol, vi + 3, fade * 0.6, fade * 1.1);
           });
@@ -531,7 +549,7 @@ export function Hero3D({ className }: { className?: string }) {
         lastT = t;
         if (t >= nextPulse) {
           spawnPulse(t);
-          nextPulse = t + 0.45 + Math.random() * 0.7;
+          nextPulse = t + 0.26 + Math.random() * 0.45;
         }
         if (t >= nextPing) {
           const src = nodes[Math.floor(Math.random() * nodes.length)];
