@@ -15,6 +15,7 @@ import Index from "./pages/Index";
 // Lazy loaded pages
 const About = lazy(() => import("./pages/About"));
 const Projects = lazy(() => import("./pages/Projects"));
+const ProjectCaseStudy = lazy(() => import("./pages/ProjectCaseStudy"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Auth = lazy(() => import("./pages/Auth"));
 const Admin = lazy(() => import("./pages/Admin"));
@@ -46,6 +47,7 @@ function AnimatedRoutes() {
           <Route path="/" element={<PageTransition><Index /></PageTransition>} />
           <Route path="/about" element={<PageTransition><About /></PageTransition>} />
           <Route path="/projects" element={<PageTransition><Projects /></PageTransition>} />
+          <Route path="/projects/:id" element={<PageTransition><ProjectCaseStudy /></PageTransition>} />
           <Route path="/contact" element={<PageTransition><Contact /></PageTransition>} />
           <Route path="/auth" element={<PageTransition><Auth /></PageTransition>} />
           <Route path="/admin" element={<PageTransition><Admin /></PageTransition>} />

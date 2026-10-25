@@ -1,7 +1,8 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { ExternalLink, Github, Filter, ShieldCheck, Terminal, Wrench } from "lucide-react";
+import { ArrowRight, ExternalLink, Github, Filter, ShieldCheck, Terminal, Wrench } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,7 +10,7 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { ScrambleText } from "@/components/ScrambleText";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { LazyImage } from "@/components/LazyImage";
-import { curatedProjects, type Project } from "@/data/projects";
+import { caseStudyIds, curatedProjects, type Project } from "@/data/projects";
 
 type ProjectCategory = "all" | "pentesting" | "tools" | "web-security";
 
@@ -220,7 +221,16 @@ const Projects = () => {
                       </div>
 
                       {/* Links */}
-                      <div className="flex gap-3">
+                      <div className="flex flex-wrap items-center gap-3">
+                        {caseStudyIds.has(project.id) && (
+                          <Link
+                            to={`/projects/${project.id}`}
+                            className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all"
+                          >
+                            Read case study
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        )}
                         {project.github_url && (
                           <a
                             href={project.github_url}
