@@ -24,8 +24,9 @@ import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
-// One continuous hero entrance: staggered Bézier reveal, no bounce
-const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+// One continuous hero entrance: staggered easeOutQuint reveal, blur
+// clearing as each element lands — no bounce (60fps house curve)
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const heroContainer: Variants = {
   hidden: {},
@@ -33,8 +34,8 @@ const heroContainer: Variants = {
 };
 
 const heroItem: Variants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: EASE } },
+  hidden: { opacity: 0, y: 18, filter: "blur(6px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.65, ease: EASE } },
 };
 
 /** Subtle 3D tilt that follows the cursor — spring-damped, max ~5deg */
@@ -104,7 +105,7 @@ function Stat({ value, suffix = "", label }: { value: number; suffix?: string; l
     if (!inView) return;
     const controls = animate(0, value, {
       duration: 1.6,
-      ease: [0.25, 0.1, 0.25, 1],
+      ease: [0.22, 1, 0.36, 1],
       onUpdate: (v) => setDisplay(Math.round(v)),
     });
     return () => controls.stop();
@@ -112,7 +113,7 @@ function Stat({ value, suffix = "", label }: { value: number; suffix?: string; l
 
   return (
     <div ref={ref} className="text-center">
-      <div className="font-mono text-3xl sm:text-4xl font-bold text-primary">
+      <div className="font-display text-3xl sm:text-[2.6rem] sm:leading-none font-bold tracking-[-0.02em] text-primary">
         {display.toLocaleString()}
         {suffix}
       </div>
@@ -172,6 +173,10 @@ const Index = () => {
         <motion.div className="absolute inset-x-0 -inset-y-24 bg-grid" style={{ y: heroGridY }} />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
+        {/* Cinematic lighting: emerald spotlight pooled behind the hologram
+            scene (bottom-right) + a slow-drifting aurora wash up top */}
+        <div aria-hidden className="hero-spotlight absolute inset-0 z-[1] pointer-events-none" />
+        <div aria-hidden className="hero-aurora animate-aurora absolute inset-0 z-[1] pointer-events-none" />
         {/* Living network + aurora shader (three.js), left faded for the headline */}
         <Hero3D className="absolute inset-0 z-[1] pointer-events-none [mask-image:linear-gradient(to_right,transparent_0%,black_45%)]" />
         {/* After-effect: cursor light-trail */}
@@ -197,12 +202,12 @@ const Index = () => {
           </motion.div>
 
           {/* Name */}
-          <motion.h1 variants={heroItem} className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
+          <motion.h1 variants={heroItem} className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.04] mb-5">
             Hi, I'm <span className="text-primary"><GlitchText text={heroName} /></span>
           </motion.h1>
 
           {/* Headline */}
-          <motion.p variants={heroItem} className="text-2xl sm:text-3xl font-semibold text-muted-foreground mb-6">
+          <motion.p variants={heroItem} className="font-display text-[1.65rem] leading-snug sm:text-4xl font-semibold tracking-[-0.02em] text-muted-foreground mb-6">
             {heroHeadline.includes("Secure") ? (
               <>Building <span className="text-primary">Secure</span> Digital Solutions</>
             ) : heroHeadline}
@@ -295,15 +300,15 @@ const Index = () => {
       </section>
 
       {/* Quick Overview Section */}
-      <section className="relative overflow-hidden py-20 bg-card/30">
+      <section className="relative overflow-hidden py-24 sm:py-28 bg-card/30">
         <KineticBackdrop word="SECURITY" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8">
             {/* Card 1 */}
             <ScrollReveal delay={0}>
-              <div className="relative p-6 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full">
+              <div className="card-lift relative p-7 rounded-lg bg-card border border-border group h-full">
                 <div className="line-accent" />
-                <Lock className="h-8 w-8 text-primary mb-4" />
+                <Lock className="h-8 w-8 text-primary mb-4 transition-transform duration-500 ease-out-expo group-hover:-translate-y-1" />
                 <h3 className="text-lg font-semibold mb-2">Penetration Testing</h3>
                 <p className="text-sm text-muted-foreground">
                   Identifying security weaknesses through authorized simulated attacks 
@@ -314,9 +319,9 @@ const Index = () => {
 
             {/* Card 2 */}
             <ScrollReveal delay={100}>
-              <div className="relative p-6 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full">
+              <div className="card-lift relative p-7 rounded-lg bg-card border border-border group h-full">
                 <div className="line-accent" />
-                <Code className="h-8 w-8 text-primary mb-4" />
+                <Code className="h-8 w-8 text-primary mb-4 transition-transform duration-500 ease-out-expo group-hover:-translate-y-1" />
                 <h3 className="text-lg font-semibold mb-2">Security Tools</h3>
                 <p className="text-sm text-muted-foreground">
                   Developing custom security utilities and automation scripts 
@@ -327,9 +332,9 @@ const Index = () => {
 
             {/* Card 3 */}
             <ScrollReveal delay={200}>
-              <div className="relative p-6 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full">
+              <div className="card-lift relative p-7 rounded-lg bg-card border border-border group h-full">
                 <div className="line-accent" />
-                <Shield className="h-8 w-8 text-primary mb-4" />
+                <Shield className="h-8 w-8 text-primary mb-4 transition-transform duration-500 ease-out-expo group-hover:-translate-y-1" />
                 <h3 className="text-lg font-semibold mb-2">Web Security</h3>
                 <p className="text-sm text-muted-foreground">
                   Securing web applications against OWASP Top 10 vulnerabilities 

@@ -5,7 +5,7 @@ interface PageTransitionProps {
   children: ReactNode;
 }
 
-const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 // Terminal curtain: the new page wipes in top-to-bottom (clip-path),
 // the old one wipes out upward. One continuous Bézier, no bounce.

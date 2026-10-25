@@ -100,6 +100,18 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
 
+  /* Display hierarchy (fontinlogo principle: one distinctive display face
+     for brand moments, neutral sans for body, mono for labels) */
+  h1, h2, h3 {
+    font-family: 'Space Grotesk', 'Inter', -apple-system, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  ::selection {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+
   code, pre, .font-mono {
     font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, monospace;
   }
@@ -116,6 +128,62 @@
 /* Glow effect for primary buttons and elements */
 .glow-primary {
   box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+}
+
+/* Cinematic hero lighting (getlayers): a soft emerald spotlight pooled
+   behind the hologram scene + a gentle top wash. Theme-aware — the same
+   primary hue reads as glow on dark and as a pale tint on light. */
+.hero-spotlight {
+  background: radial-gradient(
+    ellipse 55% 45% at 78% 82%,
+    hsl(var(--primary) / 0.22) 0%,
+    hsl(var(--primary) / 0.07) 45%,
+    transparent 70%
+  );
+}
+.hero-aurora {
+  background: radial-gradient(
+    ellipse 60% 50% at 25% 20%,
+    hsl(var(--primary) / 0.13) 0%,
+    transparent 65%
+  );
+}
+.light .hero-spotlight {
+  background: radial-gradient(
+    ellipse 55% 45% at 78% 82%,
+    hsl(var(--primary) / 0.16) 0%,
+    hsl(var(--primary) / 0.05) 45%,
+    transparent 70%
+  );
+}
+.light .hero-aurora {
+  background: radial-gradient(
+    ellipse 60% 50% at 25% 20%,
+    hsl(var(--primary) / 0.09) 0%,
+    transparent 65%
+  );
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-aurora { animation: none; }
+}
+
+@layer components {
+  /* 60fps-style card lift: one out-expo glide, border warms, soft
+     emerald shadow blooms underneath (Opal-style border glow) */
+  .card-lift {
+    transition:
+      transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+      box-shadow 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+  }
+  .card-lift:hover {
+    transform: translateY(-6px);
+    border-color: hsl(var(--primary) / 0.55);
+    box-shadow:
+      0 24px 48px -24px hsl(var(--primary) / 0.35),
+      0 4px 14px -6px hsl(var(--primary) / 0.18);
+  }
 }
 
 /* Subtle line accent for cards */

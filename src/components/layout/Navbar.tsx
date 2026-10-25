@@ -55,7 +55,7 @@ export function Navbar() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-primary">
             <Shield className="h-6 w-6" />
-            <span className="font-mono font-semibold text-foreground">
+            <span className="font-display text-lg font-bold tracking-[-0.02em] text-foreground">
               Rifqi<span className="text-primary">A</span>
             </span>
           </Link>
@@ -66,7 +66,7 @@ export function Navbar() {
               <Link
                 key={link.href}
                 to={link.href}
-                className={`relative text-sm font-medium transition-colors hover:text-primary ${
+                className={`relative text-sm font-medium transition-colors duration-300 ease-out-expo hover:text-primary ${
                   location.pathname === link.href
                     ? "text-primary"
                     : "text-muted-foreground"
@@ -133,9 +133,14 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation — soft morph-in (60fps menu detail) */}
         {isOpen && (
-          <div className="md:hidden py-4 border-t border-border">
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            className="md:hidden py-4 border-t border-border"
+          >
             <div className="flex flex-col gap-4">
               {navLinks.map((link) => (
                 <Link
@@ -188,7 +193,7 @@ export function Navbar() {
                 </>
               )}
             </div>
-          </div>
+          </motion.div>
         )}
       </div>
     </nav>

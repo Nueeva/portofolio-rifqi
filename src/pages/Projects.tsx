@@ -20,7 +20,7 @@ const categoryLabels: Record<ProjectCategory, string> = {
   "web-security": "Web Security",
 };
 
-const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const coverGradients = [
   "from-emerald-950 via-teal-950 to-black",
@@ -161,7 +161,7 @@ const Projects = () => {
                     transition={{ duration: 0.45, delay: (index % 2) * 0.08, ease: EASE }}
                     whileHover={{ y: -4 }}
                     data-cursor="VIEW"
-                    className="relative rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group h-full overflow-hidden"
+                    className="relative rounded-lg bg-card border border-border hover:border-primary/50 hover:shadow-[0_24px_48px_-24px_hsl(var(--primary)/0.35)] transition-[border-color,box-shadow] duration-500 ease-out-expo group h-full overflow-hidden"
                   >
                     {/* Thumbnail with lazy loading */}
                     {project.image_url ? (
@@ -169,7 +169,7 @@ const Projects = () => {
                         <LazyImage
                           src={project.image_url}
                           alt={project.title}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                          className="w-full h-full object-cover transition-transform duration-700 ease-out-expo group-hover:scale-105"
                           wrapperClassName="h-full"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-card to-transparent pointer-events-none" />

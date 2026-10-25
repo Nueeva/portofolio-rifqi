@@ -16,7 +16,7 @@ const defaultCertifications = [
   { name: "Open-Source Security Tooling — xssscope & CTF-Toolkit", issuer: "GitHub", year: "2026", status: "active" },
 ];
 
-const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const badgeContainer: Variants = {
   hidden: {},

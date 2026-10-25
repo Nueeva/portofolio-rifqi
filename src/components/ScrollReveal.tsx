@@ -11,8 +11,9 @@ interface ScrollRevealProps {
 
 const OFFSET = 30;
 
-// Precise Bézier curve — no bounce, no glow, one continuous reveal
-const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
+// easeOutQuint — the 60fps house curve: fast attack, long soft landing.
+// A whisper of blur clears as the element settles (award-site reveal).
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const offsets: Record<NonNullable<ScrollRevealProps["direction"]>, { x: number; y: number }> = {
   up: { x: 0, y: OFFSET },
@@ -30,12 +31,13 @@ export function ScrollReveal({
   const { x, y } = offsets[direction];
 
   const variants: Variants = {
-    hidden: { opacity: 0, x, y },
+    hidden: { opacity: 0, x, y, filter: "blur(5px)" },
     visible: {
       opacity: 1,
       x: 0,
       y: 0,
-      transition: { duration: 0.6, delay: delay / 1000, ease: EASE },
+      filter: "blur(0px)",
+      transition: { duration: 0.75, delay: delay / 1000, ease: EASE },
     },
   };
 

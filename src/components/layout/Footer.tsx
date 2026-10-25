@@ -13,12 +13,12 @@ export function Footer() {
 
   return (
     <footer className="border-t border-border bg-card/50">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-primary">
             <Shield className="h-5 w-5" />
-            <span className="font-mono font-semibold text-foreground">
+            <span className="font-display text-lg font-bold tracking-[-0.02em] text-foreground">
               Rifqi<span className="text-primary">A</span>
             </span>
           </Link>
