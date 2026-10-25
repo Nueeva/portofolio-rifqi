@@ -8,41 +8,49 @@ import { ThemeProvider } from "next-themes";
 import { AnimatePresence } from "motion/react";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { PageTransition } from "@/components/PageTransition";
+import { routeImporters, prefetchRoute, prefetchAllRoutes } from "@/lib/routePrefetch";
 
 // Eagerly loaded - critical for first paint
 import Index from "./pages/Index";
 
-// Lazy loaded pages
-const About = lazy(() => import("./pages/About"));
-const Projects = lazy(() => import("./pages/Projects"));
-const ProjectCaseStudy = lazy(() => import("./pages/ProjectCaseStudy"));
-const Contact = lazy(() => import("./pages/Contact"));
-const Auth = lazy(() => import("./pages/Auth"));
-const Admin = lazy(() => import("./pages/Admin"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const Forbidden = lazy(() => import("./pages/Forbidden"));
-const ServerError = lazy(() => import("./pages/ServerError"));
-const BadGateway = lazy(() => import("./pages/BadGateway"));
-const ServiceUnavailable = lazy(() => import("./pages/ServiceUnavailable"));
-const TooManyRequests = lazy(() => import("./pages/TooManyRequests"));
+// Lazy loaded pages — importers shared with the prefetcher (routePrefetch.ts)
+// so a prefetched chunk is the exact module React.lazy resolves later.
+const About = lazy(routeImporters.about);
+const Projects = lazy(routeImporters.projects);
+const ProjectCaseStudy = lazy(routeImporters.projectCaseStudy);
+const Contact = lazy(routeImporters.contact);
+const Auth = lazy(routeImporters.auth);
+const Admin = lazy(routeImporters.admin);
+const NotFound = lazy(routeImporters.notFound);
+const Forbidden = lazy(routeImporters.forbidden);
+const ServerError = lazy(routeImporters.serverError);
+const BadGateway = lazy(routeImporters.badGateway);
+const ServiceUnavailable = lazy(routeImporters.serviceUnavailable);
+const TooManyRequests = lazy(routeImporters.tooManyRequests);
 
-const queryClient = new QueryClient();
-
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-      <p className="text-sm text-muted-foreground">Loading...</p>
-    </div>
-  </div>
-);
+// Cache query results briefly: back-and-forth navigation re-renders from
+// cache instantly instead of refetching (and flashing) on every visit.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 60_000,
+      gcTime: 5 * 60_000,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 function AnimatedRoutes() {
   const location = useLocation();
 
   return (
     <AnimatePresence mode="wait">
-      <Suspense fallback={<PageLoader />} key={location.pathname}>
+      {/* No loading fallback on purpose: route chunks are prefetched
+          (idle + link intent), so Suspense resolving is instant in
+          practice. If a chunk ever is still in flight, rendering nothing
+          for a beat beats flashing a full-screen spinner — the curtain
+          exit finishes and the new page wipes in the moment it is ready. */}
+      <Suspense fallback={null} key={location.pathname}>
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageTransition><Index /></PageTransition>} />
           <Route path="/about" element={<PageTransition><About /></PageTransition>} />
@@ -71,6 +79,42 @@ const App = () => {
     if (!hasSeenWelcome) {
       setShowWelcome(true);
     }
+  }, []);
+
+  // Warm every route chunk while the browser idles after first paint, and
+  // warm a specific chunk the moment a same-origin link is hovered,
+  // touched, or focused — navigation then never waits on the network.
+  useEffect(() => {
+    const win = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    let idleId: number | undefined;
+    if (win.requestIdleCallback) {
+      idleId = win.requestIdleCallback(() => prefetchAllRoutes(), { timeout: 2500 });
+    }
+    const fallbackTimer = window.setTimeout(prefetchAllRoutes, 2500);
+
+    const onIntent = (e: Event) => {
+      const target = e.target as HTMLElement | null;
+      const anchor = target?.closest?.("a[href]") as HTMLAnchorElement | null;
+      if (!anchor) return;
+      const url = new URL(anchor.href, window.location.href);
+      if (url.origin === window.location.origin) {
+        prefetchRoute(url.pathname);
+      }
+    };
+    document.addEventListener("mouseover", onIntent, { passive: true });
+    document.addEventListener("touchstart", onIntent, { passive: true });
+    document.addEventListener("focusin", onIntent);
+
+    return () => {
+      if (idleId !== undefined) win.cancelIdleCallback?.(idleId);
+      window.clearTimeout(fallbackTimer);
+      document.removeEventListener("mouseover", onIntent);
+      document.removeEventListener("touchstart", onIntent);
+      document.removeEventListener("focusin", onIntent);
+    };
   }, []);
 
   const handleWelcomeComplete = () => {
