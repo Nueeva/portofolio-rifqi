@@ -30,7 +30,11 @@ function makeLine(): string {
 }
 
 export function HeroFeed() {
-  const [line, setLine] = useState(makeLine);
+  // Deterministic first line: the prerendered server HTML and the
+  // client's first render must agree, or hydration fails with a text
+  // mismatch and React throws the server markup away. The interval
+  // below takes over with random lines right after mount.
+  const [line, setLine] = useState("handshake TLS 1.3 ok — 51ms — edge SIN");
   const [clock, setClock] = useState("");
 
   useEffect(() => {

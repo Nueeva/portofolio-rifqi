@@ -33,6 +33,24 @@ export function ScrambleText({
     setMounted(true);
   }, []);
 
+  // NOTE: this hook must stay ABOVE the early return below — hooks run
+  // unconditionally in the same order on every render. Gating the body
+  // is fine; gating the hook call itself crashes React ("Rendered more
+  // hooks than during the previous render") once `mounted` flips.
+  useEffect(() => {
+    if (!mounted || !inView) return;
+    const id = setInterval(() => {
+      setFrame((f) => {
+        if (f >= totalFrames) {
+          clearInterval(id);
+          return f;
+        }
+        return f + 1;
+      });
+    }, 26);
+    return () => clearInterval(id);
+  }, [mounted, inView, totalFrames]);
+
   if (!mounted) {
     return (
       <span ref={ref} className={className} role="text" aria-label={full}>
@@ -44,20 +62,6 @@ export function ScrambleText({
       </span>
     );
   }
-
-  useEffect(() => {
-    if (!inView) return;
-    const id = setInterval(() => {
-      setFrame((f) => {
-        if (f >= totalFrames) {
-          clearInterval(id);
-          return f;
-        }
-        return f + 1;
-      });
-    }, 26);
-    return () => clearInterval(id);
-  }, [inView, totalFrames]);
 
   const revealed = Math.floor(frame / 2);
   let idx = 0;
