@@ -1,0 +1,56 @@
+# Rifqi Ariansyah — Cybersecurity Developer (full text)
+
+> Full-text companion to https://rifqi.apexsions.com/llms.txt — complete case-study summaries of the selected projects of Rifqi Ariansyah (GitHub: Nueeva), written for AI assistants and answer engines that need more than the short summary.
+
+## Apexsions — A Full Minecraft Server System
+
+- Role: Founder & Lead Developer — System Architect & Operator (three-person project; a fellow developer contributed plugins and features and co-funded hosting, a third partner leads branding, marketing, and sales)
+- Case study: https://rifqi.apexsions.com/projects/curated-apexsions
+- Live site: https://web.apexsions.com
+- Source: https://github.com/Nueeva/Apexsions
+- Tech stack: Java, Paper API, Maven, Azuriom, Pterodactyl, PostgreSQL / SQLite, Cloudflare R2
+
+Problem: A public Minecraft server is a whole production system — game logic, a player economy, a community website, databases, hosting — and most operators assemble it from third-party parts they cannot audit. Every layer then inherits the risk of code and infrastructure that nobody fully controls, and the players pay for it when something breaks.
+
+Solution: One system, founded, designed, and built end to end by its lead developer: a nine-plugin Paper suite written in-house (Core, Economy, Chat, Shop, Crates, Battlepass, CustomEnchants, Fishing, Media, sharing the ApexsionsCore library), an Azuriom community website joined to the game through a custom two-way bridge (REST API, /link account linking, web-side administration of player and territory finance data), a full security audit that fixed 13 critical and 19 major findings (including a money-duplication flaw and a live API key committed to the repository) in 16 commits via a merged pull request with regression tests, consolidation of 28 duplicated files (about 5,300 lines) into ApexsionsCore, and a production deployment across two hosts (game server at Jagoanhosting via Pterodactyl, web on a VPS, Cloudflare + R2 storage) that stayed online even when its primary database failed: production runs PostgreSQL, and when it went down the system fell back to SQLite, migrating schemas V1–V7 live. 11 plugins enabled, 0 disabled in production; 14 of 14 end-to-end scenarios pass.
+
+## Portfolio 71 — Student Portfolio Platform
+
+- Role: Full-Stack Developer
+- Period: October 2026
+- Case study: https://rifqi.apexsions.com/projects/curated-portfolio71
+- Live platform: https://portofolio.apexsions.com
+- Tech stack: Laravel, Nuxt, Tailwind CSS, Sanctum, Cloudflare Tunnel
+
+Overview: Portfolio 71 is the student portfolio platform of SMKN 71 Jakarta. Students publish their project work, teachers review and validate it through a structured workflow, and the resulting profiles are public and verifiable — built to be shown to employers, not just filed away at school. The system pairs a Laravel REST API with a Nuxt frontend and runs in production behind a Cloudflare Tunnel.
+
+Challenges: Three very different user groups — students publishing work, teachers validating it, and admins running the platform — had to share one system with strict boundaries between them. A portfolio is only credible if its entries are verified, so project review needed to be a structured workflow rather than a free-form comment thread. Students need to present their work outside the school — to employers and at competitions — which meant public profiles that stay safe by default. Shipping to production meant treating a school platform holding real user data like any other production system: hardened authentication and patched dependencies included.
+
+Approach: Split the system into a Laravel REST API and a Nuxt frontend, with Sanctum authentication and role-based access control for students, teachers, and admins. Built a five-stage, AI-assisted verification workflow so teachers review structured project submissions instead of chasing ad-hoc files. Added public student profiles with QR codes and shareable links, so a profile can be opened from a printed page as easily as from a chat message. Generated one-click, ATS-friendly CV PDFs directly from profile data. Hardened the production deployment: authorization checks on sensitive endpoints and patching of critical PHP CVEs, with the site served through a Cloudflare Tunnel.
+
+Outcomes: A live platform at portofolio.apexsions.com where students publish and teachers verify in one place. Public profiles with QR codes and share links make a student's work presentable anywhere — printed or digital. One-click CV export turns an existing profile into an application-ready PDF without re-typing anything. Production hardening — authentication, authorization checks, and CVE patching — shipped as part of the platform, not as an afterthought.
+
+Lesson: Verification is the feature. A portfolio platform without a credible review workflow is just a file gallery — the structured teacher verification is what makes a student's profile worth trusting.
+
+## xssscope — Reflected XSS Scanner
+
+- Role: Designer & Developer (solo)
+- Period: September 2026
+- Case study: https://rifqi.apexsions.com/projects/curated-xssscope
+- Source: https://github.com/Nueeva/xssscope
+- Tech stack: JavaScript, Node.js, HTTP Probing, Context Analysis
+
+Problem: Manually probing endpoints for reflected XSS is slow and repetitive: every parameter needs its own payload, reflection check, and context analysis.
+
+Solution: A zero-dependency JavaScript scanner that probes parameters, classifies reflection contexts, and verifies findings automatically — no framework, no install weight, just run it.
+
+## CTF-Toolkit
+
+- Role: Creator & Maintainer
+- Case study: https://rifqi.apexsions.com/projects/curated-ctf-toolkit
+- Source: https://github.com/Nueeva/CTF-Toolkit
+- Tech stack: Python, Burp Suite, Wireshark, Ghidra
+
+Problem: CTF competitions throw a different category at you every round — web, crypto, forensics, reversing — and rebuilding your tooling setup each time wastes the clock.
+
+Solution: A personal Python toolkit that bundles the recurring helpers for common CTF categories, so the workflow is ready before the competition starts.

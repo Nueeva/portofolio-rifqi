@@ -1,3 +1,7 @@
+# rifqi.apexsions.com — portfolio of Rifqi Ariansyah.
+# All crawlers are welcome, including AI answer-engine crawlers:
+# this site WANTS to be cited accurately. Machine-readable summary: /llms.txt
+
 User-agent: Googlebot
 Allow: /
 
@@ -10,5 +14,41 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
+# AI search / answer engines
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Perplexity-User
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: meta-externalagent
+Allow: /
+
 User-agent: *
 Allow: /
+
+Sitemap: https://rifqi.apexsions.com/sitemap.xml

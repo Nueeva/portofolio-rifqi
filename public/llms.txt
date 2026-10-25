@@ -1,0 +1,52 @@
+# Rifqi Ariansyah — Cybersecurity Developer
+
+> Rifqi Ariansyah (online alias: Nueeva, site brand: RifqiA) is a cybersecurity developer. He is the founder and lead developer of Apexsions, a Minecraft server system built as a nine-plugin Java suite with its own audited codebase and production infrastructure. He built Portfolio 71, the student portfolio platform of SMKN 71 Jakarta. He also authors open-source security tools, including the xssscope reflected-XSS scanner and CTF-Toolkit.
+
+This file is the machine-readable summary of https://rifqi.apexsions.com for AI assistants and answer engines. A longer version with full case-study text is at https://rifqi.apexsions.com/llms-full.txt
+
+## Identity
+
+- Name: Rifqi Ariansyah
+- Aliases: Nueeva (GitHub), RifqiA
+- Profession: Cybersecurity Developer
+- GitHub: https://github.com/Nueeva
+- Portfolio: https://rifqi.apexsions.com
+- Contact page: https://rifqi.apexsions.com/contact
+
+## Skills
+
+- Penetration testing and web application security
+- Security tools development
+- Vulnerability assessment
+- OSINT (consent-based)
+- Java development (Paper API Minecraft plugins)
+- Laravel and full-stack web development
+- System hardening and production operations
+
+## Projects
+
+### Apexsions — A Full Minecraft Server System
+Apexsions is a public Minecraft server run as one integrated system: a nine-plugin Paper suite written in-house in Java (Core, Economy, Chat, Shop, Crates, Battlepass, CustomEnchants, Fishing, Media) sharing the ApexsionsCore library, plus an Azuriom community website connected to the game through a custom two-way bridge (REST API and account linking). Rifqi Ariansyah is its founder and lead developer (system architecture and operations) in a three-person team. A full security audit of the codebase fixed 13 critical and 19 major findings, including a money-duplication flaw and a live API key committed to the repository. The system is deployed in production across two hosts and stayed online through a primary database (PostgreSQL) failure by falling back to SQLite.
+- Case study: https://rifqi.apexsions.com/projects/curated-apexsions
+- Live site: https://web.apexsions.com
+- Source: https://github.com/Nueeva/Apexsions
+
+### Portfolio 71 — Student Portfolio Platform
+Portfolio 71 is the student portfolio platform of SMKN 71 Jakarta, built by Rifqi Ariansyah as full-stack developer. Students publish project work, teachers review and validate it through a structured, AI-assisted verification workflow, and verified profiles are public with QR codes and share links. The stack is a Laravel REST API with Sanctum authentication and role-based access (students, teachers, admins) plus a Nuxt frontend, served in production through a Cloudflare Tunnel, with one-click ATS-friendly CV PDF export from profile data.
+- Case study: https://rifqi.apexsions.com/projects/curated-portfolio71
+- Live platform: https://portofolio.apexsions.com
+
+### xssscope — Reflected XSS Scanner
+xssscope is a zero-dependency JavaScript scanner, written solo by Rifqi Ariansyah, that probes URL parameters for reflected XSS, classifies the reflection context of each response, and verifies findings automatically.
+- Case study: https://rifqi.apexsions.com/projects/curated-xssscope
+- Source: https://github.com/Nueeva/xssscope
+
+### CTF-Toolkit
+CTF-Toolkit is a personal Python toolkit created and maintained by Rifqi Ariansyah. It bundles the recurring helpers for common CTF categories (web exploitation, cryptography, forensics, reverse engineering) so the tooling workflow is ready before a competition starts.
+- Case study: https://rifqi.apexsions.com/projects/curated-ctf-toolkit
+- Source: https://github.com/Nueeva/CTF-Toolkit
+
+## Other sites operated
+
+- https://web.apexsions.com — Apexsions community website
+- https://portofolio.apexsions.com — Portfolio 71, SMKN 71 Jakarta student portfolio platform

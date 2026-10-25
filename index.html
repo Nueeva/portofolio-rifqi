@@ -6,9 +6,11 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.png" type="image/png" />
     <link rel="icon" href="/favicon.ico" sizes="16x16 32x32 48x48" />
-    <title>RifqiA - Cybersecurity Developer Portfolio</title>
-    <meta name="description" content="Rifqi Ariansyah - Cybersecurity Developer specializing in penetration testing, security tools development, and web application security." />
+    <title>Rifqi Ariansyah — Cybersecurity Developer</title>
+    <meta name="description" content="Portfolio of Rifqi Ariansyah (Nueeva), a cybersecurity developer. Founder and lead developer of the Apexsions Minecraft server system, builder of the Portfolio 71 platform for SMKN 71 Jakarta, and author of the xssscope scanner and CTF-Toolkit." />
     <meta name="author" content="Rifqi Ariansyah" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://rifqi.apexsions.com/" />
 
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#0a0a0f" />
@@ -32,36 +34,114 @@
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" />
     </noscript>
 
-    <meta property="og:title" content="RifqiA - Cybersecurity Developer Portfolio" />
-    <meta property="og:description" content="Rifqi Ariansyah - Cybersecurity Developer specializing in penetration testing, security tools development, and web application security." />
+    <meta property="og:title" content="Rifqi Ariansyah — Cybersecurity Developer" />
+    <meta property="og:description" content="Portfolio of Rifqi Ariansyah (Nueeva), a cybersecurity developer. Founder and lead developer of the Apexsions Minecraft server system, builder of the Portfolio 71 platform for SMKN 71 Jakarta, and author of the xssscope scanner and CTF-Toolkit." />
     <meta property="og:type" content="website" />
-    <meta property="og:image" content="/pwa-512x512.png" />
+    <meta property="og:url" content="https://rifqi.apexsions.com/" />
+    <meta property="og:site_name" content="Rifqi Ariansyah — Portfolio" />
+    <meta property="og:image" content="https://rifqi.apexsions.com/pwa-512x512.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:image" content="/pwa-512x512.png" />
+    <meta name="twitter:title" content="Rifqi Ariansyah — Cybersecurity Developer" />
+    <meta name="twitter:description" content="Portfolio of Rifqi Ariansyah (Nueeva), a cybersecurity developer. Founder and lead developer of the Apexsions Minecraft server system, builder of the Portfolio 71 platform for SMKN 71 Jakarta, and author of the xssscope scanner and CTF-Toolkit." />
+    <meta name="twitter:image" content="https://rifqi.apexsions.com/pwa-512x512.png" />
 
-    <!-- JSON-LD Structured Data -->
+    <!-- JSON-LD Structured Data: one entity graph (Person + WebSite + the
+         curated projects). Every URL and fact here is verified against the
+         live sites and repositories — AI answer engines and search engines
+         cross-check this data, so guesses would do more harm than good. -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "RifqiA - Cybersecurity Developer Portfolio",
-      "url": "https://rifqi.tech",
-      "description": "Rifqi Ariansyah - Cybersecurity Developer specializing in penetration testing, security tools development, and web application security."
-    }
-    </script>
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Rifqi Ariansyah",
-      "url": "https://rifqi.tech",
-      "jobTitle": "Cybersecurity Developer",
-      "knowsAbout": ["Penetration Testing", "Web Application Security", "Security Tools Development", "Vulnerability Assessment"],
-      "sameAs": [
-        "https://github.com/rifqiariansyah",
-        "https://linkedin.com/in/rifqiariansyah",
-        "https://twitter.com/rifqiariansyah"
+      "@graph": [
+        {
+          "@type": "Person",
+          "@id": "https://rifqi.apexsions.com/#person",
+          "name": "Rifqi Ariansyah",
+          "alternateName": ["RifqiA", "Nueeva"],
+          "url": "https://rifqi.apexsions.com/",
+          "jobTitle": "Cybersecurity Developer",
+          "description": "Cybersecurity developer. Founder and lead developer of the Apexsions Minecraft server system, builder of the Portfolio 71 student portfolio platform for SMKN 71 Jakarta, and author of the xssscope reflected-XSS scanner and CTF-Toolkit.",
+          "knowsAbout": [
+            "Penetration Testing",
+            "Web Application Security",
+            "Security Tools Development",
+            "Vulnerability Assessment",
+            "OSINT",
+            "Java (Paper plugin development)",
+            "Laravel",
+            "System Hardening"
+          ],
+          "sameAs": [
+            "https://github.com/Nueeva"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://rifqi.apexsions.com/#website",
+          "name": "Rifqi Ariansyah — Portfolio",
+          "url": "https://rifqi.apexsions.com/",
+          "description": "Portfolio of Rifqi Ariansyah (Nueeva), a cybersecurity developer. Founder and lead developer of the Apexsions Minecraft server system, builder of the Portfolio 71 platform for SMKN 71 Jakarta, and author of the xssscope scanner and CTF-Toolkit.",
+          "author": { "@id": "https://rifqi.apexsions.com/#person" }
+        },
+        {
+          "@type": "ItemList",
+          "name": "Selected projects by Rifqi Ariansyah",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "item": {
+                "@type": "CreativeWork",
+                "name": "Apexsions — A Full Minecraft Server System",
+                "url": "https://rifqi.apexsions.com/projects/curated-apexsions",
+                "description": "A nine-plugin Paper server suite written in-house (Java), joined to an Azuriom community website through a custom two-way bridge. A full security audit fixed 13 critical and 19 major findings before production deployment across two hosts.",
+                "creator": { "@id": "https://rifqi.apexsions.com/#person" },
+                "sameAs": ["https://github.com/Nueeva/Apexsions", "https://web.apexsions.com"]
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "item": {
+                "@type": "CreativeWork",
+                "name": "Portfolio 71 — Student Portfolio Platform",
+                "url": "https://rifqi.apexsions.com/projects/curated-portfolio71",
+                "description": "A full-stack student portfolio platform (Laravel API + Nuxt frontend) for SMKN 71 Jakarta with role-based access for students, teachers and admins, an AI-assisted project verification workflow, and production hardening.",
+                "creator": { "@id": "https://rifqi.apexsions.com/#person" },
+                "sameAs": ["https://portofolio.apexsions.com"]
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "item": {
+                "@type": "SoftwareApplication",
+                "name": "xssscope — Reflected XSS Scanner",
+                "url": "https://rifqi.apexsions.com/projects/curated-xssscope",
+                "description": "A zero-dependency JavaScript scanner that probes URL parameters for reflected XSS, classifies reflection contexts, and verifies findings automatically.",
+                "applicationCategory": "SecurityApplication",
+                "operatingSystem": "Node.js",
+                "creator": { "@id": "https://rifqi.apexsions.com/#person" },
+                "sameAs": ["https://github.com/Nueeva/xssscope"]
+              }
+            },
+            {
+              "@type": "ListItem",
+              "position": 4,
+              "item": {
+                "@type": "SoftwareApplication",
+                "name": "CTF-Toolkit",
+                "url": "https://rifqi.apexsions.com/projects/curated-ctf-toolkit",
+                "description": "A personal Python toolkit bundling the recurring helpers for common CTF categories (web, crypto, forensics, reversing) so the workflow is ready before a competition starts.",
+                "applicationCategory": "SecurityApplication",
+                "operatingSystem": "Python",
+                "creator": { "@id": "https://rifqi.apexsions.com/#person" },
+                "sameAs": ["https://github.com/Nueeva/CTF-Toolkit"]
+              }
+            }
+          ]
+        }
       ]
     }
     </script>
