@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
-import { Shield, Github, Linkedin, Mail, Twitter } from "lucide-react";
+import { Github, Linkedin, Mail, Twitter } from "lucide-react";
+import { TembusMark } from "@/components/TembusMark";
 import { Link } from "react-router-dom";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
@@ -17,7 +18,7 @@ export function Footer() {
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-primary">
-            <Shield className="h-5 w-5" />
+            <TembusMark className="h-5 w-5" />
             <span className="font-display text-lg font-bold tracking-[-0.02em] text-foreground">
               Rifqi<span className="text-primary">A</span>
             </span>

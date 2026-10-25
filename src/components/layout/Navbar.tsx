@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "motion/react";
-import { Shield, Menu, X, Settings, LogOut } from "lucide-react";
+import { Menu, X, Settings, LogOut } from "lucide-react";
+import { TembusMark } from "@/components/TembusMark";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -54,7 +55,7 @@ export function Navbar() {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2 text-primary">
-            <Shield className="h-6 w-6" />
+            <TembusMark className="h-6 w-6" />
             <span className="font-display text-lg font-bold tracking-[-0.02em] text-foreground">
               Rifqi<span className="text-primary">A</span>
             </span>
