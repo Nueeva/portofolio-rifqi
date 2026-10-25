@@ -161,7 +161,6 @@ const Index = () => {
   const heroContentOpacity = useTransform(heroProgress, [0, 0.85], [1, 0]);
 
   const heroName = get("hero_name", "Rifqi Ariansyah");
-  const heroTitle = get("hero_title", "Cybersecurity Developer");
   const heroHeadline = get("hero_headline", "Building Secure Digital Solutions");
   const heroDescription = get("hero_description", "Identifying vulnerabilities before they become threats.");
 
@@ -196,14 +195,6 @@ const Index = () => {
           animate="visible"
           style={{ y: heroContentY, opacity: heroContentOpacity }}
         >
-          {/* Badge */}
-          <motion.div variants={heroItem} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-secondary/50 border border-border mb-8">
-            <Shield className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium text-muted-foreground">
-              {heroTitle}
-            </span>
-          </motion.div>
-
           {/* Name */}
           <motion.h1 variants={heroItem} className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.04] mb-5">
             Hi, I'm <span className="text-primary"><GlitchText text={heroName} /></span>
