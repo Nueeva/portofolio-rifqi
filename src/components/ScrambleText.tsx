@@ -24,6 +24,26 @@ export function ScrambleText({
   const full = parts.map((p) => p.text).join("");
   const totalFrames = full.length * 2 + 4;
   const [frame, setFrame] = useState(0);
+  // Before mount, render the plain final text. The glyph pass uses
+  // Math.random(), which can never match between a server prerender and
+  // the client's first render — and crawlers should read the real words,
+  // not glyphs. The decode animation starts right after mount as before.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <span ref={ref} className={className} role="text" aria-label={full}>
+        {parts.map((part, pi) => (
+          <span key={pi} className={part.className}>
+            {part.text}
+          </span>
+        ))}
+      </span>
+    );
+  }
 
   useEffect(() => {
     if (!inView) return;

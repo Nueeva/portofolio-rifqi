@@ -48,38 +48,10 @@ export default defineConfig(({ mode }) => ({
         ],
       },
       workbox: {
-        // Cache strategies for different resource types
+        // Cache strategies for different resource types.
+        // (Fonts are self-hosted since the 2026-10-26 upgrade wave — the old
+        // Google Fonts cache rules were removed with the CDN dependency.)
         runtimeCaching: [
-          {
-            // Cache Google Fonts stylesheets
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "google-fonts-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
-          {
-            // Cache Google Fonts webfonts
-            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
-            handler: "CacheFirst",
-            options: {
-              cacheName: "gstatic-fonts-cache",
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-            },
-          },
           {
             // Cache images from Supabase storage
             urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
@@ -135,6 +107,20 @@ export default defineConfig(({ mode }) => ({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+    },
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        // Split the big vendor families into their own chunks so a content
+        // change does not invalidate React/router/motion/three for returning
+        // visitors (assets are served immutable for 1y by nginx).
+        manualChunks: {
+          "react-vendor": ["react", "react-dom", "react-router-dom"],
+          motion: ["motion"],
+          three: ["three"],
+        },
+      },
     },
   },
 }));

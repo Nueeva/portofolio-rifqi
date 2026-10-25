@@ -1,4 +1,4 @@
-import { ReactNode, useEffect, useRef, useState } from "react";
+import { ReactNode, Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   animate,
@@ -14,7 +14,12 @@ import { ArrowRight, Shield, Lock, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { ScrollReveal } from "@/components/ScrollReveal";
-import { Hero3D } from "@/components/Hero3D";
+// Hero3D (three.js, ±747 KB) is lazy: the hero copy must not wait on the
+// network canvas. It fades in when its chunk lands; the spotlight/aurora
+// layers underneath carry the first paint.
+const Hero3D = lazy(() =>
+  import("@/components/Hero3D").then((m) => ({ default: m.Hero3D }))
+);
 import { CursorTrail } from "@/components/CursorTrail";
 import { GlitchText } from "@/components/GlitchText";
 import { KineticBackdrop } from "@/components/KineticBackdrop";
@@ -178,7 +183,9 @@ const Index = () => {
         {/* Living network + aurora shader (three.js), kept faint and masked
             out of the central copy zone so the headline always wins on
             contrast — decoration serves readability, never the reverse */}
-        <Hero3D className="absolute inset-0 z-[1] pointer-events-none opacity-50 [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,transparent_52%,black_96%)]" />
+        <Suspense fallback={null}>
+          <Hero3D className="absolute inset-0 z-[1] pointer-events-none opacity-50 [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,transparent_52%,black_96%)]" />
+        </Suspense>
         {/* After-effect: cursor light-trail */}
         <CursorTrail className="absolute inset-0 z-[2] h-full w-full pointer-events-none" />
         {/* Live ops ticker — the hero's living content line */}

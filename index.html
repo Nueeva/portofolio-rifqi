@@ -21,30 +21,22 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
 
-    <!-- Preconnect to Google Fonts for faster loading -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    
+    <!-- Fonts are self-hosted (@font-face in src/index.css → /fonts/*.woff2);
+         no Google Fonts on the critical path. -->
     <!-- Preconnect to Supabase for faster API calls -->
     <link rel="preconnect" href="https://zouktlwfeblvbyehznjn.supabase.co" />
-    
-    <!-- Load fonts with display=swap for non-blocking render -->
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'" />
-    <noscript>
-      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" />
-    </noscript>
 
     <meta property="og:title" content="Rifqi Ariansyah — Cybersecurity Developer" />
     <meta property="og:description" content="Portfolio of Rifqi Ariansyah (Nueeva), a cybersecurity developer. Founder and lead developer of the Apexsions Minecraft server system, builder of the Portfolio 71 platform for SMKN 71 Jakarta, and author of the xssscope scanner and CTF-Toolkit." />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://rifqi.apexsions.com/" />
     <meta property="og:site_name" content="Rifqi Ariansyah — Portfolio" />
-    <meta property="og:image" content="https://rifqi.apexsions.com/pwa-512x512.png" />
+    <meta property="og:image" content="https://rifqi.apexsions.com/og-image.png" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Rifqi Ariansyah — Cybersecurity Developer" />
     <meta name="twitter:description" content="Portfolio of Rifqi Ariansyah (Nueeva), a cybersecurity developer. Founder and lead developer of the Apexsions Minecraft server system, builder of the Portfolio 71 platform for SMKN 71 Jakarta, and author of the xssscope scanner and CTF-Toolkit." />
-    <meta name="twitter:image" content="https://rifqi.apexsions.com/pwa-512x512.png" />
+    <meta name="twitter:image" content="https://rifqi.apexsions.com/og-image.png" />
 
     <!-- JSON-LD Structured Data: one entity graph (Person + WebSite + the
          curated projects). Every URL and fact here is verified against the

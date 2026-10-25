@@ -4,8 +4,8 @@
  * Every page beyond Index is a React.lazy chunk. Without prefetching, the
  * first visit to each page has to download its chunk on click — and the
  * user stares at a loading state meanwhile. Warming the chunks ahead of
- * time (all of them while the browser idles, plus the specific one as
- * soon as a link is hovered/touched/focused) makes navigation resolve
+ * time (the public routes while the browser idles, plus the specific one
+ * as soon as a link is hovered/touched/focused) makes navigation resolve
  * from the module cache instantly, so no loading UI is ever needed.
  *
  * The importers live here so App.tsx's lazy() definitions and the
@@ -57,7 +57,14 @@ export function prefetchRoute(pathname: string) {
   else if (pathname === "/429") warm("tooManyRequests");
 }
 
-/** Warm every route chunk (idle-time prefetch after first paint). */
-export function prefetchAllRoutes() {
-  (Object.keys(routeImporters) as RouteKey[]).forEach(warm);
+/**
+ * Idle-time prefetch: warm ONLY the public content routes. Admin, Auth and
+ * the error pages are deliberately excluded — warming the ±548 KB Admin
+ * chunk for every public visitor (the old behaviour) wasted bandwidth for
+ * people who will never open those routes. They still get intent prefetch
+ * via prefetchRoute() when a link to them is actually hovered/touched.
+ */
+export function prefetchPublicRoutes() {
+  const PUBLIC_IDLE_ROUTES: RouteKey[] = ["about", "projects", "projectCaseStudy", "contact"];
+  PUBLIC_IDLE_ROUTES.forEach(warm);
 }

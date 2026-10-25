@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "postbuild": "node scripts/prerender-meta.mjs",
+    "build": "vite build && vite build --config vite.ssr.config.ts",
+    "postbuild": "node scripts/prerender-meta.mjs && node scripts/prerender-body.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"

@@ -7,7 +7,6 @@ import { ScrollReveal } from "@/components/ScrollReveal";
 import { ScrambleText } from "@/components/ScrambleText";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { Download, Award, CheckCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const defaultCertifications = [
@@ -29,7 +28,11 @@ const badgeItem: Variants = {
 };
 
 const CERTS_KEY = "portfolio_certifications";
-const RESUME_URL_KEY = "portfolio_resume_url";
+// The CV is a static file shipped with the site (public/cv-rifqi-ariansyah.pdf).
+// It previously came from a Supabase Storage public URL whose object does not
+// exist (the storage API answers "Object not found"), which left the download
+// button silently pointing at "#". A same-origin static file cannot rot that way.
+const CV_URL = "/cv-rifqi-ariansyah.pdf";
 
 const defaultSecuritySkills = ["Penetration Testing", "Vulnerability Assessment", "Web Application Security", "Network Security", "Secure Code Review", "Threat Modeling"];
 const defaultDevSkills = ["TypeScript", "React", "Python", "Node.js", "Go", "Bash"];
@@ -51,7 +54,6 @@ const About = () => {
   const devSkills = getList("skills_dev", defaultDevSkills);
   const tools = getList("skills_tools", defaultTools);
 
-  const [resumeUrl, setResumeUrl] = useState<string | null>(null);
   const [certifications, setCertifications] = useState(defaultCertifications);
 
   useEffect(() => {
@@ -59,16 +61,6 @@ const About = () => {
       const stored = localStorage.getItem(CERTS_KEY);
       if (stored) setCertifications(JSON.parse(stored));
     } catch { /* use defaults */ }
-
-    const storedUrl = localStorage.getItem(RESUME_URL_KEY);
-    if (storedUrl) {
-      setResumeUrl(storedUrl);
-    } else {
-      const { data: { publicUrl } } = supabase.storage
-        .from("resume")
-        .getPublicUrl("resume-rifqi-ariansyah.pdf");
-      setResumeUrl(publicUrl);
-    }
   }, []);
 
   return (
@@ -271,7 +263,7 @@ const About = () => {
               <h2 className="text-2xl font-semibold mb-3">Interested in working together?</h2>
               <p className="text-muted-foreground mb-6">Download my CV for more details about my experience and qualifications.</p>
               <Button asChild size="lg" className="glow-primary">
-                <a href={resumeUrl || "#"} download="resume-rifqi-ariansyah.pdf">
+                <a href={CV_URL} download="cv-rifqi-ariansyah.pdf">
                   <Download className="mr-2 h-5 w-5" />
                   Download CV / Resume
                 </a>

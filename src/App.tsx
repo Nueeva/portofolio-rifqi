@@ -3,12 +3,12 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, StaticRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AnimatePresence } from "motion/react";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { PageTransition } from "@/components/PageTransition";
-import { routeImporters, prefetchRoute, prefetchAllRoutes } from "@/lib/routePrefetch";
+import { routeImporters, prefetchRoute, prefetchPublicRoutes } from "@/lib/routePrefetch";
 
 // Eagerly loaded - critical for first paint
 import Index from "./pages/Index";
@@ -71,7 +71,7 @@ function AnimatedRoutes() {
   );
 }
 
-const App = () => {
+const App = ({ ssrPath }: { ssrPath?: string } = {}) => {
   const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
@@ -81,9 +81,10 @@ const App = () => {
     }
   }, []);
 
-  // Warm every route chunk while the browser idles after first paint, and
-  // warm a specific chunk the moment a same-origin link is hovered,
-  // touched, or focused — navigation then never waits on the network.
+  // Warm the public route chunks while the browser idles after first
+  // paint, and warm a specific chunk the moment a same-origin link is
+  // hovered, touched, or focused — navigation then never waits on the
+  // network. (Admin/Auth/error chunks are intent-only by design.)
   useEffect(() => {
     const win = window as Window & {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
@@ -91,9 +92,9 @@ const App = () => {
     };
     let idleId: number | undefined;
     if (win.requestIdleCallback) {
-      idleId = win.requestIdleCallback(() => prefetchAllRoutes(), { timeout: 2500 });
+      idleId = win.requestIdleCallback(() => prefetchPublicRoutes(), { timeout: 2500 });
     }
-    const fallbackTimer = window.setTimeout(prefetchAllRoutes, 2500);
+    const fallbackTimer = window.setTimeout(prefetchPublicRoutes, 2500);
 
     const onIntent = (e: Event) => {
       const target = e.target as HTMLElement | null;
@@ -129,9 +130,16 @@ const App = () => {
           <Toaster />
           <Sonner />
           {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
-          <BrowserRouter>
-            <AnimatedRoutes />
-          </BrowserRouter>
+          {ssrPath !== undefined ? (
+            // Build-time prerender (entry-server.tsx): same tree, static router.
+            <StaticRouter location={ssrPath}>
+              <AnimatedRoutes />
+            </StaticRouter>
+          ) : (
+            <BrowserRouter>
+              <AnimatedRoutes />
+            </BrowserRouter>
+          )}
         </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>
