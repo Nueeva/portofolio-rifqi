@@ -19,7 +19,6 @@ import { CursorTrail } from "@/components/CursorTrail";
 import { GlitchText } from "@/components/GlitchText";
 import { KineticBackdrop } from "@/components/KineticBackdrop";
 import { HeroFeed } from "@/components/HeroFeed";
-import { HeroHoloScene } from "@/components/HeroHoloScene";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
@@ -172,21 +171,18 @@ const Index = () => {
         <motion.div className="absolute inset-x-0 -inset-y-24 bg-grid" style={{ y: heroGridY }} />
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background" />
-        {/* Cinematic lighting: emerald spotlight pooled behind the hologram
-            scene (bottom-left) + a slow-drifting aurora wash up top */}
+        {/* Cinematic lighting: emerald spotlight pooled behind the centered
+            copy + a slow-drifting aurora wash up top */}
         <div aria-hidden className="hero-spotlight absolute inset-0 z-[1] pointer-events-none" />
         <div aria-hidden className="hero-aurora animate-aurora absolute inset-0 z-[1] pointer-events-none" />
-        {/* Living network + aurora shader (three.js), left faded for the headline */}
-        <Hero3D className="absolute inset-0 z-[1] pointer-events-none [mask-image:linear-gradient(to_right,transparent_0%,black_45%)]" />
+        {/* Living network + aurora shader (three.js), kept faint and masked
+            out of the central copy zone so the headline always wins on
+            contrast — decoration serves readability, never the reverse */}
+        <Hero3D className="absolute inset-0 z-[1] pointer-events-none opacity-50 [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,transparent_52%,black_96%)]" />
         {/* After-effect: cursor light-trail */}
         <CursorTrail className="absolute inset-0 z-[2] h-full w-full pointer-events-none" />
         {/* Live ops ticker — the hero's living content line */}
         <HeroFeed />
-        {/* Hologram scene: server-rack diorama projecting an emerald shield.
-            Placement override via its className API: mirrored to the
-            bottom-LEFT (component default is bottom-right) so the right
-            side of the hero stays clear; hero copy remains centered. */}
-        <HeroHoloScene className="!right-auto left-10 lg:left-28" />
 
         <motion.div
           className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center"

@@ -131,34 +131,35 @@
 }
 
 /* Cinematic hero lighting (getlayers): a soft emerald spotlight pooled
-   behind the hologram scene + a gentle top wash. Theme-aware — the same
-   primary hue reads as glow on dark and as a pale tint on light. */
+   behind the centered hero copy + a gentle top wash. Theme-aware — the
+   same primary hue reads as glow on dark and as a pale tint on light.
+   Kept soft on purpose: the light serves the text, never competes. */
 .hero-spotlight {
   background: radial-gradient(
-    ellipse 55% 45% at 22% 82%,
-    hsl(var(--primary) / 0.22) 0%,
-    hsl(var(--primary) / 0.07) 45%,
+    ellipse 60% 50% at 50% 45%,
+    hsl(var(--primary) / 0.18) 0%,
+    hsl(var(--primary) / 0.06) 45%,
     transparent 70%
   );
 }
 .hero-aurora {
   background: radial-gradient(
-    ellipse 60% 50% at 25% 20%,
+    ellipse 60% 50% at 50% 15%,
     hsl(var(--primary) / 0.13) 0%,
     transparent 65%
   );
 }
 .light .hero-spotlight {
   background: radial-gradient(
-    ellipse 55% 45% at 22% 82%,
-    hsl(var(--primary) / 0.16) 0%,
-    hsl(var(--primary) / 0.05) 45%,
+    ellipse 60% 50% at 50% 45%,
+    hsl(var(--primary) / 0.12) 0%,
+    hsl(var(--primary) / 0.04) 45%,
     transparent 70%
   );
 }
 .light .hero-aurora {
   background: radial-gradient(
-    ellipse 60% 50% at 25% 20%,
+    ellipse 60% 50% at 50% 15%,
     hsl(var(--primary) / 0.09) 0%,
     transparent 65%
   );

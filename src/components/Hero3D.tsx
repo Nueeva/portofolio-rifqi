@@ -92,14 +92,16 @@ const FRAG = /* glsl */ `
     float d = distance(vec2(uv.x * 1.6, uv.y), vec2(uMouse.x * 1.6, uMouse.y));
     float glow = exp(-d * 3.2);
 
-    // Dark theme: near-black depth with an emerald nebula
-    vec3 darkCol = mix(vec3(0.012, 0.027, 0.031), vec3(0.015, 0.135, 0.088), nebula);
-    darkCol += vec3(0.02, 0.16, 0.10) * glow * 0.7;
+    // Dark theme: near-black depth with a faint emerald nebula — kept
+    // deliberately dim (2026-10-25 readability pass) so hero copy keeps
+    // full contrast over the shader in both themes
+    vec3 darkCol = mix(vec3(0.012, 0.027, 0.031), vec3(0.008, 0.070, 0.046), nebula);
+    darkCol += vec3(0.01, 0.08, 0.05) * glow * 0.35;
     darkCol *= 0.72 + 0.28 * uv.x;
 
     // Light theme: pale paper with a soft mint nebula and a gentle tint
-    vec3 lightCol = mix(vec3(0.945, 0.972, 0.955), vec3(0.80, 0.92, 0.855), nebula * 0.65);
-    lightCol = mix(lightCol, vec3(0.62, 0.85, 0.72), glow * 0.22);
+    vec3 lightCol = mix(vec3(0.945, 0.972, 0.955), vec3(0.80, 0.92, 0.855), nebula * 0.38);
+    lightCol = mix(lightCol, vec3(0.62, 0.85, 0.72), glow * 0.12);
     lightCol *= 0.97 + 0.03 * uv.x;
 
     gl_FragColor = vec4(mix(darkCol, lightCol, uLight), 1.0);
@@ -210,7 +212,7 @@ export function Hero3D({ className }: { className?: string }) {
           sizeAttenuation: true,
           vertexColors: true,
           transparent: true,
-          opacity: 0.95,
+          opacity: 0.65,
           depthWrite: false,
           blending: THREE.AdditiveBlending,
         })
@@ -447,7 +449,7 @@ export function Hero3D({ className }: { className?: string }) {
             if (cd < 1.7) cursorGlow = (1 - cd / 1.7) ** 2;
           }
           const bright =
-            n.base * twinkle * (1 + effFlash * 1.9) * 0.6 * (1 + cursorGlow * 1.5);
+            n.base * twinkle * (1 + effFlash * 1.1) * 0.3 * (1 + cursorGlow * 0.6);
           put(nodeCol, i * 3, bright, bright * 1.3);
         }
         nodeGeo.attributes.position.needsUpdate = true;
@@ -470,10 +472,10 @@ export function Hero3D({ className }: { className?: string }) {
             const mxp = (linkPos[vi] + linkPos[vi + 3]) / 2;
             const myp = (linkPos[vi + 1] + linkPos[vi + 4]) / 2;
             const cd = Math.hypot(mxp - mouseX, myp - mouseY);
-            if (cd < 1.9) linkBoost = 1 + (1 - cd / 1.9) * 2.2;
+            if (cd < 1.9) linkBoost = 1 + (1 - cd / 1.9) * 1.1;
           }
-          put(linkCol, vi, nodes[a].base * 0.16 * linkBoost, nodes[a].base * 0.55);
-          put(linkCol, vi + 3, nodes[b].base * 0.16 * linkBoost, nodes[b].base * 0.55);
+          put(linkCol, vi, nodes[a].base * 0.07 * linkBoost, nodes[a].base * 0.34);
+          put(linkCol, vi + 3, nodes[b].base * 0.07 * linkBoost, nodes[b].base * 0.34);
         }
         linkGeo.attributes.position.needsUpdate = true;
         linkGeo.attributes.color.needsUpdate = true;
@@ -495,7 +497,7 @@ export function Hero3D({ className }: { className?: string }) {
           pulsePos[i * 3 + 1] = ay + (nodePos[pu.b * 3 + 1] - ay) * p;
           pulsePos[i * 3 + 2] = az + (nodePos[pu.b * 3 + 2] - az) * p;
           const env = Math.sin(p * Math.PI);
-          put(pulseCol, i * 3, env, 0.3 + env * 0.7);
+          put(pulseCol, i * 3, env * 0.5, 0.18 + env * 0.4);
         }
         pulseGeo.attributes.position.needsUpdate = true;
         pulseGeo.attributes.color.needsUpdate = true;
@@ -517,7 +519,7 @@ export function Hero3D({ className }: { className?: string }) {
             clPos[vi + 3] = nodePos[n.i * 3];
             clPos[vi + 4] = nodePos[n.i * 3 + 1];
             clPos[vi + 5] = nodePos[n.i * 3 + 2];
-            const fade = (1 - n.d / 2.3) * 0.6;
+            const fade = (1 - n.d / 2.3) * 0.32;
             put(clCol, vi, fade, fade * 1.6);
             put(clCol, vi + 3, fade * 0.6, fade * 1.1);
           });
