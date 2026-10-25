@@ -36,9 +36,6 @@
     --sidebar-accent-foreground: 220 20% 10%;
     --sidebar-border: 220 10% 88%;
     --sidebar-ring: 160 100% 35%;
-    
-    /* Theme transition duration */
-    --theme-transition: 0.4s;
   }
 
   .dark {
@@ -77,24 +74,14 @@
     @apply border-border;
   }
   
-  /* GPU-accelerated smooth theme transition */
+  /* Theme changes are instant on the live DOM. The switch animation is a
+     View Transition (see ThemeToggle): the browser animates snapshots of
+     the old/new page, so no per-element color transitions are wanted here —
+     they were the source of the staggered flicker on theme change. */
   html {
     transition: none;
   }
-  
-  html.theme-transitioning,
-  html.theme-transitioning *,
-  html.theme-transitioning *::before,
-  html.theme-transitioning *::after {
-    transition: 
-      background-color var(--theme-transition) cubic-bezier(0.4, 0, 0.2, 1),
-      color var(--theme-transition) cubic-bezier(0.4, 0, 0.2, 1),
-      border-color var(--theme-transition) cubic-bezier(0.4, 0, 0.2, 1),
-      box-shadow var(--theme-transition) cubic-bezier(0.4, 0, 0.2, 1),
-      fill var(--theme-transition) cubic-bezier(0.4, 0, 0.2, 1),
-      stroke var(--theme-transition) cubic-bezier(0.4, 0, 0.2, 1) !important;
-  }
-  
+
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -295,4 +282,20 @@ html {
 /* Light theme: deepen the kinetic word's outline so it survives on white */
 .light .kinetic-word {
   -webkit-text-stroke-color: hsl(160 84% 30% / 0.22);
+}
+
+/* View Transition theme reveal (ThemeToggle drives the circle clip on
+   ::view-transition-new(root) via WAAPI). No default cross-fade and no
+   group size animation: the new theme simply gets clipped in, in one
+   synchronized pass over the whole page. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-old(root) {
+  z-index: 1;
+}
+::view-transition-new(root) {
+  z-index: 2;
 }

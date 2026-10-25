@@ -1,7 +1,7 @@
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 
 const EASE: [number, number, number, number] = [0.25, 0.1, 0.25, 1];
@@ -16,11 +16,28 @@ interface Reveal {
   phase: "expand" | "fade";
 }
 
+interface ViewTransitionHandle {
+  ready: Promise<void>;
+  finished: Promise<void>;
+}
+
+type DocumentWithViewTransition = Document & {
+  startViewTransition?: (callback: () => void) => ViewTransitionHandle;
+};
+
 /**
- * Theme switch, Motion edition:
+ * Theme switch, View Transition edition:
  * - knob slides on a spring, the sun/moon icon spins through the swap
- * - a circular sweep in the *new* theme color expands from the toggle,
- *   the theme flips underneath it, then the sweep fades away
+ * - where the View Transitions API is available, the browser snapshots the
+ *   page in the old and new theme and the *actual new page* is revealed by
+ *   an expanding circle from the toggle — every component changes in the
+ *   same frame, because the animation runs on the snapshots, not on the
+ *   live elements (the old build flipped the theme under a flat-color
+ *   sweep, then let each element catch up on its own 0.4s transition,
+ *   which read as a staggered flicker)
+ * - fallback (older browsers): the flat sweep covers the screen, the theme
+ *   flips instantly and all at once underneath it, then the sweep fades
+ * - reduced-motion: direct switch, no animation at all
  */
 export function ThemeToggle() {
   const { resolvedTheme, setTheme } = useTheme();
@@ -34,6 +51,16 @@ export function ThemeToggle() {
   }, []);
 
   const isDark = resolvedTheme === "dark";
+
+  const applyThemeNow = (toDark: boolean) => {
+    setTheme(toDark ? "dark" : "light");
+    // Belt and braces for the view-transition snapshot: next-themes applies
+    // the class in an effect; sync it by hand inside the update callback so
+    // the captured "new" page is guaranteed to already wear the new theme.
+    document.documentElement.classList.toggle("dark", toDark);
+    document.documentElement.classList.toggle("light", !toDark);
+    document.documentElement.style.colorScheme = toDark ? "dark" : "light";
+  };
 
   const handleThemeChange = () => {
     if (busyRef.current) return;
@@ -50,8 +77,43 @@ export function ThemeToggle() {
     const r =
       Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y)) + 60;
 
+    const doc = document as DocumentWithViewTransition;
+    if (typeof doc.startViewTransition === "function") {
+      busyRef.current = true;
+      const transition = doc.startViewTransition(() => {
+        flushSync(() => {
+          applyThemeNow(toDark);
+        });
+      });
+      transition.ready
+        .then(() => {
+          document.documentElement.animate(
+            {
+              clipPath: [
+                `circle(0px at ${x}px ${y}px)`,
+                `circle(${r}px at ${x}px ${y}px)`,
+              ],
+            },
+            {
+              duration: 550,
+              easing: "cubic-bezier(0.25, 0.1, 0.25, 1)",
+              pseudoElement: "::view-transition-new(root)",
+            }
+          );
+        })
+        .catch(() => {
+          /* transition skipped by the browser — theme already applied */
+        });
+      transition.finished.finally(() => {
+        busyRef.current = false;
+      });
+      return;
+    }
+
+    // Fallback: flat-color sweep; the theme flips instantly (no per-element
+    // transitions exist anymore) while the sweep is fully opaque, so the
+    // whole page is already in the new theme when the fade reveals it.
     busyRef.current = true;
-    document.documentElement.classList.add("theme-transitioning");
     setReveal({ x, y, r, toDark, phase: "expand" });
   };
 
@@ -119,10 +181,9 @@ export function ThemeToggle() {
             }
             onAnimationComplete={() => {
               if (reveal.phase === "expand") {
-                setTheme(reveal.toDark ? "dark" : "light");
+                applyThemeNow(reveal.toDark);
                 setReveal({ ...reveal, phase: "fade" });
               } else {
-                document.documentElement.classList.remove("theme-transitioning");
                 busyRef.current = false;
                 setReveal(null);
               }
