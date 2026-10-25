@@ -72,7 +72,7 @@ export const curatedProjects: CuratedProject[] = [
     problem:
       "A public Minecraft server is a whole production system — game logic, a player economy, a community website, databases, hosting — and most operators assemble it from third-party parts they cannot audit. Every layer then inherits the risk of code and infrastructure that nobody fully controls, and the players pay for it when something breaks.",
     solution:
-      "One system, designed, built, and operated end to end by a single person: a nine-plugin Paper suite written in-house, an Azuriom community website joined to the game through a custom two-way bridge, a full self-audit that fixed 13 critical and 19 major findings, and a production deployment across two hosts that stayed online even when its primary database failed.",
+      "One system, founded, designed, and built end to end by its lead developer: a nine-plugin Paper suite written in-house, an Azuriom community website joined to the game through a custom two-way bridge, a full security audit that fixed 13 critical and 19 major findings, and a production deployment across two hosts that stayed online even when its primary database failed.",
     tech_stack: [
       "Java",
       "Paper API",
@@ -83,15 +83,15 @@ export const curatedProjects: CuratedProject[] = [
       "Cloudflare R2",
     ],
     github_url: "https://github.com/Nueeva/Apexsions",
-    demo_url: null,
+    demo_url: "https://web.apexsions.com",
     image_url: null,
     created_at: "2026-10-02T00:00:00Z",
     updated_at: "2026-10-25T00:00:00Z",
     caseStudy: {
-      role: "Architect, Developer & Operator (solo)",
+      role: "Founder & Lead Developer — System Architect & Operator",
       period: "October 2026",
       overview:
-        "Apexsions is not a plugin pack — it is the complete system behind a public Minecraft server, and one person owns every layer of it. The game layer is a suite of nine Paper plugins written in-house. The web layer is an Azuriom community site connected to the server through a custom bridge. Underneath sits the infrastructure layer: two hosts, a management panel, domain and DNS, and object storage. Across all of it runs a security layer — a full audit of the codebase before players were exposed to it — and an operations layer that deploys, restarts, and keeps the whole thing alive on production infrastructure. Architect, developer, security auditor, and operator are the same person.",
+        "Apexsions is not a plugin pack — it is the complete system behind a live Minecraft server that is being built into a brand, and I founded it and lead its development. The game layer is a suite of nine Paper plugins written in-house. The web layer is an Azuriom community site connected to the server through a custom bridge. Underneath sits the infrastructure layer: two hosts, a management panel, domain and DNS, and object storage. Across all of it runs a security layer — a full audit of the codebase before players were exposed to it — and an operations layer that deploys, restarts, and keeps the whole thing alive on production infrastructure. I designed the architecture, built the system end to end — plugins, website, security, operations — and run it day to day. Apexsions is a three-person project: a fellow developer contributed plugins and features and co-funded the hosting, and a third partner leads branding, marketing, and sales.",
       challenges: [
         "A public server inherits the risk of every line of code it runs: a single plugin flaw can duplicate the in-game currency, delete player items, or hang the server — exactly the classes of bugs the audit later found.",
         "Nine plugins sharing player, economy, and progression data — plus a website reflecting the same state — have to stay consistent with each other without any layer becoming a single point of failure.",
@@ -109,10 +109,10 @@ export const curatedProjects: CuratedProject[] = [
         "13 critical and 19 major security findings found and fixed before players were exposed to them — including a money-duplication bug and a live API key sitting in the repository.",
         "The complete system runs in production: all nine in-house plugins enabled on the game server, and the Azuriom website synchronized through the bridge — 14 of 14 end-to-end integration scenarios (site, admin panel, database, bridge sync, mobile UI) passing.",
         "When the primary PostgreSQL database failed in production, the SQLite fallback kept the core services online instead of taking the server down.",
-        "One person operates the whole stack — game, web, infrastructure, security, and day-to-day operations — under a hard rule: the server only restarts when no players are online.",
+        "The whole stack — game, web, infrastructure, security, and day-to-day operations — is run by its founder under a hard rule: the server only restarts when no players are online.",
       ],
       lessons:
-        "Owning every layer changes what you can promise. When the code, the audit, the infrastructure, and the operations are one person's responsibility, a database outage becomes a fallback you designed instead of a vendor ticket you wait on — and a security audit stops being a sample, because there is no layer you cannot open.",
+        "Owning every layer changes what you can promise. When the code, the audit, the infrastructure, and the operations sit with the person who founded the system, a database outage becomes a fallback you designed instead of a vendor ticket you wait on — and a security audit stops being a sample, because there is no layer you cannot open.",
     },
   },
   {
