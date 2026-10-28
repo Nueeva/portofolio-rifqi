@@ -1,10 +1,11 @@
-import { ReactNode, Suspense, lazy, useEffect, useRef, useState } from "react";
+import { ReactNode, Suspense, lazy, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   animate,
   motion,
   useInView,
   useMotionValue,
+  useReducedMotion,
   useScroll,
   useSpring,
   useTransform,
@@ -99,26 +100,38 @@ function Magnetic({ children }: { children: ReactNode }) {
   );
 }
 
-/** Animated counter that counts up once when it scrolls into view */
+/**
+ * Stat counter. The real value is what renders — including in the
+ * prerendered HTML, so crawlers, link previews and no-JS visitors see
+ * the true number, never "0". The count-up is a post-hydration
+ * enhancement only: it mutates the number node's text directly (no
+ * state, no re-render), and reduced-motion visitors keep the static
+ * value.
+ */
 function Stat({ value, suffix = "", label }: { value: number; suffix?: string; label: string }) {
   const ref = useRef<HTMLDivElement>(null);
+  const numRef = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
-  const [display, setDisplay] = useState(0);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
-    if (!inView) return;
+    if (!inView || reduceMotion || !numRef.current) return;
     const controls = animate(0, value, {
       duration: 1.6,
       ease: [0.22, 1, 0.36, 1],
-      onUpdate: (v) => setDisplay(Math.round(v)),
+      onUpdate: (v) => {
+        if (numRef.current) {
+          numRef.current.textContent = Math.round(v).toLocaleString();
+        }
+      },
     });
     return () => controls.stop();
-  }, [inView, value]);
+  }, [inView, value, reduceMotion]);
 
   return (
     <div ref={ref} className="text-center">
       <div className="font-display text-3xl sm:text-[2.6rem] sm:leading-none font-bold tracking-[-0.02em] text-primary">
-        {display.toLocaleString()}
+        <span ref={numRef}>{value.toLocaleString()}</span>
         {suffix}
       </div>
       <div className="mt-1 text-[11px] uppercase tracking-widest text-muted-foreground">

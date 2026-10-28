@@ -2,39 +2,81 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 /**
- * Live ops feed for the hero's bottom-left corner: a one-line terminal
- * ticker cycling plausible network events under a real clock, so the
- * hero carries living content, not just texture. Pure DOM, one small
- * interval — negligible cost. Decorative (aria-hidden).
+ * Activity feed for the hero's bottom-left corner: a one-line ticker
+ * cycling the owner's REAL recent GitHub activity (public events API)
+ * under a real clock. If the API is unreachable, it falls back to
+ * plain true statements about the work — the same figures the stats
+ * row above states. Nothing here is simulated: a security portfolio
+ * does not get to fake its telemetry. Decorative (aria-hidden).
  */
 
-const CITIES = ["SIN", "FRA", "NRT", "JKT", "AMS", "IAD", "SYD", "GRU"];
-const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
-const rnd = (min: number, max: number) =>
-  Math.floor(min + Math.random() * (max - min));
+// True on the day they were written and consistent with the hero stats;
+// they are the offline fallback, not the main act.
+const FALLBACK_LINES = [
+  "9 Paper plugins in production — Apexsions",
+  "security audit — 32 findings found & fixed",
+  "900+ AI models routed behind one gateway",
+  "3 production systems live",
+];
 
-function makeLine(): string {
-  const kind = rnd(0, 5);
-  switch (kind) {
-    case 0:
-      return `handshake TLS 1.3 ok — ${rnd(38, 210)}ms — edge ${pick(CITIES)}`;
-    case 1:
-      return `${rnd(800, 42000).toLocaleString("en-US")} packets routed — 0 dropped`;
-    case 2:
-      return `threat scan: ${rnd(9000, 64000).toLocaleString("en-US")} signatures — 0 hits`;
-    case 3:
-      return `session verified — ${pick(CITIES)} → JKT — integrity ok`;
+type GhEvent = {
+  type: string;
+  created_at: string;
+  repo?: { name?: string };
+  payload?: {
+    action?: string;
+    ref_type?: string;
+    ref?: string | null;
+    commits?: unknown[];
+    pull_request?: { number?: number };
+    issue?: { number?: number };
+    release?: { tag_name?: string };
+  };
+};
+
+function timeAgo(iso: string): string {
+  const secs = Math.max(1, Math.floor((Date.now() - Date.parse(iso)) / 1000));
+  if (secs < 3600) return `${Math.max(1, Math.floor(secs / 60))}m ago`;
+  if (secs < 86400) return `${Math.floor(secs / 3600)}h ago`;
+  return `${Math.floor(secs / 86400)}d ago`;
+}
+
+function describe(ev: GhEvent): string | null {
+  const repo = ev.repo?.name;
+  if (!repo) return null;
+  const p = ev.payload ?? {};
+  const when = timeAgo(ev.created_at);
+  switch (ev.type) {
+    case "PushEvent": {
+      const n = Array.isArray(p.commits) ? p.commits.length : 0;
+      return `push — ${repo}${n ? ` — ${n} commit${n === 1 ? "" : "s"}` : ""} — ${when}`;
+    }
+    case "CreateEvent":
+      if (p.ref_type === "repository") return `new repo — ${repo} — ${when}`;
+      return `created ${p.ref_type ?? "ref"}${p.ref ? ` ${p.ref}` : ""} — ${repo} — ${when}`;
+    case "PullRequestEvent":
+      return `pull request ${p.action ?? "updated"}${p.pull_request?.number ? ` #${p.pull_request.number}` : ""} — ${repo} — ${when}`;
+    case "IssuesEvent":
+      return `issue ${p.action ?? "updated"}${p.issue?.number ? ` #${p.issue.number}` : ""} — ${repo} — ${when}`;
+    case "ReleaseEvent":
+      return `release${p.release?.tag_name ? ` ${p.release.tag_name}` : ""} — ${repo} — ${when}`;
+    case "WatchEvent":
+      return `starred — ${repo} — ${when}`;
+    case "ForkEvent":
+      return `forked — ${repo} — ${when}`;
+    case "PublicEvent":
+      return `made public — ${repo} — ${when}`;
     default:
-      return `rule set v${rnd(2, 9)}.${rnd(0, 9)} synced — all nodes nominal`;
+      return null;
   }
 }
 
 export function HeroFeed() {
   // Deterministic first line: the prerendered server HTML and the
   // client's first render must agree, or hydration fails with a text
-  // mismatch and React throws the server markup away. The interval
-  // below takes over with random lines right after mount.
-  const [line, setLine] = useState("handshake TLS 1.3 ok — 51ms — edge SIN");
+  // mismatch and React throws the server markup away.
+  const [lines, setLines] = useState<string[]>(FALLBACK_LINES);
+  const [idx, setIdx] = useState(0);
   const [clock, setClock] = useState("");
 
   useEffect(() => {
@@ -42,12 +84,40 @@ export function HeroFeed() {
       new Date().toLocaleTimeString("en-GB", { hour12: false });
     setClock(fmt());
     const clockId = setInterval(() => setClock(fmt()), 1000);
-    const lineId = setInterval(() => setLine(makeLine()), 2600);
+    const lineId = setInterval(
+      () => setIdx((i) => i + 1),
+      2600,
+    );
     return () => {
       clearInterval(clockId);
       clearInterval(lineId);
     };
   }, []);
+
+  useEffect(() => {
+    const ctrl = new AbortController();
+    fetch("https://api.github.com/users/Nueeva/events/public?per_page=30", {
+      signal: ctrl.signal,
+      headers: { Accept: "application/vnd.github+json" },
+    })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((events: GhEvent[]) => {
+        const real = (Array.isArray(events) ? events : [])
+          .map(describe)
+          .filter((s): s is string => typeof s === "string")
+          .slice(0, 8);
+        if (real.length > 0) {
+          setLines(real);
+          setIdx(0);
+        }
+      })
+      .catch(() => {
+        /* offline or rate-limited — the fallback lines stay, by design */
+      });
+    return () => ctrl.abort();
+  }, []);
+
+  const line = lines[idx % lines.length];
 
   return (
     <div
