@@ -11,6 +11,19 @@
  *
  * Facts below mirror src/data/projects.ts — keep them in sync when the
  * curated projects change.
+ *
+ * Per-project og:image: text cards (project name + the caseStudy role
+ * from src/data/projects.ts, nothing else). A live-site screenshot was
+ * the first choice, but the build VM cannot fetch external sites
+ * headless (ERR_TUNNEL_CONNECTION_FAILED, same egress limit as earlier
+ * cycles), so the text-card fallback from the backlog is what ships.
+ * Sources are SVG in scripts/og-cards/; scripts/generate-og-cards.mjs
+ * (first postbuild step, via sharp) renders them to dist/og/*.png —
+ * the PNGs themselves are build artifacts, not committed files, because
+ * the GitHub snapshot connector accepts UTF-8 text only. The curated
+ * `image_url` fields stay null on purpose: filling them would swap the
+ * Projects grid covers (h-48 object-cover crop) to these 1200x630
+ * cards, which is a different UI change.
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -40,24 +53,28 @@ const ROUTES = [
   },
   {
     path: "projects/curated-apexsions",
+    image: "og/og-apexsions.png",
     title: "Apexsions — A Full Minecraft Server System — Rifqi Ariansyah",
     description:
       "Case study: Apexsions, a full Minecraft server system by Rifqi Ariansyah — nine in-house Java plugins, an Azuriom community website joined by a custom two-way bridge, a security audit fixing 13 critical and 19 major findings, and a production deployment across two hosts.",
   },
   {
     path: "projects/curated-portfolio71",
+    image: "og/og-portfolio71.png",
     title: "Portfolio 71 — Student Portfolio Platform — Rifqi Ariansyah",
     description:
       "Case study: Portfolio 71, the SMKN 71 Jakarta student portfolio platform built by Rifqi Ariansyah — Laravel API + Nuxt frontend, AI-assisted teacher verification, public profiles with QR codes and share links, one-click CV PDF export, and production hardening.",
   },
   {
     path: "projects/curated-xssscope",
+    image: "og/og-xssscope.png",
     title: "xssscope — Reflected XSS Scanner — Rifqi Ariansyah",
     description:
       "Case study: xssscope, a zero-dependency JavaScript reflected-XSS scanner by Rifqi Ariansyah that probes parameters, classifies reflection contexts, and verifies findings automatically.",
   },
   {
     path: "projects/curated-ctf-toolkit",
+    image: "og/og-ctf-toolkit.png",
     title: "CTF-Toolkit — Rifqi Ariansyah",
     description:
       "Case study: CTF-Toolkit, a personal Python toolkit by Rifqi Ariansyah bundling the recurring helpers for common CTF categories — web, crypto, forensics, reversing — so the workflow is ready before a competition starts.",
@@ -81,6 +98,11 @@ for (const route of ROUTES) {
   html = swap(html, /(<meta property="og:url" content=")[^"]*(")/, `$1${url}$2`, "og:url");
   html = swap(html, /(<meta name="twitter:title" content=")[^"]*(")/, `$1${route.title}$2`, "twitter:title");
   html = swap(html, /(<meta name="twitter:description" content=")[^"]*(")/, `$1${route.description}$2`, "twitter:description");
+  if (route.image) {
+    const imageUrl = `${SITE}/${route.image}`;
+    html = swap(html, /(<meta property="og:image" content=")[^"]*(")/, `$1${imageUrl}$2`, "og:image");
+    html = swap(html, /(<meta name="twitter:image" content=")[^"]*(")/, `$1${imageUrl}$2`, "twitter:image");
+  }
   html = swap(html, /(<link rel="canonical" href=")[^"]*(")/, `$1${url}$2`, "canonical");
 
   const outFile = join(distDir, route.path, "index.html");
