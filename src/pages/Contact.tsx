@@ -1,4 +1,5 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Mail, Github, Linkedin, Send, CheckCircle, Sparkles, Check } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,14 @@ const contactSchema = z.object({
   message: z.string().trim().min(10, "Pesan minimal 10 karakter").max(1000, "Pesan maksimal 1000 karakter"),
 });
 
+// Client-side topic prefill texts for /contact?topic=<slug> (see Contact).
+const TOPIC_PREFILLS: Record<string, string> = {
+  "penetration-testing":
+    "Hi, I'd like to discuss a penetration testing engagement.",
+  "security-tools": "Hi, I'd like to discuss building a custom security tool.",
+  "web-security": "Hi, I'd like to discuss securing a web application.",
+};
+
 const EMAIL_DOMAINS = [
   "@gmail.com",
   "@yahoo.com",
@@ -62,6 +71,24 @@ const Contact = () => {
     email: "",
     message: "",
   });
+  // Topic prefill (client-side only, backlog item 13): service cards on
+  // `/` link here as /contact?topic=<slug>. There is no topic/subject
+  // field on this form — it is a single step (name/email/message) that
+  // submits unchanged to the existing Edge Function — so the topic
+  // pre-fills the message instead, and only when it is still empty, so
+  // nothing the visitor typed is ever overwritten. Unknown topics are
+  // ignored. Applied in an effect (after hydration) on purpose: the
+  // prerendered HTML is built without a query string, and an initial
+  // value read from the URL would mismatch it.
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    const prefill = TOPIC_PREFILLS[searchParams.get("topic") ?? ""];
+    if (!prefill) return;
+    setFormData((prev) =>
+      prev.message ? prev : { ...prev, message: prefill }
+    );
+  }, [searchParams]);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [shakeFields, setShakeFields] = useState<Record<string, boolean>>({});
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);

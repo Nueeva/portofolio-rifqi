@@ -324,9 +324,16 @@ const Index = () => {
                 <Lock className="h-8 w-8 text-primary mb-4 transition-transform duration-500 ease-out-expo group-hover:-translate-y-1" />
                 <h3 className="text-lg font-semibold mb-2">Penetration Testing</h3>
                 <p className="text-sm text-muted-foreground">
-                  Identifying security weaknesses through authorized simulated attacks 
+                  Identifying security weaknesses through authorized simulated attacks
                   and comprehensive vulnerability assessments.
                 </p>
+                <Link
+                  to="/contact?topic=penetration-testing"
+                  className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+                >
+                  Discuss this service
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </ScrollReveal>
 
@@ -337,9 +344,16 @@ const Index = () => {
                 <Code className="h-8 w-8 text-primary mb-4 transition-transform duration-500 ease-out-expo group-hover:-translate-y-1" />
                 <h3 className="text-lg font-semibold mb-2">Security Tools</h3>
                 <p className="text-sm text-muted-foreground">
-                  Developing custom security utilities and automation scripts 
+                  Developing custom security utilities and automation scripts
                   to streamline testing workflows and enhance detection capabilities.
                 </p>
+                <Link
+                  to="/contact?topic=security-tools"
+                  className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+                >
+                  Discuss this service
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </ScrollReveal>
 
@@ -350,9 +364,16 @@ const Index = () => {
                 <Shield className="h-8 w-8 text-primary mb-4 transition-transform duration-500 ease-out-expo group-hover:-translate-y-1" />
                 <h3 className="text-lg font-semibold mb-2">Web Security</h3>
                 <p className="text-sm text-muted-foreground">
-                  Securing web applications against OWASP Top 10 vulnerabilities 
+                  Securing web applications against OWASP Top 10 vulnerabilities
                   with secure coding practices and thorough code review.
                 </p>
+                <Link
+                  to="/contact?topic=web-security"
+                  className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+                >
+                  Discuss this service
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
             </ScrollReveal>
           </div>
