@@ -28,6 +28,7 @@ import { HeroFeed } from "@/components/HeroFeed";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { caseStudyIds, curatedProjects } from "@/data/projects";
 
 // One continuous hero entrance: staggered easeOutQuint reveal, blur
 // clearing as each element lands — no bounce (60fps house curve)
@@ -354,6 +355,75 @@ const Index = () => {
                 </p>
               </div>
             </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Selected Projects — horizontal snap rail. There was no project
+          row/rail on `/` before (projects lived only on the `/projects`
+          grid), so this rail is the closure affordance itself: cards are
+          sized so the next card always peeks in from the rail's edge
+          (mobile: ~78vw card in a full-width rail; desktop: 400px cards
+          in a 1152px rail leave the third card partly visible), telling
+          visitors there is more to scroll to. Static markup on purpose
+          (no motion wrapper): identical in prerendered HTML and the
+          client tree, and no animation to clash with reduced motion.
+          The rail itself is a scroll container, so it never widens the
+          page: only the rail scrolls, the page does not overflow. */}
+      <section className="relative py-24 sm:py-28">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-bold">Selected Projects</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Scroll sideways to browse the rest — the next project is already peeking in.
+              </p>
+            </div>
+            <Link
+              to="/projects"
+              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+            >
+              View all projects
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div
+            tabIndex={0}
+            aria-label="Selected projects — scroll horizontally to see more"
+            className="flex gap-6 overflow-x-auto pb-4 snap-x snap-proximity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg"
+          >
+            {curatedProjects.map((project) => (
+              <article
+                key={project.id}
+                className="relative w-[78vw] max-w-[400px] sm:w-[400px] shrink-0 snap-start rounded-lg bg-card border border-border hover:border-primary/50 transition-[border-color] p-6"
+              >
+                <div className="line-accent" />
+                <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
+                  {project.category}
+                </span>
+                <h3 className="mt-3 text-lg font-semibold">{project.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
+                  {project.solution}
+                </p>
+                {caseStudyIds.has(project.id) ? (
+                  <Link
+                    to={`/projects/${project.id}`}
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+                  >
+                    Read case study
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <Link
+                    to="/projects"
+                    className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
+                  >
+                    View project
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                )}
+              </article>
+            ))}
           </div>
         </div>
       </section>
