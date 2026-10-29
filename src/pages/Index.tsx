@@ -144,7 +144,6 @@ function Stat({ value, suffix = "", label }: { value: number; suffix?: string; l
 const stats = [
   { value: 9, suffix: "", label: "Plugins Built & Shipped" },
   { value: 32, suffix: "", label: "Audit Findings Fixed" },
-  { value: 900, suffix: "+", label: "AI Models Routed" },
   { value: 3, suffix: "", label: "Production Systems Live" },
 ];
 
@@ -284,7 +283,7 @@ const Index = () => {
 
           {/* Stats — animated counters */}
           <motion.div variants={heroItem} className="mt-16 pt-10 border-t border-border/60">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
               {stats.map((s) => (
                 <Stat key={s.label} value={s.value} suffix={s.suffix} label={s.label} />
               ))}

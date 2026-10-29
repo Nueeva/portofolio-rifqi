@@ -15,7 +15,6 @@ import { AnimatePresence, motion } from "motion/react";
 const FALLBACK_LINES = [
   "9 Paper plugins in production — Apexsions",
   "security audit — 32 findings found & fixed",
-  "900+ AI models routed behind one gateway",
   "3 production systems live",
 ];
 
