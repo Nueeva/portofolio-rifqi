@@ -10,7 +10,7 @@ Personal portfolio of **Rifqi Ariansyah**, a cybersecurity-focused developer bas
 - **Real content, database-backed** — projects, site settings, and certifications are served from Supabase and can be managed from the built-in admin panel; a curated list of real projects ships in code as the always-available base layer.
 - **Contact form** with validation and Cloudflare Turnstile protection.
 - **PWA** — installable, with offline precaching.
-- Dark, terminal-inspired design (Inter + JetBrains Mono), fully responsive.
+- Dark, terminal-inspired design (Space Grotesk display headings, Inter body, JetBrains Mono code — all self-hosted), fully responsive.
 
 ## Tech Stack
 
@@ -36,6 +36,7 @@ Required environment variables: `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_
 | --------------- | ------------------------------- |
 | `npm run dev`   | Start the dev server            |
 | `npm run build` | Production build into `dist/`  |
+| `npm run postbuild` | Prerender route shells + bodies into `dist/` (runs automatically after `build`) |
 | `npm run preview` | Preview the production build  |
 | `npm run lint`  | Run ESLint                      |
 
@@ -53,4 +54,4 @@ supabase/       config, migrations, edge functions
 
 ## Deployment
 
-The production build (`dist/`) is served as a static site behind nginx on a VPS, exposed through a Cloudflare Tunnel at `rifqi.apexsions.com`. SPA fallback (`try_files … /index.html`) is required for client-side routing.
+The production build (`dist/`) is served as a static site behind nginx on a VPS, exposed through a Cloudflare Tunnel at `rifqi.apexsions.com`. The build's `postbuild` step prerenders route shells and bodies into `dist/`, so served HTML already contains page content; SPA fallback (`try_files … /index.html`) is still required for client-side routing.
