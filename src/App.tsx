@@ -8,6 +8,7 @@ import { ThemeProvider } from "next-themes";
 import { AnimatePresence, MotionConfig } from "motion/react";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { PageTransition } from "@/components/PageTransition";
+import { PageTransitionReadyContext } from "@/components/PageTransitionReadyContext";
 import { routeImporters, prefetchRoute, prefetchPublicRoutes } from "@/lib/routePrefetch";
 
 // Eagerly loaded - critical for first paint
@@ -73,6 +74,16 @@ function AnimatedRoutes() {
 
 const App = ({ ssrPath }: { ssrPath?: string } = {}) => {
   const [showWelcome, setShowWelcome] = useState(false);
+  // Flipped in an effect after mount (never on the server, never on
+  // the first render): from then on, client-side navigations animate
+  // through the PageTransition curtain, while the first page — server
+  // render and hydrated render alike — mounts already visible (see
+  // PageTransitionReadyContext). Unconditional hook, no SSR mismatch.
+  const [transitionReady, setTransitionReady] = useState(false);
+
+  useEffect(() => {
+    setTransitionReady(true);
+  }, []);
 
   useEffect(() => {
     const hasSeenWelcome = sessionStorage.getItem("hasSeenWelcome");
@@ -134,6 +145,7 @@ const App = ({ ssrPath }: { ssrPath?: string } = {}) => {
           <Toaster />
           <Sonner />
           {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
+          <PageTransitionReadyContext.Provider value={transitionReady}>
           {ssrPath !== undefined ? (
             // Build-time prerender (entry-server.tsx): same tree, static router.
             <StaticRouter location={ssrPath}>
@@ -144,6 +156,7 @@ const App = ({ ssrPath }: { ssrPath?: string } = {}) => {
               <AnimatedRoutes />
             </BrowserRouter>
           )}
+          </PageTransitionReadyContext.Provider>
           </MotionConfig>
         </TooltipProvider>
       </QueryClientProvider>

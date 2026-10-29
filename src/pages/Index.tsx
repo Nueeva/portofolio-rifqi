@@ -1,4 +1,4 @@
-import { ReactNode, Suspense, lazy, useEffect, useRef } from "react";
+import { ReactNode, Suspense, lazy, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   animate,
@@ -15,9 +15,13 @@ import { ArrowRight, Shield, Lock, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
 import { ScrollReveal } from "@/components/ScrollReveal";
-// Hero3D (three.js, ±747 KB) is lazy: the hero copy must not wait on the
-// network canvas. It fades in when its chunk lands; the spotlight/aurora
-// layers underneath carry the first paint.
+// Hero3D (three.js, ±747 KB raw / ±192 KB gzip) is lazy AND deferred:
+// it mounts only after the page has loaded and the browser idles, so its
+// download + parse can no longer sit inside the LCP/TBT window (PSI
+// mobile 29 Okt: LCP 4,1 dtk, TBT 1.180 ms) while the hero copy is still
+// animating in. The CSS spotlight/aurora layers underneath carry the
+// first paint, so the canvas arriving a beat later loses nothing — it is
+// aria-hidden decoration, never content.
 const Hero3D = lazy(() =>
   import("@/components/Hero3D").then((m) => ({ default: m.Hero3D }))
 );
@@ -41,6 +45,21 @@ const heroContainer: Variants = {
 
 const heroItem: Variants = {
   hidden: { opacity: 0, y: 18, filter: "blur(6px)" },
+  visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.65, ease: EASE } },
+};
+
+// The hero heading is the LCP element (PSI mobile 29 Okt: LCP 4,1 dtk).
+// It must NOT start invisible: the prerendered HTML carried
+// opacity:0 + blur(6px) on the h1, so Chrome could not count it for
+// FCP/LCP until hydration + the entrance animation finished — one of
+// the two measured LCP gates (the other is the PageTransition
+// curtain, which hid the whole page the same way). The title
+// therefore renders fully opaque from the first paint and only rises
+// 18px into place — a transform, not a visibility gate — while every
+// other hero element keeps its fade-in. SSR and client first render
+// agree (static variant), so hydration cannot mismatch.
+const heroTitle: Variants = {
+  hidden: { opacity: 1, y: 18, filter: "blur(0px)" },
   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.65, ease: EASE } },
 };
 
@@ -177,6 +196,40 @@ const Index = () => {
   const heroContentY = useTransform(heroProgress, [0, 1], [0, -60]);
   const heroContentOpacity = useTransform(heroProgress, [0, 0.85], [1, 0]);
 
+  // Deferred hero backdrop (see comment on the Hero3D lazy import):
+  // initial render (prerender + client first render) agrees on `false`,
+  // so hydration never mismatches; the effect only ever runs client-side.
+  // The generous idle timeout is deliberate: on a slow device the main
+  // thread stays busy through the hero entrance, and firing three.js
+  // then would land it back inside the LCP window it must stay out of.
+  // On a fast device the idle callback fires promptly after load.
+  const [heroBackdropReady, setHeroBackdropReady] = useState(false);
+  useEffect(() => {
+    const win = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    let idleId: number | undefined;
+    let fallbackTimer: number | undefined;
+    const schedule = () => {
+      if (win.requestIdleCallback) {
+        idleId = win.requestIdleCallback(() => setHeroBackdropReady(true), { timeout: 5000 });
+      } else {
+        fallbackTimer = window.setTimeout(() => setHeroBackdropReady(true), 2000);
+      }
+    };
+    if (document.readyState === "complete") {
+      schedule();
+    } else {
+      window.addEventListener("load", schedule, { once: true });
+    }
+    return () => {
+      if (idleId !== undefined) win.cancelIdleCallback?.(idleId);
+      if (fallbackTimer !== undefined) window.clearTimeout(fallbackTimer);
+      window.removeEventListener("load", schedule);
+    };
+  }, []);
+
   const heroName = get("hero_name", "Rifqi Ariansyah");
   const heroHeadline = get("hero_headline", "Building Secure Digital Solutions");
   const heroDescription = get("hero_description", "Identifying vulnerabilities before they become threats.");
@@ -196,9 +249,11 @@ const Index = () => {
         {/* Living network + aurora shader (three.js), kept faint and masked
             out of the central copy zone so the headline always wins on
             contrast — decoration serves readability, never the reverse */}
-        <Suspense fallback={null}>
-          <Hero3D className="absolute inset-0 z-[1] pointer-events-none opacity-50 [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,transparent_52%,black_96%)]" />
-        </Suspense>
+        {heroBackdropReady && (
+          <Suspense fallback={null}>
+            <Hero3D className="absolute inset-0 z-[1] pointer-events-none opacity-50 [mask-image:radial-gradient(ellipse_75%_70%_at_50%_45%,transparent_52%,black_96%)]" />
+          </Suspense>
+        )}
         {/* After-effect: cursor light-trail */}
         <CursorTrail className="absolute inset-0 z-[2] h-full w-full pointer-events-none" />
         {/* Live ops ticker — the hero's living content line */}
@@ -212,7 +267,7 @@ const Index = () => {
           style={{ y: heroContentY, opacity: heroContentOpacity }}
         >
           {/* Name */}
-          <motion.h1 variants={heroItem} className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.04] mb-5">
+          <motion.h1 variants={heroTitle} className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.04] mb-5">
             Hi, I'm <span className="text-primary"><GlitchText text={heroName} /></span>
           </motion.h1>
 
