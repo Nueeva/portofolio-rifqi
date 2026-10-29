@@ -5,7 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, StaticRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, MotionConfig } from "motion/react";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { PageTransition } from "@/components/PageTransition";
 import { routeImporters, prefetchRoute, prefetchPublicRoutes } from "@/lib/routePrefetch";
@@ -127,6 +127,10 @@ const App = ({ ssrPath }: { ssrPath?: string } = {}) => {
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
+          {/* Respect the visitor's OS-level reduced-motion setting for
+              every motion animation in the tree (motion/react reads this
+              context instead of its own media query). */}
+          <MotionConfig reducedMotion="user">
           <Toaster />
           <Sonner />
           {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
@@ -140,6 +144,7 @@ const App = ({ ssrPath }: { ssrPath?: string } = {}) => {
               <AnimatedRoutes />
             </BrowserRouter>
           )}
+          </MotionConfig>
         </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>

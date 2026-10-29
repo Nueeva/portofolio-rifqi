@@ -48,13 +48,20 @@ export function Layout({ children }: LayoutProps) {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Skip link — first focusable element; visible only on keyboard focus */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
+      >
+        Skip to main content
+      </a>
       {/* Scroll progress — spring-smoothed, transform-only */}
       <motion.div
         className="fixed top-0 left-0 right-0 h-0.5 bg-primary origin-left z-[60]"
         style={{ scaleX }}
       />
       <Navbar />
-      <main className="flex-1 pt-16">{children}</main>
+      <main id="main-content" className="flex-1 pt-16">{children}</main>
       <Footer />
 
       {/* Back to top — appears after scrolling past ~600px */}

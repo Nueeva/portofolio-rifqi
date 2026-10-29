@@ -313,6 +313,9 @@ const Index = () => {
       <section className="relative overflow-hidden py-24 sm:py-28 bg-card/30">
         <KineticBackdrop word="SECURITY" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Semantic heading for the h3 cards below (screen-reader only;
+              the visual design intentionally has no heading here) */}
+          <h2 className="sr-only">Security services overview</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {/* Card 1 */}
             <ScrollReveal delay={0}>
