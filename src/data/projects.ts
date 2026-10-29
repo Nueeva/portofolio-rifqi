@@ -128,7 +128,7 @@ export const curatedProjects: CuratedProject[] = [
     demo_url: "https://portofolio.apexsions.com",
     image_url: null,
     created_at: "2026-10-15T00:00:00Z",
-    updated_at: "2026-10-23T00:00:00Z",
+    updated_at: "2026-10-29T00:00:00Z",
     caseStudy: {
       role: "Full-Stack Developer",
       period: "October 2026",
@@ -148,6 +148,7 @@ export const curatedProjects: CuratedProject[] = [
         "Hardened the production deployment: authorization checks on sensitive endpoints and patching of critical PHP CVEs, with the site served through a Cloudflare Tunnel.",
       ],
       outcomes: [
+        "Live public counts, checked 29 October 2026: 51 published works across all three majors (RPL 20, Animasi 16, DKV 15), from 28 students, guided by 4 supervising teachers — including 5 cross-major team projects involving 10 students.",
         "A live platform at portofolio.apexsions.com where students publish and teachers verify in one place.",
         "Public profiles with QR codes and share links make a student's work presentable anywhere — printed or digital.",
         "One-click CV export turns an existing profile into an application-ready PDF without re-typing anything.",
