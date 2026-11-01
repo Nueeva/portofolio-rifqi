@@ -11,10 +11,9 @@ import {
   useTransform,
   type Variants,
 } from "motion/react";
-import { ArrowRight, Shield, Lock, Code } from "lucide-react";
+import { ArrowRight, ArrowDown, Shield, Lock, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/layout/Layout";
-import { ChapterRail, NextChapter, type Chapter } from "@/components/ChapterRail";
 import { WordReveal } from "@/components/WordReveal";
 // Hero3D (three.js, ±747 KB raw / ±192 KB gzip) is lazy AND deferred:
 // it mounts only after the page has loaded and the browser idles, so its
@@ -33,7 +32,7 @@ import { HeroFeed } from "@/components/HeroFeed";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
-import { caseStudyIds, curatedProjects } from "@/data/projects";
+
 
 // One continuous hero entrance: staggered easeOutQuint reveal, blur
 // clearing as each element lands — no bounce (60fps house curve)
@@ -63,16 +62,6 @@ const heroTitle: Variants = {
   hidden: { opacity: 1, y: 18, filter: "blur(0px)" },
   visible: { opacity: 1, y: 0, filter: "blur(0px)", transition: { duration: 0.65, ease: EASE } },
 };
-
-// The home page reads as four chapters, not four unrelated sections:
-// the rail (ChapterRail) shows where the visitor is, and each chapter
-// ends with a cue into the next. Ids are the scroll targets.
-const chapters: Chapter[] = [
-  { id: "bab-pembuka", label: "Pembuka" },
-  { id: "bab-jasa", label: "Jasa" },
-  { id: "bab-karya", label: "Karya" },
-  { id: "bab-kontak", label: "Kontak" },
-];
 
 // Services choreography: the grid is conducted as one unit — cards
 // rise, un-scale and un-blur in sequence under a single whileInView,
@@ -272,9 +261,8 @@ const Index = () => {
 
   return (
     <Layout>
-      <ChapterRail chapters={chapters} />
-      {/* Hero Section — Bab 01 */}
-      <section id="bab-pembuka" ref={heroRef} className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
+      {/* Hero Section */}
+      <section ref={heroRef} className="relative min-h-[calc(100vh-4rem)] flex items-center justify-center overflow-hidden">
         {/* Parallax grid layer — drifts slower than the content scrolls */}
         <motion.div className="absolute inset-x-0 -inset-y-24 bg-grid" style={{ y: heroGridY }} />
         {/* Gradient overlay */}
@@ -303,14 +291,6 @@ const Index = () => {
           animate="visible"
           style={{ y: heroContentY, opacity: heroContentOpacity, scale: heroContentScale }}
         >
-          {/* Chapter marker — this is Bab 01 of the guided story */}
-          <motion.p
-            variants={heroItem}
-            className="mb-5 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground"
-          >
-            Bab 01 — Pembuka
-          </motion.p>
-
           {/* Name */}
           <motion.h1 variants={heroTitle} className="font-display text-5xl sm:text-6xl lg:text-7xl font-bold tracking-[-0.03em] leading-[1.04] mb-5">
             Hi, I'm <span className="text-primary"><GlitchText text={heroName} /></span>
@@ -392,10 +372,17 @@ const Index = () => {
           </motion.div>
         </motion.div>
 
-        {/* Pull into the next chapter (desktop: the hero is exactly one
-            viewport tall, so the cue lives on its bottom edge) */}
+        {/* Plain scroll cue (desktop: the hero is exactly one viewport
+            tall, so the cue lives on its bottom edge) */}
         <div className="absolute bottom-5 left-1/2 z-10 hidden -translate-x-1/2 md:block">
-          <NextChapter targetId="bab-jasa" index={2} label="Jasa" />
+          <button
+            type="button"
+            aria-label="Gulir ke bawah"
+            onClick={() => document.getElementById("bab-jasa")?.scrollIntoView({ behavior: "smooth" })}
+            className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:text-primary hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+          >
+            <ArrowDown className="h-4 w-4 animate-bounce" />
+          </button>
         </div>
       </section>
 
@@ -415,16 +402,13 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Quick Overview Section — Bab 02 */}
+      {/* Quick Overview Section */}
       <section id="bab-jasa" className="relative overflow-hidden py-24 sm:py-28 bg-card/30">
         <KineticBackdrop word="SECURITY" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Semantic heading for the h3 cards below (screen-reader only;
               the visual design intentionally has no heading here) */}
           <h2 className="sr-only">Security services overview</h2>
-          <p className="mb-10 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            Bab 02 — Jasa
-          </p>
           <motion.div
             className="grid md:grid-cols-3 gap-8"
             variants={servicesContainer}
@@ -492,95 +476,13 @@ const Index = () => {
               </div>
             </motion.div>
           </motion.div>
-
-          <NextChapter targetId="bab-karya" index={3} label="Karya" className="mt-14" />
         </div>
       </section>
 
-      {/* Selected Projects — horizontal snap rail. There was no project
-          row/rail on `/` before (projects lived only on the `/projects`
-          grid), so this rail is the closure affordance itself: cards are
-          sized so the next card always peeks in from the rail's edge
-          (mobile: ~78vw card in a full-width rail; desktop: 400px cards
-          in a 1152px rail leave the third card partly visible), telling
-          visitors there is more to scroll to. Static markup on purpose
-          (no motion wrapper): identical in prerendered HTML and the
-          client tree, and no animation to clash with reduced motion.
-          The rail itself is a scroll container, so it never widens the
-          page: only the rail scrolls, the page does not overflow. */}
-      <section id="bab-karya" className="relative py-24 sm:py-28">
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            Bab 03 — Karya
-          </p>
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-bold">
-                <WordReveal text="Selected Projects" />
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Scroll sideways to browse the rest — the next project is already peeking in.
-              </p>
-            </div>
-            <Link
-              to="/projects"
-              className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
-            >
-              View all projects
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </div>
-          <div
-            tabIndex={0}
-            aria-label="Selected projects — scroll horizontally to see more"
-            className="flex gap-6 overflow-x-auto pb-4 snap-x snap-proximity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg"
-          >
-            {curatedProjects.map((project) => (
-              <article
-                key={project.id}
-                className="relative w-[78vw] max-w-[400px] sm:w-[400px] shrink-0 snap-start rounded-lg bg-card border border-border hover:border-primary/50 transition-[border-color] p-6"
-              >
-                <div className="line-accent" />
-                <span className="font-mono text-[11px] uppercase tracking-[0.25em] text-muted-foreground">
-                  {project.category}
-                </span>
-                <h3 className="mt-3 text-lg font-semibold">{project.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground line-clamp-3">
-                  {project.solution}
-                </p>
-                {caseStudyIds.has(project.id) ? (
-                  <Link
-                    to={`/projects/${project.id}`}
-                    className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
-                  >
-                    Read case study
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                ) : (
-                  <Link
-                    to="/projects"
-                    className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-primary hover:gap-2 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-sm"
-                  >
-                    View project
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                )}
-              </article>
-            ))}
-          </div>
-
-          <NextChapter targetId="bab-kontak" index={4} label="Kontak" className="mt-12" />
-        </div>
-      </section>
-
-      {/* Closing chapter — Bab 04: the story ends in an invitation,
-          not at the bottom of a project rail */}
-      <section id="bab-kontak" className="relative overflow-hidden border-t border-border bg-card/30 py-24 sm:py-28">
+      {/* Closing invitation — the page ends in an offer, not a dead end */}
+      <section className="relative overflow-hidden border-t border-border bg-card/30 py-24 sm:py-28">
         <KineticBackdrop word="CONTACT" />
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="mb-6 font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
-            Bab 04 — Kontak
-          </p>
           <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-[-0.02em]">
             <WordReveal text="Ada sistem yang perlu diuji?" />
           </h2>
@@ -604,9 +506,7 @@ const Index = () => {
               </motion.div>
             </Magnetic>
             <Button asChild variant="outline" size="lg">
-              <a href="https://github.com/Nueeva" target="_blank" rel="noreferrer">
-                GitHub — Nueeva
-              </a>
+              <Link to="/projects">Lihat Proyek</Link>
             </Button>
           </div>
         </div>
