@@ -5,26 +5,20 @@ import {
   motion,
   useMotionValueEvent,
   useScroll,
-  useSpring,
 } from "motion/react";
 import { ArrowUp } from "lucide-react";
 import { Navbar } from "./Navbar";
 import { Footer } from "./Footer";
 import { RivaAgent } from "@/components/RivaAgent";
 import { CustomCursor } from "@/components/CustomCursor";
-import { GrainOverlay } from "@/components/GrainOverlay";
+
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
-  const { scrollYProgress, scrollY } = useScroll();
-  const scaleX = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001,
-  });
+  const { scrollY } = useScroll();
 
   const [showBackToTop, setShowBackToTop] = useState(false);
   useMotionValueEvent(scrollY, "change", (v) => setShowBackToTop(v > 600));
@@ -55,11 +49,6 @@ export function Layout({ children }: LayoutProps) {
       >
         Skip to main content
       </a>
-      {/* Scroll progress — spring-smoothed, transform-only */}
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-0.5 bg-primary origin-left z-[60]"
-        style={{ scaleX }}
-      />
       <Navbar />
       <main id="main-content" className="flex-1 pt-16">{children}</main>
       <Footer />
@@ -76,7 +65,7 @@ export function Layout({ children }: LayoutProps) {
             whileHover={{ scale: 1.08, y: -2 }}
             whileTap={{ scale: 0.94 }}
             transition={{ type: "spring", stiffness: 400, damping: 22 }}
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })}
             className="fixed bottom-24 right-6 z-[60] flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25"
           >
             <ArrowUp className="h-5 w-5" />
@@ -85,7 +74,7 @@ export function Layout({ children }: LayoutProps) {
       </AnimatePresence>
       <RivaAgent />
       <CustomCursor />
-      <GrainOverlay />
+
     </div>
   );
 }
