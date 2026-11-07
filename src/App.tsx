@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, StaticRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AnimatePresence, MotionConfig } from "motion/react";
-import { WelcomeScreen } from "@/components/WelcomeScreen";
+
 import { PageTransition } from "@/components/PageTransition";
 import { PageTransitionReadyContext } from "@/components/PageTransitionReadyContext";
 import { routeImporters, prefetchRoute, prefetchPublicRoutes } from "@/lib/routePrefetch";
@@ -73,23 +73,15 @@ function AnimatedRoutes() {
 }
 
 const App = ({ ssrPath }: { ssrPath?: string } = {}) => {
-  const [showWelcome, setShowWelcome] = useState(false);
   // Flipped in an effect after mount (never on the server, never on
   // the first render): from then on, client-side navigations animate
-  // through the PageTransition curtain, while the first page — server
+  // through the PageTransition camera lift, while the first page — server
   // render and hydrated render alike — mounts already visible (see
   // PageTransitionReadyContext). Unconditional hook, no SSR mismatch.
   const [transitionReady, setTransitionReady] = useState(false);
 
   useEffect(() => {
     setTransitionReady(true);
-  }, []);
-
-  useEffect(() => {
-    const hasSeenWelcome = sessionStorage.getItem("hasSeenWelcome");
-    if (!hasSeenWelcome) {
-      setShowWelcome(true);
-    }
   }, []);
 
   // Warm the public route chunks while the browser idles after first
@@ -129,11 +121,6 @@ const App = ({ ssrPath }: { ssrPath?: string } = {}) => {
     };
   }, []);
 
-  const handleWelcomeComplete = () => {
-    sessionStorage.setItem("hasSeenWelcome", "true");
-    setShowWelcome(false);
-  };
-
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <QueryClientProvider client={queryClient}>
@@ -144,7 +131,7 @@ const App = ({ ssrPath }: { ssrPath?: string } = {}) => {
           <MotionConfig reducedMotion="user">
           <Toaster />
           <Sonner />
-          {showWelcome && <WelcomeScreen onComplete={handleWelcomeComplete} />}
+
           <PageTransitionReadyContext.Provider value={transitionReady}>
           {ssrPath !== undefined ? (
             // Build-time prerender (entry-server.tsx): same tree, static router.

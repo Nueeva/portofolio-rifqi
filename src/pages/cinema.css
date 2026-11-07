@@ -19,36 +19,6 @@
   background:var(--acid);
   color:#101612
 }
-.film-opening {
-  height:175svh
-}
-.film-camera {
-  height:calc(100svh - 64px);
-  min-height:640px;
-  position:sticky;
-  top:64px;
-  isolation:isolate;
-  overflow:hidden
-}
-.film-title {
-  position:absolute;
-  left:8%;
-  top:14%;
-  z-index:2
-}
-.film-title h1 {
-  font-size:clamp(4rem,9.4vw,6rem);
-  line-height:.95;
-  margin:0 0 30px
-}
-.film-title h1 span {
-  color:var(--acid)
-}
-.film-title p {
-  font-size:clamp(1.15rem,2vw,1.6rem);
-  line-height:1.5;
-  margin-bottom:28px
-}
 .film-link {
   display:inline-flex;
   align-items:center;
@@ -62,36 +32,6 @@
 .film-link:hover {
   color:var(--acid);
   gap:30px
-}
-.film-gate {
-  position:absolute;
-  width:60vw;
-  height:60vw;
-  right:-8%;
-  top:8%;
-  color:#426343;
-  transform-origin:55% 50%;
-  z-index:-1
-}
-.film-gate svg {
-  width:100%;
-  height:100%;
-  filter:drop-shadow(18px 30px 25px #0005)
-}
-.film-light {
-  position:absolute;
-  inset:-50%;
-  background:linear-gradient(110deg,transparent 38%,#d2ef681a 48%,transparent 58%);
-  z-index:-1;
-  pointer-events:none
-}
-.film-opening-note {
-  position:absolute;
-  right:8%;
-  bottom:8%;
-  font-size:13px;
-  line-height:1.6;
-  color:#c1cbb9
 }
 .film-origin {
   position:relative;
@@ -293,31 +233,6 @@
   }
 }
 @media(max-width:700px) {
-  .film-opening {
-    height:145svh
-  }
-  .film-camera {
-    min-height:600px
-  }
-  .film-title {
-    left:7%;
-    top:15%
-  }
-  .film-title h1 {
-    font-size:clamp(3.5rem,13vw,5rem)
-  }
-  .film-gate {
-    width:95vw;
-    height:95vw;
-    top:36%;
-    right:-32%;
-    color:#3f5938
-  }
-  .film-opening-note {
-    left:7%;
-    right:auto;
-    bottom:5%
-  }
   .film-origin {
     padding:80px 7% 90px
   }
@@ -362,13 +277,6 @@
   }
 }
 @media(prefers-reduced-motion:reduce) {
-  .film-opening {
-    height:auto
-  }
-  .film-camera {
-    position:relative;
-    top:0
-  }
   .film-signal span {
     animation:none
   }
@@ -377,4 +285,4 @@
   }
 }
 
-@media(prefers-reduced-motion:reduce){.film-art,.film-gate,.film-title,.film-light,.film-origin-word{transform:none!important}}
+@media(prefers-reduced-motion:reduce){.film-art,.film-origin-word{transform:none!important}}

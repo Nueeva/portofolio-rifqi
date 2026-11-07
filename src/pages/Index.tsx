@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, useReducedMotion, useScroll, useTransform } from "motion/react";
 import { ArrowUpRight } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
+import { CybersecurityHero } from "@/components/CybersecurityHero";
 import { TembusMark } from "@/components/TembusMark";
 import { curatedProjects } from "@/data/projects";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
@@ -28,32 +29,16 @@ function ProjectScene({ id, className, children }: { id: string; className: stri
 
 export default function Index() {
   usePageAnalytics("/");
-  const hero = useRef<HTMLElement>(null);
+
   const origin = useRef<HTMLElement>(null);
   const preference = useReducedMotion();
   const [reduced, setReduced] = useState(false);
   useEffect(() => setReduced(!!preference), [preference]);
-  const { scrollYProgress } = useScroll({ target: hero, offset: ["start start", "end end"] });
-  const scale = useTransform(scrollYProgress, [0, 1], [1, 5]);
-  const rotate = useTransform(scrollYProgress, [0, 1], [-12, 12]);
-  const titleY = useTransform(scrollYProgress, [0, 1], [0, -170]);
-  const lightX = useTransform(scrollYProgress, [0, 1], ["-35%", "75%"]);
   const { scrollYProgress: originProgress } = useScroll({ target: origin, offset: ["start end", "end start"] });
   const originX = useTransform(originProgress, [0, 1], [70, -70]);
 
   return <Layout><div className="cinema">
-    <section ref={hero} className="film-opening">
-      <div className="film-camera">
-        <motion.div className="film-light" aria-hidden="true" style={reduced ? undefined : { x: lightX }} />
-        <motion.div className="film-gate" aria-hidden="true" style={reduced ? undefined : { scale, rotate }}><TembusMark /></motion.div>
-        <motion.div className="film-title" style={reduced ? undefined : { y: titleY }}>
-          <h1>Rifqi<br /><span>Ariansyah.</span></h1>
-          <p>Desain. Bangun. Audit.<br />Operasikan.</p>
-          <Link className="film-link" to="/projects">Jelajahi karya <ArrowUpRight size={22} /></Link>
-        </motion.div>
-        <p className="film-opening-note">Sistem yang saya bangun.<br />Tanggung jawab yang saya jalankan.</p>
-      </div>
-    </section>
+    <CybersecurityHero />
     <section ref={origin} className="film-origin">
       <motion.div className="film-origin-word" aria-hidden="true" style={reduced ? undefined : { x: originX }}>Berawal.</motion.div>
       <div className="film-origin-copy"><h2>Sejak SMP,<br />kode sudah berarti<br /><em>sesuatu di rumah.</em></h2>
