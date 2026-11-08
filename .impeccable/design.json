@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-11-08T01:27:03.695Z",
+  "generatedAt": "2026-11-08T05:16:35.259Z",
   "title": "Design System: Celah — Rifqi Ariansyah",
   "extensions": {
     "colorMeta": {
@@ -295,6 +295,90 @@
           "oklch(84% 0.1184 24.66)",
           "oklch(95% 0.1184 24.66)"
         ]
+      },
+      "light-cyan": {
+        "role": "secondary",
+        "displayName": "Light Cyan",
+        "tonalRamp": [
+          "oklch(15% 0.0716 187.40)",
+          "oklch(27% 0.0716 187.40)",
+          "oklch(38% 0.0716 187.40)",
+          "oklch(49% 0.0716 187.40)",
+          "oklch(60% 0.0716 187.40)",
+          "oklch(72% 0.0716 187.40)",
+          "oklch(84% 0.0716 187.40)",
+          "oklch(95% 0.0716 187.40)"
+        ]
+      },
+      "dark-cyan": {
+        "role": "secondary",
+        "displayName": "Dark Cyan",
+        "tonalRamp": [
+          "oklch(15% 0.0787 187.68)",
+          "oklch(27% 0.0787 187.68)",
+          "oklch(38% 0.0787 187.68)",
+          "oklch(49% 0.0787 187.68)",
+          "oklch(60% 0.0787 187.68)",
+          "oklch(72% 0.0787 187.68)",
+          "oklch(84% 0.0787 187.68)",
+          "oklch(95% 0.0787 187.68)"
+        ]
+      },
+      "light-periwinkle": {
+        "role": "secondary",
+        "displayName": "Light Periwinkle",
+        "tonalRamp": [
+          "oklch(15% 0.0986 273.23)",
+          "oklch(27% 0.0986 273.23)",
+          "oklch(38% 0.0986 273.23)",
+          "oklch(49% 0.0986 273.23)",
+          "oklch(60% 0.0986 273.23)",
+          "oklch(72% 0.0986 273.23)",
+          "oklch(84% 0.0986 273.23)",
+          "oklch(95% 0.0986 273.23)"
+        ]
+      },
+      "dark-periwinkle": {
+        "role": "secondary",
+        "displayName": "Dark Periwinkle",
+        "tonalRamp": [
+          "oklch(15% 0.0911 274.46)",
+          "oklch(27% 0.0911 274.46)",
+          "oklch(38% 0.0911 274.46)",
+          "oklch(49% 0.0911 274.46)",
+          "oklch(60% 0.0911 274.46)",
+          "oklch(72% 0.0911 274.46)",
+          "oklch(84% 0.0911 274.46)",
+          "oklch(95% 0.0911 274.46)"
+        ]
+      },
+      "light-copper": {
+        "role": "secondary",
+        "displayName": "Light Copper",
+        "tonalRamp": [
+          "oklch(15% 0.0969 41.10)",
+          "oklch(27% 0.0969 41.10)",
+          "oklch(38% 0.0969 41.10)",
+          "oklch(49% 0.0969 41.10)",
+          "oklch(60% 0.0969 41.10)",
+          "oklch(72% 0.0969 41.10)",
+          "oklch(84% 0.0969 41.10)",
+          "oklch(95% 0.0969 41.10)"
+        ]
+      },
+      "dark-copper": {
+        "role": "secondary",
+        "displayName": "Dark Copper",
+        "tonalRamp": [
+          "oklch(15% 0.0867 47.47)",
+          "oklch(27% 0.0867 47.47)",
+          "oklch(38% 0.0867 47.47)",
+          "oklch(49% 0.0867 47.47)",
+          "oklch(60% 0.0867 47.47)",
+          "oklch(72% 0.0867 47.47)",
+          "oklch(84% 0.0867 47.47)",
+          "oklch(95% 0.0867 47.47)"
+        ]
       }
     },
     "typographyMeta": {
@@ -352,27 +436,56 @@
       {
         "name": "control-feedback",
         "value": "180ms",
-        "purpose": "Most public hover and control feedback."
+        "purpose": "Color and background feedback for public buttons; text links also expand their arrow gap."
       },
       {
         "name": "route-transition",
-        "value": "450ms cubic-bezier(0.22, 1, 0.36, 1)",
-        "purpose": "Visible camera lift and blur; filter and transform clear on completion."
+        "value": "400ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Vertical route-content lift with a persistent public shell; no blur or opacity gate."
+      },
+      {
+        "name": "diagram-wire",
+        "value": "400ms with 80ms stagger",
+        "purpose": "User-driven context selection and replay; static full wires under reduced motion."
+      },
+      {
+        "name": "diagram-node",
+        "value": "350ms",
+        "purpose": "Selected node feedback; no scale sequence under reduced motion."
       },
       {
         "name": "pointer-glint",
         "value": "spring(stiffness: 90, damping: 28)",
-        "purpose": "Damped decorative hero glint only."
+        "purpose": "Damped decorative glint in the HTML/SVG hero."
       },
       {
         "name": "hero-scroll-gate",
-        "value": "(min-width: 768px) and (min-height: 780px) and (prefers-reduced-motion: no-preference)",
-        "purpose": "Only this configuration enables the hero scroll timeline."
+        "value": "(min-width: 1024px) and (min-height: 780px) and (prefers-reduced-motion: no-preference)",
+        "purpose": "Hero scroll timeline additionally requires the stage to fit below the 64px navbar."
+      },
+      {
+        "name": "optical-layer-eligibility",
+        "value": "min-width: 1024px; pointer: fine; reduced motion off; Save-Data off; no reported slow-2g/2g",
+        "purpose": "One optional two-pass WebGL layer, with a complete always-present SVG poster."
+      },
+      {
+        "name": "optical-render-policy",
+        "value": "on demand; DPR at most 1.5; half-resolution background target; hidden/offscreen pause",
+        "purpose": "Sustained slow frames reduce DPR to 1, then hide the canvas; context loss and failures retain HTML/SVG."
+      },
+      {
+        "name": "shared-layout-selections",
+        "value": "Motion shared layout; source default timing",
+        "purpose": "Desktop nav line, category line, diagram context indicator and selected gallery preview; no custom duration is declared."
       }
     ],
     "breakpoints": [
       {
-        "name": "mobile-max",
+        "name": "gallery-stack-max-width",
+        "value": "1023px"
+      },
+      {
+        "name": "mobile-max-width",
         "value": "767px"
       },
       {
@@ -380,7 +493,7 @@
         "value": "779px"
       },
       {
-        "name": "hero-small-max-width",
+        "name": "diagram-small-max-width",
         "value": "480px"
       },
       {
@@ -404,7 +517,7 @@
       "refersTo": "button-primary",
       "description": "Filled form action with brightness hover and disabled feedback.",
       "html": "<button type=\"button\" class=\"ds-submit\">Kirim pesan <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m22 2-7 20-4-9-9-4Z\"/><path d=\"M22 2 11 13\"/></svg></button>",
-      "css": ".ds-submit{min-height:48px;padding:10px 22px;display:inline-flex;align-items:center;justify-content:center;gap:22px;background:var(--site-metal,#725739);color:var(--site-bg,#f1ece1);border:0;border-radius:3px;font:14px Inter,sans-serif;cursor:pointer;transition:filter .18s}.ds-submit:hover{filter:brightness(1.1)}.ds-submit:disabled{opacity:.55;cursor:not-allowed}.ds-submit svg{width:18px;height:18px}.ds-submit:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}@media(prefers-reduced-motion:reduce){.ds-submit{transition:none}}"
+      "css": ".ds-submit{min-height:48px;padding:10px 22px;display:inline-flex;align-items:center;justify-content:center;gap:22px;background:var(--site-metal,#725739);color:var(--site-bg,#f1ece1);border:0;border-radius:3px;font:14px Inter,sans-serif;cursor:pointer;transition:color .18s,background-color .18s}.ds-submit:hover{filter:brightness(1.1);color:var(--site-cyan,#246d67)}.ds-submit:disabled{opacity:.55;cursor:not-allowed}.ds-submit svg{width:18px;height:18px}.ds-submit:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}@media(prefers-reduced-motion:reduce){.ds-submit{transition:none}}"
     },
     {
       "name": "Contact Field",
@@ -412,31 +525,31 @@
       "refersTo": "input",
       "description": "Visible label and transparent input with a reserved validation/count line.",
       "html": "<div class=\"ds-field\"><label for=\"ds-contact-name\">Nama</label><input id=\"ds-contact-name\" name=\"name\" placeholder=\"Nama lengkapmu\" aria-describedby=\"ds-name-info\" maxlength=\"50\"/><div class=\"ds-field-info\" id=\"ds-name-info\"><span></span><span>0/50</span></div></div>",
-      "css": ".ds-field{display:grid;gap:9px;color:var(--site-ink,#10272e);font-family:Inter,sans-serif}.ds-field label{font-size:13px;font-weight:500}.ds-field input{width:100%;border:1px solid var(--site-input,#8a8274);padding:13px 15px;border-radius:3px;background:transparent;color:var(--site-ink,#10272e);font:16px Inter,sans-serif;caret-color:var(--site-metal,#725739)}.ds-field input::placeholder{color:var(--site-muted,#536568)}.ds-field input[aria-invalid=true]{border-color:hsl(var(--destructive,4 66% 39%))}.ds-field input:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}.ds-field-info{display:flex;justify-content:space-between;gap:12px;min-height:20px;font-size:12px;color:var(--site-muted,#536568)}"
+      "css": ".ds-field{display:grid;gap:9px;color:var(--site-ink,#10272e);font-family:Inter,sans-serif}.ds-field label{font-size:13px;font-weight:500}.ds-field input{width:100%;border:1px solid var(--site-input,#8a8274);padding:13px 15px;border-radius:3px;background:transparent;color:var(--site-ink,#10272e);font:16px Inter,sans-serif;caret-color:var(--site-metal,#725739)}.ds-field input::placeholder{color:var(--site-muted,#536568)}.ds-field input[aria-invalid=true]{border-color:hsl(var(--destructive,4 66% 39%))}.ds-field input:focus-visible{outline:2px solid var(--site-cyan,#246d67);outline-offset:3px;}.ds-field-info{display:flex;justify-content:space-between;gap:12px;min-height:20px;font-size:12px;color:var(--site-muted,#536568)}"
     },
     {
       "name": "Public Navigation",
       "kind": "nav",
       "refersTo": "navigation",
-      "description": "Official mark, full name and ruled active state from the public desktop shell.",
-      "html": "<nav class=\"ds-nav\" aria-label=\"Navigasi utama\"><a class=\"ds-brand\" href=\"#beranda\"><svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M144 176L144 160L176 160L176 144L128 144L128 112L144 112L144 32L224 32L224 224L144 224L144 208L176 208L176 176Z M32 32L96 32L96 96L128 96L128 112L96 112L96 144L128 144L128 176L144 176L144 208L96 208L96 224L32 224Z\"/></svg><span>Rifqi Ariansyah</span></a><div class=\"ds-nav-links\"><a href=\"#beranda\">Beranda</a><a href=\"#karya\" aria-current=\"page\">Karya</a><a href=\"#tentang\">Tentang</a><a href=\"#kontak\">Kontak</a></div></nav>",
-      "css": ".ds-nav{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px;background:var(--site-bg,#f1ece1);border-bottom:1px solid var(--site-line,#c9c3b4);font-family:Inter,sans-serif}.ds-brand{display:inline-flex;align-items:center;gap:11px;min-height:44px;font-size:13px;font-weight:500;white-space:nowrap;color:var(--site-ink,#10272e);text-decoration:none}.ds-brand svg{width:28px;height:28px;color:var(--site-metal,#725739);flex:none}.ds-nav-links{display:flex;align-items:center;flex-wrap:wrap;gap:28px;font-size:12px}.ds-nav-links a{min-height:44px;display:inline-flex;align-items:center;color:var(--site-muted,#536568);text-decoration:none;transition:color .18s}.ds-nav-links a:hover,.ds-nav-links a[aria-current]{color:var(--site-metal,#725739)}.ds-nav-links a[aria-current]{text-decoration:underline;text-underline-offset:8px}.ds-nav a:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}@media(prefers-reduced-motion:reduce){.ds-nav-links a{transition:none}}"
+      "description": "Official mark, full name and the resting active-line state from the persistent public desktop shell.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Navigasi utama\"><a class=\"ds-brand\" href=\"#beranda\"><svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M144 176L144 160L176 160L176 144L128 144L128 112L144 112L144 32L224 32L224 224L144 224L144 208L176 208L176 176Z M32 32L96 32L96 96L128 96L128 112L96 112L96 144L128 144L128 176L144 176L144 208L96 208L96 224L32 224Z\"/></svg><span>Rifqi Ariansyah</span></a><div class=\"ds-nav-links\"><a href=\"#beranda\">Beranda</a><a href=\"#karya\" aria-current=\"page\">Karya<span class=\"ds-nav-active-line\"></span></a><a href=\"#tentang\">Tentang</a><a href=\"#kontak\">Kontak</a></div></nav>",
+      "css": ".ds-nav{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px;background:var(--site-bg,#f1ece1);border-bottom:1px solid var(--site-line,#c9c3b4);font-family:Inter,sans-serif}.ds-brand{display:inline-flex;align-items:center;gap:11px;min-height:44px;font-size:13px;font-weight:500;white-space:nowrap;color:var(--site-ink,#10272e);text-decoration:none}.ds-brand svg{width:28px;height:28px;color:var(--site-metal,#725739);flex:none}.ds-nav-links{display:flex;align-items:center;flex-wrap:wrap;gap:28px;font-size:12px}.ds-nav-links a{min-height:44px;display:inline-flex;align-items:center;color:var(--site-muted,#536568);text-decoration:none;transition:color .18s}.ds-nav-links a:hover,.ds-nav-links a[aria-current]{color:var(--site-metal,#725739)}.ds-nav-links a{position:relative}.ds-nav-active-line{position:absolute;bottom:7px;inset-inline:0;height:1px;background:var(--site-metal,#725739)}.ds-nav a:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}@media(prefers-reduced-motion:reduce){.ds-nav-links a{transition:none}}"
     },
     {
       "name": "Category Filter",
       "kind": "chip",
       "refersTo": "filter",
       "description": "Wrapping text filter; the selected state uses metal color and an underline.",
-      "html": "<div class=\"ds-filter\" role=\"group\" aria-label=\"Filter kategori proyek\"><button type=\"button\" aria-pressed=\"true\">Semua karya</button><button type=\"button\" aria-pressed=\"false\">Security Tools</button><button type=\"button\" aria-pressed=\"false\">Web Security</button><button type=\"button\" aria-pressed=\"false\">Penetration Testing</button></div>",
-      "css": ".ds-filter{display:flex;flex-wrap:wrap;gap:12px 28px;padding-bottom:22px;border-bottom:1px solid var(--site-line,#c9c3b4)}.ds-filter button{min-height:44px;color:var(--site-muted,#536568);background:transparent;border:0;border-bottom:1px solid transparent;font:13px Inter,sans-serif;cursor:pointer}.ds-filter button[aria-pressed=true]{color:var(--site-metal,#725739);border-bottom-color:var(--site-metal,#725739)}.ds-filter button:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}"
+      "html": "<div class=\"ds-filter\" role=\"group\" aria-label=\"Filter kategori proyek\"><button type=\"button\" aria-pressed=\"true\">Semua karya<span class=\"ds-filter-line\"></span></button><button type=\"button\" aria-pressed=\"false\">Security Tools</button><button type=\"button\" aria-pressed=\"false\">Web Security</button><button type=\"button\" aria-pressed=\"false\">Penetration Testing</button></div>",
+      "css": ".ds-filter{display:flex;flex-wrap:wrap;gap:12px 28px;padding-bottom:22px;border-bottom:1px solid var(--site-line,#c9c3b4)}.ds-filter button{min-height:44px;color:var(--site-muted,#536568);background:transparent;border:0;border-bottom:1px solid transparent;font:13px Inter,sans-serif;cursor:pointer}.ds-filter button[aria-pressed=true]{color:var(--site-metal,#725739);border-bottom-color:var(--site-metal,#725739)}.ds-filter button:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}.ds-filter button{position:relative;transition:color .18s,background-color .18s}.ds-filter button:hover{color:var(--site-cyan,#246d67)}.ds-filter-line{position:absolute;bottom:0;inset-inline:0;height:2px;background:var(--site-cyan,#246d67)}@media(prefers-reduced-motion:reduce){.ds-filter button{transition:none}}"
     },
     {
-      "name": "Process Artwork",
-      "kind": "card",
-      "refersTo": "artwork",
-      "description": "Decorative diagram of xssscope reasoning, with the recurring diagonal highlight.",
-      "html": "<div class=\"ds-artwork\" aria-hidden=\"true\"><div class=\"ds-process\"><span>Parameter</span><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M12 5v14m-6-6 6 6 6-6\"/></svg><span>Konteks refleksi</span><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M12 5v14m-6-6 6 6 6-6\"/></svg><em>Verifikasi.</em></div><p class=\"ds-art-detail\">HTML · Atribut · Script<br/>JavaScript / Node.js</p></div>",
-      "css": ".ds-artwork{min-height:340px;position:relative;overflow:hidden;background:var(--site-surface,#e4e0d4);padding:clamp(25px,5vw,56px);display:flex;flex-direction:column;justify-content:center;color:var(--site-ink,#10272e)}.ds-artwork::after{content:\"\";position:absolute;left:-12%;right:-12%;bottom:19%;height:1px;background:linear-gradient(90deg,transparent,var(--site-cool,#6a857f),var(--site-metal,#725739),transparent);transform:rotate(-8deg)}.ds-process{display:flex;flex-direction:column;align-items:flex-start;gap:8px;font:clamp(1.4rem,2.6vw,2.5rem)/1.2 \"Space Grotesk\",sans-serif;letter-spacing:-.025em}.ds-process svg{width:18px;height:18px;color:var(--site-cool,#6a857f);margin-left:12px}.ds-process em{margin-left:12%;font-family:\"Instrument Serif\",serif;font-style:italic;font-size:1.4em;color:var(--site-metal,#725739)}.ds-art-detail{font:12px Inter,sans-serif;margin-top:28px;color:var(--site-muted,#536568);max-width:32ch}@media(max-width:767px){.ds-artwork{min-height:290px}}"
+      "name": "Project Process Diagram",
+      "kind": "custom",
+      "refersTo": "process-diagram",
+      "description": "Default HTML context from the accessible xssscope process illustration; source controls select context and replay short wire draws.",
+      "html": "<figure class=\"ds-technical-figure\"><div class=\"ds-diagram-topline\"><span>xssscope</span><button type=\"button\" aria-label=\"Ulangi ilustrasi xssscope\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/><path d=\"M3 3v5h5\"/></svg>Ulangi</button></div><svg class=\"ds-system-diagram\" viewBox=\"0 0 620 330\" role=\"img\" aria-labelledby=\"ds-process-title ds-process-desc\"><title id=\"ds-process-title\">xssscope: ilustrasi proses</title><desc id=\"ds-process-desc\">Konteks markup ditelusuri sebelum kandidat diverifikasi.</desc><defs><linearGradient id=\"ds-process-flow\"><stop stop-color=\"var(--site-cyan,#246d67)\"/><stop offset=\"1\" stop-color=\"var(--site-violet,#515e9b)\"/></linearGradient></defs><g class=\"ds-context-brackets\"><path d=\"M58 85H30V245H58 M562 85H590V245H562\"/><text x=\"310\" y=\"68\" text-anchor=\"middle\">REFLECTION CONTEXT</text></g><path class=\"ds-diagram-wire\" d=\"M140 165H265 M355 165H480\"/><path d=\"M140 165H265 M355 165H480\" fill=\"none\" stroke=\"url(#ds-process-flow)\" stroke-width=\"3\"/><g class=\"ds-diagram-node\"><circle cx=\"95\" cy=\"165\" r=\"35\"/><circle cx=\"95\" cy=\"165\" r=\"4\" class=\"ds-node-core\"/><path d=\"M77 165h36 M95 147v36\" class=\"ds-node-cross\"/><text x=\"95\" y=\"244\" text-anchor=\"middle\">Parameter</text></g><g class=\"ds-diagram-node ds-is-selected\"><circle cx=\"310\" cy=\"165\" r=\"47\"/><circle cx=\"310\" cy=\"165\" r=\"4\" class=\"ds-node-core\"/><path d=\"M292 165h36 M310 147v36\" class=\"ds-node-cross\"/><text x=\"310\" y=\"244\" text-anchor=\"middle\">HTML</text></g><g class=\"ds-diagram-node\"><circle cx=\"525\" cy=\"165\" r=\"35\"/><circle cx=\"525\" cy=\"165\" r=\"4\" class=\"ds-node-core\"/><path d=\"M507 165h36 M525 147v36\" class=\"ds-node-cross\"/><text x=\"525\" y=\"244\" text-anchor=\"middle\">Verifikasi</text></g><text x=\"310\" y=\"290\" text-anchor=\"middle\" class=\"ds-diagram-code\">&lt;body&gt; input &lt;/body&gt;</text></svg><div class=\"ds-diagram-controls\" role=\"group\" aria-label=\"Pilih konteks xssscope\"><button type=\"button\" aria-pressed=\"true\">HTML<span class=\"ds-diagram-indicator\"></span></button><button type=\"button\" aria-pressed=\"false\">Atribut</button><button type=\"button\" aria-pressed=\"false\">Script</button></div><figcaption><span>Ilustrasi proses</span><p aria-live=\"polite\">Konteks markup ditelusuri sebelum kandidat diverifikasi.</p></figcaption></figure>",
+      "css": ".ds-technical-figure{margin:0;min-width:0;background:var(--site-low,#e6e8df);padding:28px;position:relative;overflow:hidden;color:var(--site-ink,#10272e);font-family:Inter,sans-serif}.ds-technical-figure button{background:transparent;border:0;cursor:pointer;transition:color .18s,background-color .18s}.ds-technical-figure button:hover{color:var(--site-cyan,#246d67)}.ds-technical-figure button:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}.ds-diagram-topline{display:flex;justify-content:space-between;gap:20px;align-items:center;font-size:14px}.ds-diagram-topline>span{font:20px \"Space Grotesk\",sans-serif}.ds-diagram-topline button{display:flex;align-items:center;gap:8px;min-height:44px;color:var(--site-muted,#536568);font:12px Inter,sans-serif}.ds-diagram-topline svg{width:16px;height:16px}.ds-system-diagram{width:100%;height:auto;display:block;overflow:visible}.ds-system-diagram text{fill:var(--site-ink,#10272e);font:14px Inter,sans-serif}.ds-system-diagram .ds-diagram-code{font:13px \"JetBrains Mono\",monospace;fill:var(--site-violet,#515e9b)}.ds-diagram-wire{fill:none;stroke:var(--site-line,#c9c3b4);stroke-width:1}.ds-diagram-node circle{fill:var(--site-surface,#e4e0d4);stroke:var(--site-line,#c9c3b4)}.ds-diagram-node.ds-is-selected circle{stroke:var(--site-cyan,#246d67)}.ds-diagram-node .ds-node-core{fill:var(--site-cyan,#246d67);stroke:none}.ds-node-cross{stroke:var(--site-cyan,#246d67);stroke-width:1}.ds-context-brackets{fill:none;stroke:var(--site-violet,#515e9b);stroke-width:1}.ds-context-brackets text{stroke:none;font-size:11px;letter-spacing:.1em;fill:var(--site-violet,#515e9b)}.ds-diagram-controls{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--site-line,#c9c3b4)}.ds-diagram-controls button{position:relative;min-height:44px;padding:10px 14px;color:var(--site-muted,#536568);font:13px Inter,sans-serif}.ds-diagram-controls button[aria-pressed=true]{color:var(--site-cyan,#246d67)}.ds-diagram-indicator{position:absolute;height:2px;bottom:-1px;inset-inline:12px;background:var(--site-cyan,#246d67)}.ds-technical-figure figcaption{padding-top:18px;min-height:95px}.ds-technical-figure figcaption>span{font-size:11px;color:var(--site-muted,#536568)}.ds-technical-figure figcaption p{font-size:13px;line-height:1.6;margin:8px 0 0;max-width:65ch}@media(max-width:1023px){.ds-technical-figure{padding:20px}}@media(max-width:480px){.ds-technical-figure{padding:16px}.ds-diagram-controls button{padding:10px}.ds-technical-figure figcaption{min-height:110px}.ds-system-diagram text{font-size:16px}.ds-system-diagram .ds-diagram-code{font-size:14px}}@media(prefers-reduced-motion:reduce){.ds-technical-figure button{transition:none}}"
     },
     {
       "name": "RIVA Message Panel",
@@ -444,29 +557,50 @@
       "refersTo": "riva-dialog",
       "description": "Token-scoped information panel with a scrollable conversation and compact input.",
       "html": "<section class=\"ds-riva\" aria-label=\"RIVA\"><h2>RIVA</h2><p class=\"ds-riva-description\">Asisten informasi portofolio Rifqi.</p><div class=\"ds-messages\" role=\"log\"><p>Halo, saya RIVA. Saya bisa membantu mengenalkan pekerjaan Rifqi, keahlian, dan cara menghubunginya. Pilih topik atau tulis pertanyaanmu.</p></div><div class=\"ds-riva-shortcuts\"><button type=\"button\">xssscope</button><button type=\"button\">Apexsions</button><button type=\"button\">Keahlian</button><button type=\"button\">Kontak</button></div><form class=\"ds-riva-form\"><label class=\"ds-riva-label\" for=\"ds-riva-input\">Pertanyaan untuk RIVA</label><input id=\"ds-riva-input\" placeholder=\"Tanya tentang karya Rifqi\" maxlength=\"500\"/><button type=\"button\" aria-label=\"Kirim pertanyaan\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m22 2-7 20-4-9-9-4Z\"/><path d=\"M22 2 11 13\"/></svg></button></form></section>",
-      "css": ".ds-riva{width:min(410px,calc(100vw - 32px));height:min(570px,calc(100dvh - 110px));max-height:calc(100dvh - 110px);padding:24px;border:1px solid var(--site-line,#c9c3b4);border-radius:8px;background:var(--site-bg,#f1ece1);color:var(--site-ink,#10272e);font-family:Inter,sans-serif;display:grid;grid-template-rows:auto auto minmax(65px,1fr) auto auto;gap:16px}.ds-riva h2{margin:0;font:400 18px \"Space Grotesk\",sans-serif}.ds-riva-description{font-size:14px;color:var(--site-muted,#536568);margin:0}.ds-messages{min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:18px;padding-right:8px;font-size:13px}.ds-messages p{margin:0;padding:12px;background:var(--site-surface,#e4e0d4);border-radius:4px}.ds-messages p[data-from=user]{margin-left:30px;background:var(--site-metal,#725739);color:var(--site-bg,#f1ece1)}.ds-riva-form{display:flex;gap:8px}.ds-riva-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.ds-riva-form input{min-width:0;flex:1;padding:10px;border:1px solid var(--site-input,#8a8274);border-radius:3px;background:var(--site-bg,#f1ece1);color:var(--site-ink,#10272e);font:16px Inter,sans-serif}.ds-riva-form button{width:44px;height:44px;display:grid;place-items:center;background:var(--site-metal,#725739);color:var(--site-bg,#f1ece1);border:0;border-radius:3px}.ds-riva-form svg{width:18px;height:18px}.ds-riva-form button:disabled{opacity:.5}.ds-riva-form input:focus-visible,.ds-riva-form button:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}.ds-riva-shortcuts{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}.ds-riva-shortcuts button{font:inherit;background:transparent;border:0;color:inherit;text-decoration:underline;text-underline-offset:4px;min-height:40px}.ds-riva-shortcuts button:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px}@media(max-height:600px){.ds-riva{height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);padding:18px;gap:10px;grid-template-rows:auto auto minmax(40px,1fr) auto auto}}"
+      "css": ".ds-riva{width:min(410px,calc(100vw - 32px));height:min(570px,calc(100dvh - 110px));max-height:calc(100dvh - 110px);padding:24px;border:1px solid var(--site-line,#c9c3b4);border-radius:8px;background:var(--site-bg,#f1ece1);color:var(--site-ink,#10272e);font-family:Inter,sans-serif;display:grid;grid-template-rows:auto auto minmax(65px,1fr) auto auto;gap:16px}.ds-riva h2{margin:0;font:400 18px \"Space Grotesk\",sans-serif}.ds-riva-description{font-size:14px;color:var(--site-muted,#536568);margin:0}.ds-messages{min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:18px;padding-right:8px;font-size:13px}.ds-messages p{margin:0;padding:12px;background:var(--site-surface,#e4e0d4);border-radius:4px}.ds-messages p[data-from=user]{margin-left:30px;background:var(--site-metal,#725739);color:var(--site-bg,#f1ece1)}.ds-riva-form{display:flex;gap:8px}.ds-riva-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.ds-riva-form input{min-width:0;flex:1;padding:10px;border:1px solid var(--site-input,#8a8274);border-radius:3px;background:var(--site-bg,#f1ece1);color:var(--site-ink,#10272e);font:16px Inter,sans-serif}.ds-riva-form button{width:44px;height:44px;display:grid;place-items:center;background:var(--site-metal,#725739);color:var(--site-bg,#f1ece1);border:0;border-radius:3px}.ds-riva-form svg{width:18px;height:18px}.ds-riva-form button:disabled{opacity:.5}.ds-riva-form input:focus-visible{outline:2px solid var(--site-cyan,#246d67);outline-offset:3px;}.ds-riva-form button:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}.ds-riva-shortcuts{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}.ds-riva-shortcuts button{font:inherit;background:transparent;border:0;color:inherit;text-decoration:underline;text-underline-offset:4px;min-height:40px}.ds-riva-shortcuts button:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px}@media(max-height:600px){.ds-riva{height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);padding:18px;gap:10px;grid-template-rows:auto auto minmax(40px,1fr) auto auto}}.ds-riva button:hover{color:var(--site-cyan,#246d67)}.ds-riva button{transition:color .18s,background-color .18s}@media(prefers-reduced-motion:reduce){.ds-riva button{transition:none}}"
+    },
+    {
+      "name": "Gallery Entry",
+      "kind": "card",
+      "refersTo": "gallery-entry",
+      "description": "Selected project row with a native disclosure; the application synchronizes its separate visual stage on hover, focus and click.",
+      "html": "<article class=\"ds-gallery-entry ds-selected\"><button type=\"button\" class=\"ds-gallery-select\" aria-pressed=\"true\">xssscope — Reflected XSS Scanner<span>Security Tools</span></button><p>JavaScript / Node.js</p><details><summary>Ringkasan karya</summary><h3>Masalah</h3><p>Menguji reflected XSS secara manual berarti mengulang payload, memeriksa respons, dan menganalisis konteks untuk setiap parameter.</p><h3>Pendekatan</h3><p>Scanner JavaScript tanpa dependency yang menguji parameter, mengklasifikasikan konteks refleksi, lalu memverifikasi temuan secara otomatis. Berjalan langsung di Node.js.</p></details></article>",
+      "css": ".ds-gallery-entry{padding:28px 0;border-top:1px solid var(--site-line,#c9c3b4);font-family:Inter,sans-serif;color:var(--site-ink,#10272e)}.ds-gallery-entry.ds-selected{border-top-color:var(--site-cyan,#246d67)}.ds-gallery-select{text-align:left;font:26px/1.3 \"Space Grotesk\",sans-serif;width:100%;min-height:64px;background:transparent;color:inherit;border:0;cursor:pointer;transition:color .18s,background-color .18s}.ds-gallery-select:hover{color:var(--site-cyan,#246d67)}.ds-gallery-select:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}.ds-gallery-select span{display:block;font:12px Inter,sans-serif;color:var(--site-muted,#536568);margin-top:10px}.ds-gallery-entry>p{font-size:12px;color:var(--site-muted,#536568)}.ds-gallery-entry details{margin:20px 0}.ds-gallery-entry summary{cursor:pointer;padding:10px 0;font-size:14px}.ds-gallery-entry summary:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}.ds-gallery-entry details p{font-size:14px;max-width:65ch}.ds-gallery-entry h3{font-family:\"Space Grotesk\",sans-serif;font-weight:400;letter-spacing:-.035em}@media(prefers-reduced-motion:reduce){.ds-gallery-select{transition:none}}"
+    },
+    {
+      "name": "Hero SVG Poster",
+      "kind": "custom",
+      "refersTo": "optical-poster",
+      "description": "Always-present static seam poster from the hero; this preview contains no WebGL runtime.",
+      "html": "<svg class=\"ds-optical-poster\" viewBox=\"0 0 1280 760\" preserveAspectRatio=\"xMidYMid slice\" aria-hidden=\"true\"><defs><linearGradient id=\"ds-optical-spectrum\"><stop stop-color=\"var(--site-cyan,#246d67)\"/><stop offset=\".6\" stop-color=\"var(--site-violet,#515e9b)\"/><stop offset=\"1\" stop-color=\"var(--site-copper,#8d4b32)\"/></linearGradient></defs><path d=\"M-60 570L1340 325L1340 470L-60 715Z\" fill=\"var(--site-cavity,#10272e)\"/><path d=\"M-60 568L1340 323\" stroke=\"url(#ds-optical-spectrum)\" stroke-width=\"3\"/><path d=\"M-60 717L1340 472\" stroke=\"var(--site-metal,#725739)\" stroke-width=\"1\"/></svg>",
+      "css": ".ds-optical-poster{display:block;width:100%;height:auto;background:var(--site-bg,#f1ece1);pointer-events:none}"
     }
   ],
   "narrative": {
     "northStar": "Celah",
-    "overview": "Two diagonal material planes open a narrow seam of light. This motif connects the cybersecurity hero to project artwork, while generous editorial spacing and restrained type keep the work readable. Rifqi is presented as a Cybersecurity Engineer; the official TembusMark and full name anchor the shared shell.\n\nThis system covers all public pages, case studies and errors. A route-scoped boundary contains its CSS variables, notification roots and portal host. Dialog, AlertDialog and Select portals inherit that scope. Exact `/admin` and `/auth` routes retain their legacy shell and root theme tokens; unknown nested paths use the public error design.",
+    "overview": "Two diagonal material planes open a narrow seam of light. This motif connects the cybersecurity hero to technical process diagrams, while generous editorial spacing and restrained type keep the work readable. Rifqi is presented as a Cybersecurity Engineer; the official TembusMark and full name anchor the shared shell. Cyan, periwinkle and copper extend the established petrol, ivory and metal palette.\n\nThis system covers all public pages, case studies and errors. A persistent public shell holds navigation, footer, settings and on-demand RIVA while route content changes. Its design boundary contains public CSS variables, notification roots and the portal host; Dialog, AlertDialog and Select portals inherit that scope. Exact `/admin` and `/auth` routes retain their legacy shell and root theme tokens; unknown nested paths use the public error design.",
     "keyCharacteristics": [
-      "Petrol and warm ivory, with champagne or bronze interaction accents.",
-      "Alternating editorial compositions and diagrams of documented work.",
-      "Selectable, visible reading content with decorative motion around it."
+      "Petrol and warm ivory, with metal accents and a restrained technical spectrum.",
+      "Editorial sections, a selectable project gallery and accessible process diagrams.",
+      "Complete HTML/SVG content with optional optical depth and user-driven motion."
     ],
     "rules": [
       {
         "name": "The Scope Rule",
         "body": "Apply Celah through the public boundary and its portal host; preserve the legacy root palette for admin and authentication.",
         "section": "colors"
+      },
+      {
+        "name": "The Readable Base Rule",
+        "body": "Keep HTML content, SVG diagrams and the hero poster complete when animation or WebGL is unavailable.",
+        "section": "elevation"
       }
     ],
     "dos": [
       "**Do** keep every public route and overlay in the Celah scope, with both themes and visible keyboard focus.",
       "**Do** keep Indonesian interface copy, the Cybersecurity Engineer role, and the official TembusMark geometry.",
       "**Do** preserve canonical project facts, names, IDs, technical terms, quantities and links from `src/data/projects.ts`; use `projectCopy.id.ts` for presentation text and preserve future CMS edits.",
-      "**Do** keep reading content visible on first render and provide complete static compositions for mobile, short screens and reduced motion."
+      "**Do** keep reading content visible on first render, preserve accessible diagram controls and captions, and provide complete HTML/SVG compositions for mobile, short screens, reduced motion and failed optional enhancements."
     ],
     "donts": [
       "**Don't** apply the public theme to legacy admin/auth, or change contact payloads, validation, Turnstile, honeypot or timing contracts as a design edit.",

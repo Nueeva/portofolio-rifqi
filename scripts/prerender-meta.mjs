@@ -33,52 +33,13 @@ const distDir = join(process.cwd(), "dist");
 const baseHtml = readFileSync(join(distDir, "index.html"), "utf8");
 
 const ROUTES = [
-  {
-    path: "about",
-    title: "About — Rifqi Ariansyah",
-    description:
-      "About Rifqi Ariansyah — cybersecurity developer, founder and lead developer of Apexsions, builder of Portfolio 71 for SMKN 71 Jakarta, and author of the xssscope scanner and CTF-Toolkit. Background, skills, and experience.",
-  },
-  {
-    path: "projects",
-    title: "Projects — Rifqi Ariansyah",
-    description:
-      "Selected projects by Rifqi Ariansyah: the Apexsions Minecraft server system, Portfolio 71 for SMKN 71 Jakarta, the xssscope reflected-XSS scanner, and CTF-Toolkit — each with a full case study.",
-  },
-  {
-    path: "contact",
-    title: "Contact — Rifqi Ariansyah",
-    description:
-      "Contact Rifqi Ariansyah, cybersecurity developer — about security work, collaborations, or his projects: Apexsions, Portfolio 71, xssscope, and CTF-Toolkit.",
-  },
-  {
-    path: "projects/curated-apexsions",
-    image: "og/og-apexsions.png",
-    title: "Apexsions — A Full Minecraft Server System — Rifqi Ariansyah",
-    description:
-      "Case study: Apexsions, a full Minecraft server system by Rifqi Ariansyah — nine in-house Java plugins, an Azuriom community website joined by a custom two-way bridge, a security audit fixing 13 critical and 19 major findings, and a production deployment across two hosts.",
-  },
-  {
-    path: "projects/curated-portfolio71",
-    image: "og/og-portfolio71.png",
-    title: "Portfolio 71 — Student Portfolio Platform — Rifqi Ariansyah",
-    description:
-      "Case study: Portfolio 71, the SMKN 71 Jakarta student portfolio platform built by Rifqi Ariansyah — Laravel API + Nuxt frontend, AI-assisted teacher verification, public profiles with QR codes and share links, one-click CV PDF export, and production hardening.",
-  },
-  {
-    path: "projects/curated-xssscope",
-    image: "og/og-xssscope.png",
-    title: "xssscope — Reflected XSS Scanner — Rifqi Ariansyah",
-    description:
-      "Case study: xssscope, a zero-dependency JavaScript reflected-XSS scanner by Rifqi Ariansyah that probes parameters, classifies reflection contexts, and verifies findings automatically.",
-  },
-  {
-    path: "projects/curated-ctf-toolkit",
-    image: "og/og-ctf-toolkit.png",
-    title: "CTF-Toolkit — Rifqi Ariansyah",
-    description:
-      "Case study: CTF-Toolkit, a personal Python toolkit by Rifqi Ariansyah bundling the recurring helpers for common CTF categories — web, crypto, forensics, reversing — so the workflow is ready before a competition starts.",
-  },
+ {path:"about",title:"Tentang — Rifqi Ariansyah",description:"Tentang Rifqi Ariansyah, Cybersecurity Engineer. Keahlian, pengalaman, perjalanan keluarga, dan CV."},
+ {path:"projects",title:"Karya — Rifqi Ariansyah",description:"Security tooling, aplikasi web, dan operasi sistem: xssscope, Apexsions, Portfolio 71, dan CTF-Toolkit."},
+ {path:"contact",title:"Kontak — Rifqi Ariansyah",description:"Hubungi Rifqi Ariansyah, Cybersecurity Engineer, untuk pekerjaan keamanan aplikasi dan kolaborasi engineering."},
+ {path:"projects/curated-apexsions",image:"og/og-apexsions.png",title:"Apexsions — Rifqi Ariansyah",description:"Studi kasus Apexsions: sembilan plugin Paper, bridge Azuriom, dua host, serta perbaikan 13 temuan critical dan 19 major."},
+ {path:"projects/curated-portfolio71",image:"og/og-portfolio71.png",title:"Portfolio 71 — Rifqi Ariansyah",description:"Studi kasus Portfolio 71: Laravel, Nuxt, batas akses siswa, guru, dan admin, serta workflow verifikasi karya."},
+ {path:"projects/curated-xssscope",image:"og/og-xssscope.png",title:"xssscope — Rifqi Ariansyah",description:"Studi kasus xssscope: scanner reflected XSS JavaScript tanpa dependency, analisis konteks refleksi, dan verifikasi kandidat temuan."},
+ {path:"projects/curated-ctf-toolkit",image:"og/og-ctf-toolkit.png",title:"CTF-Toolkit — Rifqi Ariansyah",description:"Studi kasus CTF-Toolkit: helper Python untuk persiapan kategori Web, Crypto, Forensics, dan Reversing."}
 ];
 
 function swap(html, pattern, replacement, label) {

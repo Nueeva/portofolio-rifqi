@@ -3,31 +3,31 @@ import { useQuery } from "@tanstack/react-query";
 import { ArrowUpRight, Download, ExternalLink } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { usePublicSettings } from "@/hooks/usePublicSettings";
 import { supabase } from "@/integrations/supabase/client";
+import { ProjectDiagram } from "@/components/public/ProjectDiagram";
 import { publicProjects } from "@/data/projectCopy.id";
-
 const security = ["Penetration Testing", "Vulnerability Assessment", "Web Application Security", "Network Security", "Secure Code Review", "Threat Modeling"];
 const development = ["TypeScript", "React", "Python", "Node.js", "Go", "Bash"];
 const instruments = ["Burp Suite", "Wireshark", "Nmap", "OWASP ZAP", "Metasploit", "Ghidra", "sqlmap", "Hashcat"];
-
 export default function About() {
-  usePageAnalytics("/about");
-  const { getList } = useSiteSettings();
-  const skills = [
-    { title: "Keamanan", items: getList("skills_security", security) },
-    { title: "Pengembangan", items: getList("skills_dev", development) },
-    { title: "Tools", items: getList("skills_tools", instruments) },
-  ];
-  const { data: certifications, isError } = useQuery({
-    queryKey: ["public-certifications"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("certifications").select("*").order("created_at", { ascending: false });
-      if (error) throw error;
-      return data;
-    },
-  });
-  return <Layout><div className="public-container public-page">
+    usePageAnalytics("/about");
+    const { getList } = usePublicSettings();
+    const skills = [
+        { title: "Keamanan", items: getList("skills_security", security) },
+        { title: "Pengembangan", items: getList("skills_dev", development) },
+        { title: "Tools", items: getList("skills_tools", instruments) },
+    ];
+    const { data: certifications, isError } = useQuery({
+        queryKey: ["public-certifications"],
+        queryFn: async () => {
+            const { data, error } = await supabase.from("certifications").select("*").order("created_at", { ascending: false });
+            if (error)
+                throw error;
+            return data;
+        },
+    });
+    return <Layout><div className="public-container public-page">
     <header className="about-intro"><h1>Rifqi Ariansyah.<br /><em>Cybersecurity<br />Engineer.</em></h1><div>
       <p>Saya menelusuri celah aplikasi, membangun security tooling, dan memperbaiki sistem sampai ke produksi. Pekerjaan saya menghubungkan pengujian keamanan dengan pengembangan dan operasi.</p>
       <p>Dari reflected XSS di xssscope sampai audit ekosistem Apexsions, saya ingin memahami penyebab masalah dan memastikan perbaikannya bisa digunakan.</p>
@@ -36,6 +36,7 @@ export default function About() {
     <section className="about-section" aria-labelledby="about-skills"><h2 id="about-skills">Keahlian & <em>perangkat kerja.</em></h2>
       {skills.map(group => <div className="skill-line" key={group.title}><h3>{group.title}</h3><ul>{group.items.map(item => <li key={item}>{item}</li>)}</ul></div>)}
     </section>
+    <section className="about-section capability-proof" aria-label="Keahlian dalam praktik"><div><h2>Batas akses,<br /><em>dalam praktik.</em></h2><p>Web Application Security bertemu pengembangan aplikasi: peran siswa, guru, dan admin pada Portfolio 71.</p><Link className="public-text-link" to="/projects/curated-portfolio71">Telusuri implementasi <ArrowUpRight /></Link></div><ProjectDiagram id="curated-portfolio71"/></section>
     <section className="about-section" aria-labelledby="about-experience"><h2 id="about-experience">Pengalaman melalui<br /><em>sistem yang dibangun.</em></h2>
       {[publicProjects[1], publicProjects[2], publicProjects[0], publicProjects[3]].map(project => <article className="experience-entry" key={project.id}><div><h3>{project.title.split(" — ")[0]}</h3><p>{project.caseStudy?.role}</p><p className="experience-period">{project.caseStudy?.period}</p></div><div><p>{project.solution}</p><Link className="public-text-link" to={`/projects/${project.id}`}>Baca studi kasus <ArrowUpRight /></Link></div></article>)}
     </section>

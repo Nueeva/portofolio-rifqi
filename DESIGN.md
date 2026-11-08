@@ -1,6 +1,6 @@
 ---
 name: "Celah — Rifqi Ariansyah"
-description: "An Indonesian cybersecurity portfolio with diagonal material apertures and editorial project narratives."
+description: "An Indonesian cybersecurity portfolio with optical seams, interactive process diagrams and editorial project narratives."
 colors:
   petrol: "#0b181c"
   petrol-surface: "#18343b"
@@ -23,6 +23,12 @@ colors:
   light-reflection: "#d1c3a8"
   light-danger: "hsl(4 66% 39%)"
   dark-danger: "hsl(4 75% 73%)"
+  light-cyan: "#246d67"
+  dark-cyan: "#8eddd5"
+  light-periwinkle: "#515e9b"
+  dark-periwinkle: "#a9b7f6"
+  light-copper: "#8d4b32"
+  dark-copper: "#d39576"
 typography:
   display:
     fontFamily: "Space Grotesk, sans-serif"
@@ -102,6 +108,20 @@ components:
     rounded: "{rounded.riva}"
     padding: "24px"
     width: "min(410px, calc(100vw - 32px))"
+  process-diagram:
+    backgroundColor: "{colors.light-low}"
+    textColor: "{colors.petrol-ink}"
+    padding: "28px"
+  diagram-control:
+    textColor: "{colors.light-muted}"
+    padding: "10px 14px"
+  diagram-control-selected:
+    textColor: "{colors.light-cyan}"
+  gallery-entry:
+    padding: "28px 0"
+  optical-poster:
+    width: "100%"
+    height: "100%"
 ---
 
 # Design System: Celah — Rifqi Ariansyah
@@ -110,17 +130,17 @@ components:
 
 **Creative North Star: "Celah"**
 
-Two diagonal material planes open a narrow seam of light. This motif connects the cybersecurity hero to project artwork, while generous editorial spacing and restrained type keep the work readable. Rifqi is presented as a Cybersecurity Engineer; the official TembusMark and full name anchor the shared shell.
+Two diagonal material planes open a narrow seam of light. This motif connects the cybersecurity hero to technical process diagrams, while generous editorial spacing and restrained type keep the work readable. Rifqi is presented as a Cybersecurity Engineer; the official TembusMark and full name anchor the shared shell. Cyan, periwinkle and copper extend the established petrol, ivory and metal palette.
 
-This system covers all public pages, case studies and errors. A route-scoped boundary contains its CSS variables, notification roots and portal host. Dialog, AlertDialog and Select portals inherit that scope. Exact `/admin` and `/auth` routes retain their legacy shell and root theme tokens; unknown nested paths use the public error design.
+This system covers all public pages, case studies and errors. A persistent public shell holds navigation, footer, settings and on-demand RIVA while route content changes. Its design boundary contains public CSS variables, notification roots and the portal host; Dialog, AlertDialog and Select portals inherit that scope. Exact `/admin` and `/auth` routes retain their legacy shell and root theme tokens; unknown nested paths use the public error design.
 
 **Key Characteristics:**
 
-- Petrol and warm ivory, with champagne or bronze interaction accents.
-- Alternating editorial compositions and diagrams of documented work.
-- Selectable, visible reading content with decorative motion around it.
+- Petrol and warm ivory, with metal accents and a restrained technical spectrum.
+- Editorial sections, a selectable project gallery and accessible process diagrams.
+- Complete HTML/SVG content with optional optical depth and user-driven motion.
 
-Source-derived snapshot (2026-11-08): no valid screenshots or visual approval are available because local browser origin access was denied. Build, type, lint and source/production-SSR checks are recorded in [the integration contract](docs/celah-unification.md); they do not replace visual verification. The full revision remains subject to that contract's release gate.
+Source-derived snapshot (2026-11-08): saved browser permissions deny preview access, so no screenshots or browser visual approval exist for this update. This document records source behavior, not visual validation or release approval. The browser and finish-review gate in [the integration contract](docs/celah-unification.md) remains pending; earlier verification records do not validate these new enhancements.
 
 ## Colors
 
@@ -130,7 +150,7 @@ Champagne is the dark-theme action, emphasis, selection and focus color; bronze 
 
 ### Secondary
 
-Cool reflection and light cool support thin seam highlights and process arrows. They remain supporting colors. Danger uses the source HSL tokens for validation and failure feedback.
+Cool reflection and light cool retain the original seam highlights. The added cyan pair carries diagram nodes, selected diagram controls, gallery selection rules, field focus and public button hover. Periwinkle (the source `--site-violet` variable) marks reflection context, code and workflow details. Copper marks the plugin/result layer and the warm end of the optical seam. These supporting colors inherit their dark/light variants from the public boundary. Danger retains the source HSL tokens for validation and failure feedback.
 
 ### Neutral
 
@@ -151,36 +171,40 @@ The public stylesheet also maps semantic HSL variables for shared UI components.
 
 Space Grotesk carries headings; Inter carries body text, controls and labels. Instrument Serif italic marks selected words, including “Engineer.” JetBrains Mono is reserved for code or data, rather than ordinary public labels. All four font families are self-hosted; the italic serif is declared in the hero stylesheet.
 
-The frontmatter records the hero, page and home-section scales. Project titles use a smaller display range (`clamp(2rem, 3.8vw, 3.5rem)`); study headings tighten further. Headings use balanced wrapping and light CSS weight (400). Inter supporting text is usually (12–15px), while form text remains (16px). Ledes and home paragraphs stop at (65ch); study articles stop at (72ch), with generous line height (1.95). Italic accents inherit contextual size outside the hero and artwork.
+The frontmatter records the hero, page and home-section scales. Gallery selectors use Space Grotesk (26px) and stage titles (28px); study headings keep their narrower hierarchy. Headings use balanced wrapping and light CSS weight (400). Inter supporting text is usually (12–15px), while form text remains (16px). Diagram labels use Inter; actual context snippets use JetBrains Mono (13px). Ledes and home paragraphs stop at (65ch); study articles stop at (72ch), with generous line height (1.95). Italic accents inherit contextual size outside the hero and fallback artwork.
 
 ## Layout
 
 A centered container stops at (1280px), with fluid gutters from (20px) to (64px). The fixed navbar occupies (64px), matched by the main-content offset. Public pages use vertical padding (76px / 120px); home sections use (110px).
 
-Home moves from the hero through xssscope reasoning, Apexsions remediation, other work, the personal story and the shared contact invitation. Projects alternate unequal two-column image/copy rows; filters are a wrapping text rail, rather than a card grid. Case studies separate metadata from a narrow reading column. About uses ruled skill and experience rows. Contact uses a smaller details column beside a larger form. Errors keep a simple code, explanation and recovery actions.
+Home moves from the hero through xssscope reasoning, Apexsions remediation, other work, the personal story and the shared contact invitation. Projects use a selected visual stage beside a ruled project index: unequal columns (1.1fr / 1fr), a gap (64px), and a sticky stage offset (100px). Hover, focus or a selector button changes the selected project. Native details elements disclose the problem and approach. Category filters remain a wrapping text rail. Case studies separate metadata from a narrow reading column. About combines ruled skill/experience rows with a Portfolio 71 process example. Contact keeps its smaller details column beside a larger form. Errors retain explanations and recovery actions; route-load failure adds reload and home actions within the public shell.
 
-At widths below (768px), editorial, about and contact columns stack; alternating image order resets. Page padding becomes (50px / 80px), home sections (75px), artwork minimum height (290px), and navigation becomes a full-width dialog below the navbar. Long titles, technologies and contact details wrap. Filters and action groups wrap naturally.
+Below (1024px), the gallery becomes one column: the sticky stage is hidden and every project gains an inline visual. Diagram padding reduces from (28px) to (20px). Below (768px), home, about and contact columns stack; page padding becomes (50px / 80px), home sections (75px), and navigation becomes a full-width dialog below the navbar. At (480px) or less, diagrams use padding (16px), larger SVG labels and tighter controls. Long titles, technologies and contact details wrap. Filters and action groups wrap naturally.
 
-The hero scroll timeline runs only at widths of at least (768px), heights of at least (780px), and without reduced motion. Its tall desktop section (175svh) holds a sticky stage; mobile and short screens use a complete static stage (710px). Below (481px), the hero heading moves lower. Reduced motion also selects the static stage and removes the glint/sweep and project crop animation.
+The hero starts as a complete static composition with a minimum height (760px), rising to (780px) below (768px). Its body stays in normal flow to accommodate text. A sticky section (175svh) is enabled only at widths of at least (1024px), heights of at least (780px), without reduced motion, and when the stage actually fits below the navbar. Small, short, reduced-motion or overflowing layouts retain the static composition. Project crop animation has been removed; all diagram controls and captions remain available without motion.
 
 ## Elevation & Depth
 
 Depth comes mainly from tonal planes, thin rules and the diagonal seam. The hero keeps a cavity inset shadow and a soft lower-plane shadow; email suggestions and shared dialogs retain functional overlay shadows. Public glow utilities and the back-to-top shadow are suppressed. The sidecar carries the extracted shadow declarations.
 
-The hero opens its planes before the highlight sweeps through. Pointer response is damped and limited to the glint. Project apertures uncrop decorative artwork during scroll; text and fields never wait for an entrance. Controls mostly use (180ms) feedback. Route changes use the existing camera lift and blur (450ms), then clear filter and transform. Reduced motion removes those transitions and skips Lenis. There is no content opacity gate or fullscreen welcome overlay.
+The hero's opening phase precedes its light sweep. One optional WebGL layer renders a background pass and an optical pass for refraction, chromatic separation and a copper/cyan bevel; ordinary HTML carries all text. A static SVG poster is always present beneath it. The layer is eligible only on fine-pointer screens at least (1024px) wide, without reduced motion, Save-Data or a reported 2G connection. It renders on demand, pauses when hidden/offscreen, caps pixel ratio (1.5), and drops quality before hiding the canvas after sustained slow frames. Initialization, rendering and context-loss failures leave the poster and HTML intact.
+
+Diagram context selection and replay use short wire draws (400ms) and node feedback (350ms); the selected caption stays visible and is announced. General control feedback remains (180ms). Navigation, filter and diagram indicators use shared layout movement, as does the gallery preview. Route content lifts vertically (400ms), with no blur or opacity gate, while the shell persists. Scroll reset or history restoration waits for the destination to mount, then synchronizes smooth scrolling; the new heading receives focus. Reduced motion disables the hero enhancement, diagram draws and route transforms, and skips Lenis. There is no fullscreen welcome overlay.
+
+**The Readable Base Rule.** Keep HTML content, SVG diagrams and the hero poster complete when animation or WebGL is unavailable.
 
 ## Shapes
 
-Editorial sections and artwork remain rectangular, separated by fine rules. The recurring diagonal is (−8deg) in the hero and artwork highlight; project apertures begin with a sloped lower edge. Fields and submit buttons use a small radius (3px), RIVA messages (4px), general public dialogs (6px), and RIVA's panel (8px). Theme, menu, RIVA-launcher and back-to-top controls are circular. The mobile navigation panel is square-edged.
+Editorial sections, diagram figures and the gallery remain rectangular, separated by fine rules. The recurring diagonal stays in the hero seam, poster and fallback artwork. SVG figures use fine wires, crosshair nodes, context brackets, small plugin cells and dashed host frames; these describe documented processes. Fields and submit buttons use a small radius (3px), RIVA messages (4px), general public dialogs (6px), and RIVA's panel (8px). Theme, menu, RIVA-launcher and back-to-top controls are circular. The mobile navigation panel is square-edged.
 
 ## Components
 
-- **Actions:** Underlined text links have a minimum target height (44px) and a widening arrow gap on hover. The filled submit button uses metal on page background, minimum height (48px), a brightness hover and reduced disabled opacity. Focus is an offset metal outline (2px); hero links use a slightly wider offset.
-- **Navigation:** TembusMark plus the settings-driven name precede Indonesian route links. Active links use metal color and an underline. Theme and mobile menu buttons use circular (44px) targets. The mobile dialog provides large ruled links with active-state color and scrolls within the viewport below the navbar.
-- **Filters and tags:** Category buttons expose selected state through `aria-pressed`, metal text and an underline. Technology labels are a wrapping text list; they are not filled chips.
-- **Artwork and editorial rows:** Decorative diagrams present documented project processes or quantities; supplied project images replace the diagram and fall back to it on failure. Artwork is hidden from accessibility APIs, while adjacent titles, problem, approach, technologies and links remain ordinary HTML.
+- **Actions:** Underlined text links have a minimum target height (44px) and a widening arrow gap on hover. The filled submit button uses metal on page background, minimum height (48px), brightness feedback and reduced disabled opacity. Public button hover uses cyan. General focus remains an offset metal outline (2px); inputs and textareas use cyan with a closer offset (3px). Hero actions lead to the project gallery and CV download.
+- **Navigation:** TembusMark plus the settings-driven name precede Indonesian route links. Active desktop links use metal color and a shared moving rule below the label. Theme and mobile menu buttons use circular (44px) targets. The mobile dialog provides large ruled links with active-state color and scrolls within the viewport below the navbar.
+- **Filters and gallery:** Category buttons expose selected state through `aria-pressed`, metal text and a cyan indicator. The gallery's selected row gains a cyan top rule; selection works with pointer, focus and click. Technology labels remain text, rather than filled chips. Each row retains links and a native problem/approach disclosure.
+- **Process diagrams:** The four curated projects use selectable SVG illustrations with unique title/description IDs, pressed-state context buttons, a replay control and a visible live caption. xssscope exposes HTML, attribute and script contexts; Apexsions exposes game, bridge and operations; Portfolio 71 exposes access roles; CTF-Toolkit exposes four preparation areas. These are labeled process illustrations, not live scans or screenshots. Supplied project images still take precedence and fall back to the diagram on failure; generic fallback artwork remains decorative.
 - **Fields:** Transparent stroked inputs have visible labels, character counts, associated validation messages and a metal caret. Email suggestions form a bounded tonal overlay with selected/hover states. Turnstile, sending, error, retry and success feedback use Indonesian copy. Fields and long text stay still.
-- **RIVA and notifications:** A circular launcher opens a bottom-right, viewport-bounded dialog with a scrollable message log. At heights of (600px) or less, the dialog uses tighter padding and a small viewport inset. Bot messages use the surface tone; user messages use metal on page background. Notification surfaces inherit the same public scope. RIVA's public project descriptions use the shared presentation data.
+- **RIVA and notifications:** The persistent shell loads RIVA on first activation, with Indonesian loading/failure feedback, then preserves its conversation across public route changes. A circular launcher opens the bottom-right, viewport-bounded dialog with a scrollable message log. At heights of (600px) or less, the dialog uses tighter padding and a small viewport inset. Bot messages use the surface tone; user messages use metal on page background. Notification surfaces inherit the public scope. RIVA's project descriptions use the shared presentation data.
 
 ## Do's and Don'ts
 
@@ -189,7 +213,7 @@ Editorial sections and artwork remain rectangular, separated by fine rules. The 
 - **Do** keep every public route and overlay in the Celah scope, with both themes and visible keyboard focus.
 - **Do** keep Indonesian interface copy, the Cybersecurity Engineer role, and the official TembusMark geometry.
 - **Do** preserve canonical project facts, names, IDs, technical terms, quantities and links from `src/data/projects.ts`; use `projectCopy.id.ts` for presentation text and preserve future CMS edits.
-- **Do** keep reading content visible on first render and provide complete static compositions for mobile, short screens and reduced motion.
+- **Do** keep reading content visible on first render, preserve accessible diagram controls and captions, and provide complete HTML/SVG compositions for mobile, short screens, reduced motion and failed optional enhancements.
 
 ### Don't:
 

@@ -134,3 +134,14 @@ test("all 13 route patterns remain registered; unknown case study has no fabrica
   const unknown = await render("/projects/not-a-real-project");
   assert.doesNotMatch(unknown, /class="study-header"/);
 });
+
+test("project explanations render as labelled figures and native selection controls", async () => {
+ for(const id of ["xssscope","apexsions","portfolio71","ctf-toolkit"]){
+  const html=await render(`/projects/curated-${id}`);
+  assert.match(html,/<figure class="technical-figure/);
+  assert.match(html,/Ilustrasi proses/);
+  assert.match(html,/aria-pressed="true"/);
+  assert.match(html,/aria-live="polite"/);
+  assert.doesNotMatch(html,/<canvas/);
+ }
+});
