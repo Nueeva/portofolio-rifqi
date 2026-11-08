@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ShieldCheck, CheckCircle2 } from "lucide-react";
+import { usePublicDesign } from "@/components/public/PublicDesignContext";
 
 const TURNSTILE_SITE_KEY = "0x4AAAAAACLFADmrVmL9XOiI";
 const TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
@@ -38,6 +39,7 @@ const getTurnstile = (): TurnstileInstance | undefined => {
 
 export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptchaProps>(
   ({ onVerify, onExpire, onError, theme = "dark", className }, ref) => {
+    const { isPublic } = usePublicDesign();
     const [isLoading, setIsLoading] = useState(true);
     const [isVerified, setIsVerified] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -75,6 +77,20 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
     useEffect(() => {
       let cancelled = false;
       let pollInterval: ReturnType<typeof setInterval>;
+      const loadTimeout = isPublic ? setTimeout(() => {
+        if (!cancelled && !getTurnstile()) {
+          setIsLoading(false);
+          const script = document.querySelector<HTMLScriptElement>('script[src*="turnstile"]');
+          if (script) script.dataset.loadState = "error";
+          onErrorRef.current?.();
+        }
+      }, 10_000) : undefined;
+      if (isPublic) {
+        setIsLoading(true);
+        setIsVerified(false);
+        const failedScript = document.querySelector<HTMLScriptElement>('script[src*="turnstile"][data-load-state="error"]');
+        failedScript?.remove();
+      }
 
       const renderWidget = () => {
         const turnstile = getTurnstile();
@@ -92,14 +108,17 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
           widgetIdRef.current = turnstile.render(containerRef.current, {
             sitekey: TURNSTILE_SITE_KEY,
             callback: (token: string) => {
+              if (cancelled) return;
               setIsVerified(true);
               onVerifyRef.current(token);
             },
             "expired-callback": () => {
+              if (cancelled) return;
               setIsVerified(false);
               onExpireRef.current?.();
             },
             "error-callback": () => {
+              if (cancelled) return;
               setIsVerified(false);
               onErrorRef.current?.();
             },
@@ -134,6 +153,11 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
           if (attempts >= 100) {
             clearInterval(pollInterval);
             setIsLoading(false);
+            if (isPublic) {
+              const script = document.querySelector<HTMLScriptElement>('script[src*="turnstile"]');
+              if (script && !getTurnstile()) script.dataset.loadState = "error";
+              onErrorRef.current?.();
+            }
           }
         }, 100);
       };
@@ -155,7 +179,11 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
         };
         script.onerror = () => {
           console.error("Failed to load Turnstile script");
-          if (!cancelled) setIsLoading(false);
+          if (isPublic) script.dataset.loadState = "error";
+          if (!cancelled) {
+            setIsLoading(false);
+            if (isPublic) onErrorRef.current?.();
+          }
         };
         document.head.appendChild(script);
       }
@@ -163,6 +191,7 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
       // Cleanup on unmount
       return () => {
         cancelled = true;
+        if (loadTimeout) clearTimeout(loadTimeout);
         if (pollInterval) clearInterval(pollInterval);
         
         const turnstile = getTurnstile();
@@ -176,7 +205,7 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
           }
         }
       };
-    }, [theme]); // Only re-run if theme changes
+    }, [theme, isPublic]);
 
     return (
       <div className={className}>
@@ -192,7 +221,7 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
         
         {/* Success overlay */}
         {isVerified && !isLoading && (
-          <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30 animate-fade-in">
+          <div data-captcha="verified" className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30 animate-fade-in">
             <div className="relative">
               <CheckCircle2 className="h-6 w-6 text-green-500 animate-scale-in" />
               <div className="absolute inset-0 h-6 w-6 rounded-full bg-green-500/20 animate-ping" />

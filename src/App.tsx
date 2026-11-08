@@ -1,12 +1,11 @@
 import { useState, useEffect, lazy, Suspense } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, StaticRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AnimatePresence, MotionConfig } from "motion/react";
 
+import { PublicDesignBoundary } from "@/components/public/PublicDesignBoundary";
 import { PageTransition } from "@/components/PageTransition";
 import { PageTransitionReadyContext } from "@/components/PageTransitionReadyContext";
 import { routeImporters, prefetchRoute, prefetchPublicRoutes } from "@/lib/routePrefetch";
@@ -52,6 +51,7 @@ function AnimatedRoutes() {
           for a beat beats flashing a full-screen spinner — the curtain
           exit finishes and the new page wipes in the moment it is ready. */}
       <Suspense fallback={null} key={location.pathname}>
+        <PublicDesignBoundary pathname={location.pathname}>
         <Routes location={location} key={location.pathname}>
           <Route path="/" element={<PageTransition><Index /></PageTransition>} />
           <Route path="/about" element={<PageTransition><About /></PageTransition>} />
@@ -67,6 +67,7 @@ function AnimatedRoutes() {
           <Route path="/429" element={<PageTransition><TooManyRequests /></PageTransition>} />
           <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
         </Routes>
+        </PublicDesignBoundary>
       </Suspense>
     </AnimatePresence>
   );
@@ -129,8 +130,7 @@ const App = ({ ssrPath }: { ssrPath?: string } = {}) => {
               every motion animation in the tree (motion/react reads this
               context instead of its own media query). */}
           <MotionConfig reducedMotion="user">
-          <Toaster />
-          <Sonner />
+
 
           <PageTransitionReadyContext.Provider value={transitionReady}>
           {ssrPath !== undefined ? (

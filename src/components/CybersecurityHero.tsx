@@ -2,8 +2,8 @@ import { useEffect, useRef, type PointerEvent } from "react";
 import { Link } from "react-router-dom";
 import { motion, useMotionValue, useMotionValueEvent, useScroll, useSpring, useTransform } from "motion/react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
-import { TembusMark } from "./TembusMark";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { presentText } from "@/data/projectCopy.id";
 import "./cybersecurity-hero.css";
 
 /** Celah: one scroll timeline, separate phases for material and light.
@@ -23,7 +23,7 @@ export function CybersecurityHero() {
     if (scrollEnabled.current) progress.set(value);
   });
   useEffect(() => {
-    const media = window.matchMedia("(min-width: 701px) and (min-height: 751px) and (prefers-reduced-motion: no-preference)");
+    const media = window.matchMedia("(min-width: 768px) and (min-height: 780px) and (prefers-reduced-motion: no-preference)");
     const sync = () => {
       scrollEnabled.current = media.matches;
       progress.set(media.matches ? scrollYProgress.get() : 0);
@@ -47,7 +47,6 @@ export function CybersecurityHero() {
   const reflectionY = useTransform(progress, [0, 1], [-4, 12]);
   const pointerX = useSpring(0, { stiffness: 90, damping: 28 });
   const pointerY = useSpring(0, { stiffness: 90, damping: 28 });
-  const name = get("hero_name", "Rifqi Ariansyah");
 
   function onPointerMove(event: PointerEvent<HTMLElement>) {
     if (event.pointerType !== "mouse" || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -62,8 +61,6 @@ export function CybersecurityHero() {
         onPointerLeave={() => { pointerX.set(0); pointerY.set(0); }}>
         <div className="cyber-upper" aria-hidden="true" />
         <motion.div className="cyber-lower" aria-hidden="true" style={{ y: lowerY }} />
-        <div className="cyber-signature"><TembusMark className="cyber-mark" /><span>{name}</span></div>
-
         <motion.div className="cyber-heading" style={{ y: titleY }}>
           <h1 id="cyber-title"><span>Cybersecurity</span><motion.em style={{ x: engineerX }}>Engineer.</motion.em></h1>
         </motion.div>
@@ -71,7 +68,7 @@ export function CybersecurityHero() {
         <div className="cyber-seam-frame" aria-hidden="true">
           <motion.div className="cyber-cavity" style={{ clipPath: aperture }}>
             <motion.div className="cyber-reflection" style={{ y: reflectionY }}><span>Cybersecurity</span><em>Engineer.</em></motion.div>
-            <div className="cyber-seam-copy"><span>xssscope</span><span>Context analysis <ArrowRight /> verification</span></div>
+            <div className="cyber-seam-copy"><span>xssscope</span><span>Konteks refleksi <ArrowRight /> verifikasi</span></div>
           </motion.div>
           <motion.div className="cyber-lip cyber-lip-top" style={{ y: upperLip }}>
             <motion.div className="cyber-sweep" style={{ x: sweepX }} />
@@ -82,8 +79,8 @@ export function CybersecurityHero() {
 
         <div className="cyber-body">
           <div className="cyber-description">
-            <p>{get("hero_headline", "Menguji keamanan aplikasi.")}</p>
-            <p>{get("hero_description", "Membangun tooling dan memperbaiki celah pada sistem produksi.")}</p>
+            <p>{presentText(get("hero_headline", "Menguji keamanan aplikasi."))}</p>
+            <p>{presentText(get("hero_description", "Membangun tooling dan memperbaiki celah pada sistem produksi."))}</p>
           </div>
           <div className="cyber-project">
             <Link to="/projects/curated-xssscope"><span>Telusuri xssscope</span><span className="cyber-project-arrow"><ArrowUpRight /></span></Link>

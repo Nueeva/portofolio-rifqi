@@ -13,11 +13,16 @@ import { RivaAgent } from "@/components/RivaAgent";
 import { CustomCursor } from "@/components/CustomCursor";
 
 
+import { usePublicDesign } from "@/components/public/PublicDesignContext";
+import { PublicNavbar, PublicFooter } from "@/components/public/PublicChrome";
+import { PublicRiva } from "@/components/public/PublicRiva";
+
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: LayoutProps) {
+  const { isPublic } = usePublicDesign();
   const { scrollY } = useScroll();
 
   const [showBackToTop, setShowBackToTop] = useState(false);
@@ -47,32 +52,32 @@ export function Layout({ children }: LayoutProps) {
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100] focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-primary-foreground"
       >
-        Skip to main content
+        {isPublic ? "Lewati ke konten utama" : "Skip to main content"}
       </a>
-      <Navbar />
+      {isPublic ? <PublicNavbar /> : <Navbar />}
       <main id="main-content" className="flex-1 pt-16">{children}</main>
-      <Footer />
+      {isPublic ? <PublicFooter /> : <Footer />}
 
       {/* Back to top — appears after scrolling past ~600px */}
       <AnimatePresence>
         {showBackToTop && (
           <motion.button
             type="button"
-            aria-label="Back to top"
-            initial={{ opacity: 0, scale: 0.8, y: 12 }}
+            aria-label={isPublic ? "Kembali ke atas" : "Back to top"}
+            initial={isPublic ? { y: 8 } : { opacity: 0, scale: 0.8, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.8, y: 12 }}
-            whileHover={{ scale: 1.08, y: -2 }}
-            whileTap={{ scale: 0.94 }}
-            transition={{ type: "spring", stiffness: 400, damping: 22 }}
+            exit={isPublic ? { y: 8 } : { opacity: 0, scale: 0.8, y: 12 }}
+            whileHover={isPublic ? { y: -2 } : { scale: 1.08, y: -2 }}
+            whileTap={{ scale: isPublic ? 1 : 0.94 }}
+            transition={isPublic ? { duration: 0.18, ease: "easeOut" } : { type: "spring", stiffness: 400, damping: 22 }}
             onClick={() => window.scrollTo({ top: 0, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" })}
-            className="fixed bottom-24 right-6 z-[60] flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25"
+            className={`${isPublic ? "public-back-top " : ""}fixed bottom-24 right-6 z-[60] flex h-11 w-11 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/25`}
           >
             <ArrowUp className="h-5 w-5" />
           </motion.button>
         )}
       </AnimatePresence>
-      <RivaAgent />
+      {isPublic ? <PublicRiva /> : <RivaAgent />}
       <CustomCursor />
 
     </div>
