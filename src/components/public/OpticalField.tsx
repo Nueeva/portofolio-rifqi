@@ -3,9 +3,9 @@ import type { MotionValue } from "motion/react";
 import { Color, Mesh, OrthographicCamera, PlaneGeometry, Scene, ShaderMaterial, Vector2, WebGLRenderer, WebGLRenderTarget } from "three";
 const vertex = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`;
 const background = `varying vec2 vUv; uniform vec3 base;uniform vec3 cool;uniform vec3 violet;
-void main(){vec2 p=vUv;float field=exp(-length((p-vec2(.74,.48))*vec2(1.5,2.8))*3.);float band=.5+.5*sin(p.x*5.+p.y*3.);gl_FragColor=vec4(mix(base,mix(cool,violet,band),field*.24),1.);}`.replace(';#include', ';\n#include');
+void main(){vec2 p=vUv;float field=exp(-length((p-vec2(.74,.48))*vec2(1.5,2.8))*3.);float band=.5+.5*sin(p.x*15.+p.y*9.);gl_FragColor=vec4(mix(base,mix(cool,violet,band),field*.24),1.);}`.replace(';#include', ';\n#include');
 const optical = `varying vec2 vUv;uniform sampler2D source;uniform float progress;uniform vec2 pointer;uniform vec2 resolution;uniform vec3 copper;uniform vec3 cool;
-void main(){vec2 p=vUv;float gap=.025+smoothstep(0.,.35,progress)*.07;float seam=p.y-.35-p.x*.19;float edge=abs(seam)-gap;float bevel=exp(-abs(edge)*180.);vec2 offset=vec2(bevel*.012+pointer.x*.001,bevel*.008);vec3 col;col.r=texture2D(source,p+offset*1.7).r;col.g=texture2D(source,p+offset).g;col.b=texture2D(source,p+offset*.3).b;float cavity=1.-smoothstep(-.003,.003,edge);col*=1.-cavity*.72;float sweep=smoothstep(.35,.75,progress);float shine=exp(-pow((p.x-(sweep*1.5-.25))*.9,2.)*22.);col+=bevel*mix(cool,copper,p.x)*(.26+shine*.8);col+=exp(-abs(edge)*35.)*copper*.035;gl_FragColor=vec4(col,1.);\n#include <colorspace_fragment>\n}`;
+void main(){vec2 p=vUv;float gap=.025+smoothstep(0.,.35,progress)*.07;float seam=p.y-.35-p.x*.19;float edge=abs(seam)-gap;float bevel=exp(-abs(edge)*180.);vec2 offset=vec2(bevel*.012+pointer.x*.028,bevel*.018+pointer.y*.012);vec3 col;col.r=texture2D(source,p+offset*1.7).r;col.g=texture2D(source,p+offset).g;col.b=texture2D(source,p+offset*.3).b;float cavity=1.-smoothstep(-.003,.003,edge);col*=1.-cavity*.72;float sweep=smoothstep(.35,.75,progress);float shine=exp(-pow((p.x-(sweep*1.5-.25))*.9,2.)*22.);col+=bevel*mix(cool,copper,p.x)*(.26+shine*.8);col+=exp(-abs(edge)*35.)*copper*.035;gl_FragColor=vec4(col,1.);\n#include <colorspace_fragment>\n}`;
 /** Decorative, render-on-demand optical layer. Poster and DOM remain complete on failure. */
 export default function OpticalField({ progress }: {
     progress: MotionValue<number>;
@@ -45,7 +45,7 @@ export default function OpticalField({ progress }: {
                 renderer.setRenderTarget(target);
                 renderer.render(scene, camera);
                 renderer.setRenderTarget(null);
-                renderer.render(screen, camera);
+                renderer.render(screen, camera);window.dispatchEvent(new Event("celah:theme-rendered"));
             }
             catch {
                 fallBack();

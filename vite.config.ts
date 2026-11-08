@@ -9,7 +9,9 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    proxy: {"/api": "http://127.0.0.1:8788"},
   },
+  preview: {proxy: {"/api": "http://127.0.0.1:8788"}},
   plugins: [
     react(),
     mode === "development" && componentTagger(),

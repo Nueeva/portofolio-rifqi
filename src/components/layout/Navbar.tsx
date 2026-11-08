@@ -5,7 +5,7 @@ import { TembusMark } from "@/components/TembusMark";
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/api/client";
 import {
   AlertDialog,
   AlertDialogAction,

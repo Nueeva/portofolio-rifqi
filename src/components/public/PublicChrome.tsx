@@ -1,3 +1,4 @@
+import { changePublicTheme } from "@/lib/themeTransition";
 import * as m from "motion/react-m";
 import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
@@ -13,7 +14,7 @@ export function PublicThemeSwitch() {
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
     const dark = mounted && resolvedTheme === "dark";
-    return <button className="public-theme-switch" type="button" disabled={!mounted} aria-label={mounted ? `Gunakan tema ${dark ? "terang" : "gelap"}` : "Ganti tema"} onClick={() => setTheme(dark ? "light" : "dark")}>
+    return <button className="public-theme-switch" type="button" disabled={!mounted} aria-label={mounted ? `Gunakan tema ${dark ? "terang" : "gelap"}` : "Ganti tema"} onClick={() => void changePublicTheme(dark ? "light" : "dark",setTheme)}>
     {dark ? <Sun aria-hidden="true"/> : <Moon aria-hidden="true"/>}
   </button>;
 }
@@ -25,7 +26,7 @@ export function PublicNavbar() {
     useEffect(() => {
         let active = true;
         let unsubscribe: (() => void) | undefined;
-        void import("@/integrations/supabase/client").then(({ supabase }) => {
+        void import("@/integrations/api/client").then(({ supabase }) => {
             if (!active)
                 return;
             const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { if (active)
@@ -41,7 +42,7 @@ export function PublicNavbar() {
     <AlertDialog>
       <AlertDialogTrigger asChild><button type="button">Keluar</button></AlertDialogTrigger>
       <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Keluar dari akun?</AlertDialogTitle><AlertDialogDescription>Kamu perlu masuk kembali untuk mengakses admin.</AlertDialogDescription></AlertDialogHeader>
-        <AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction onClick={async () => { const { supabase } = await import("@/integrations/supabase/client"); await supabase.auth.signOut(); setOpen(false); }}>Keluar</AlertDialogAction></AlertDialogFooter>
+        <AlertDialogFooter><AlertDialogCancel>Batal</AlertDialogCancel><AlertDialogAction onClick={async () => { const { supabase } = await import("@/integrations/api/client"); await supabase.auth.signOut(); setOpen(false); }}>Keluar</AlertDialogAction></AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   </>;

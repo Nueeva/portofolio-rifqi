@@ -28,3 +28,7 @@ dist-server
 *.njsproj
 *.sln
 *.sw?
+
+server/.env
+server/node_modules/
+server/uploads/

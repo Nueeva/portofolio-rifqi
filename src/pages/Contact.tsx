@@ -7,7 +7,7 @@ import { TurnstileCaptcha, type TurnstileCaptchaRef } from "@/components/Turnsti
 import { useToast } from "@/hooks/use-toast";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/api/client";
 import { contactSchema, prefillContact, sendContactMessage, suggestEmails, type ContactData } from "@/lib/contactForm";
 const emptyForm: ContactData = { name: "", email: "", message: "" };
 type CaptchaStatus = "unverified" | "verified" | "expired" | "error";

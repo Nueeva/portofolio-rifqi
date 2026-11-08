@@ -5,7 +5,7 @@ function useSettingsQuery() {
     const { pathname } = useLocation();
     const query = useQuery({ queryKey: ["public-site-settings"], staleTime: 60000,
         queryFn: async () => {
-            const { supabase } = await import("@/integrations/supabase/client");
+            const { supabase } = await import("@/integrations/api/client");
             const { data, error } = await supabase.from("site_settings").select("setting_key, setting_value");
             if (error)
                 throw error;

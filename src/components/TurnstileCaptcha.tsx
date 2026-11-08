@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ShieldCheck, CheckCircle2 } from "lucide-react";
 import { usePublicDesign } from "@/components/public/PublicDesignContext";
 
-const TURNSTILE_SITE_KEY = "0x4AAAAAACLFADmrVmL9XOiI";
+
 const TURNSTILE_SCRIPT_URL = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
 
 interface TurnstileInstance {
@@ -22,6 +22,7 @@ interface TurnstileInstance {
 }
 
 interface TurnstileCaptchaProps {
+  siteKey?: string;
   onVerify: (token: string) => void;
   onExpire?: () => void;
   onError?: () => void;
@@ -37,8 +38,8 @@ const getTurnstile = (): TurnstileInstance | undefined => {
   return (window as unknown as { turnstile?: TurnstileInstance }).turnstile;
 };
 
-export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptchaProps>(
-  ({ onVerify, onExpire, onError, theme = "dark", className }, ref) => {
+const TurnstileWidget = forwardRef<TurnstileCaptchaRef, TurnstileCaptchaProps>(
+  ({ onVerify, onExpire, onError, theme = "dark", className, siteKey }, ref) => {
     const { isPublic } = usePublicDesign();
     const [isLoading, setIsLoading] = useState(true);
     const [isVerified, setIsVerified] = useState(false);
@@ -106,7 +107,7 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
 
         try {
           widgetIdRef.current = turnstile.render(containerRef.current, {
-            sitekey: TURNSTILE_SITE_KEY,
+            sitekey: siteKey!,
             callback: (token: string) => {
               if (cancelled) return;
               setIsVerified(true);
@@ -205,7 +206,7 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
           }
         }
       };
-    }, [theme, isPublic]);
+    }, [theme, isPublic, siteKey]);
 
     return (
       <div className={className}>
@@ -241,4 +242,16 @@ export const TurnstileCaptcha = forwardRef<TurnstileCaptchaRef, TurnstileCaptcha
   }
 );
 
-TurnstileCaptcha.displayName = "TurnstileCaptcha";
+TurnstileWidget.displayName = "TurnstileCaptcha";
+
+export const TurnstileCaptcha=forwardRef<TurnstileCaptchaRef,TurnstileCaptchaProps>((props,ref)=>{
+ const widget=useRef<TurnstileCaptchaRef>(null);
+ const [config,setConfig]=useState<{captchaEnabled:boolean;captchaSiteKey:string|null}|null>(null);const [failed,setFailed]=useState(false);const latest=useRef(props.onVerify);latest.current=props.onVerify;
+ useEffect(()=>{const controller=new AbortController();void fetch("/api/config",{signal:controller.signal}).then(response=>{if(!response.ok)throw Error();return response.json();}).then(setConfig).catch(()=>{if(!controller.signal.aborted)setFailed(true);});return()=>controller.abort();},[]);
+ useEffect(()=>{if(config&&!config.captchaEnabled)latest.current("rate-limit-only");},[config]);
+ useImperativeHandle(ref,()=>({reset:()=>{if(config?.captchaEnabled)widget.current?.reset();else if(config)latest.current("rate-limit-only");}}),[config]);
+ if(failed)return <p role="alert">Layanan keamanan belum terhubung. Muat ulang untuk mencoba lagi.</p>;
+ if(!config)return <p role="status">Menghubungkan layanan keamanan…</p>;
+ if(!config.captchaEnabled)return <p className="text-sm" role="status">Pembatasan percobaan aktif. CAPTCHA belum diaktifkan.</p>;
+ return <TurnstileWidget {...props} siteKey={config.captchaSiteKey??undefined} ref={widget}/>;
+});

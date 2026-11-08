@@ -1,3 +1,4 @@
+import { usePortfolioContent } from "@/hooks/usePortfolioContent";
 import { useEffect, useRef, useState } from "react";
 import { Bot, Send } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
@@ -9,6 +10,7 @@ interface Message {
 export function PublicRiva({ initiallyOpen = false }: {
     initiallyOpen?: boolean;
 }) {
+    const {projects}=usePortfolioContent();
     const [open, setOpen] = useState(initiallyOpen);
     const [input, setInput] = useState("");
     const [messages, setMessages] = useState<Message[]>([{ from: "bot", text: rivaGreeting }]);
@@ -22,7 +24,7 @@ export function PublicRiva({ initiallyOpen = false }: {
         if (!text)
             return;
         setInput("");
-        setMessages(current => [...current, { from: "user", text }, { from: "bot", text: publicRivaReply(text) }]);
+        setMessages(current => [...current, { from: "user", text }, { from: "bot", text: publicRivaReply(text,projects) }]);
     }
     return <Dialog open={open} onOpenChange={setOpen}>
     <DialogTrigger asChild><button type="button" className="public-riva-launcher" aria-label="Buka RIVA, asisten portofolio"><Bot aria-hidden="true"/></button></DialogTrigger>

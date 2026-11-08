@@ -1,5 +1,6 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/api/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -63,6 +64,7 @@ interface CertForm {
 
 export const CertificationsManager = () => {
   const { toast } = useToast();
+  const queryCache = useQueryClient();
   const [certifications, setCertifications] = useState<Certification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -86,6 +88,7 @@ export const CertificationsManager = () => {
   }, []);
 
   const fetchCertifications = async () => {
+    void queryCache.invalidateQueries({queryKey:["public-certifications"]});
     try {
       const { data, error } = await supabase
         .from("certifications")

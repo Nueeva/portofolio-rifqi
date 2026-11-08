@@ -9,9 +9,11 @@ let localized;
 let contact;
 let riva;
 let render;
+let api;
 
 before(async () => {
-  vite = await createServer({ server: { middlewareMode: true }, logLevel: "error" });
+  vite = await createServer({ server: { middlewareMode: true, hmr: false, ws: false }, logLevel: "error" });
+  ({ api } = await vite.ssrLoadModule("/src/integrations/api/client.ts"));
   projects = await vite.ssrLoadModule("/src/data/projects.ts");
   localized = await vite.ssrLoadModule("/src/data/projectCopy.id.ts");
   contact = await vite.ssrLoadModule("/src/lib/contactForm.ts");
@@ -144,4 +146,92 @@ test("project explanations render as labelled figures and native selection contr
   assert.match(html,/aria-live="polite"/);
   assert.doesNotMatch(html,/<canvas/);
  }
+});
+
+test("editorial metadata supports future projects, stable URLs, explicit features and ordering", async()=>{
+ const {applyEditorial,featuredProjects}=await vite.ssrLoadModule("/src/data/editorial.ts");
+ const source={...projects.curatedProjects[0],id:"a19ac108-063c-4653-b2f8-4ff009026bbc",title:"New owner project",caseStudy:undefined};
+ const plain=applyEditorial([source],[])[0];assert.deepEqual(plain.caseStudy.outcomes,[]);assert.equal(plain.caseStudy.overview,source.solution);
+ const entry={project_key:source.id,summary:"Owner supplied summary",featured:true,sort_order:1,role:"Engineer",period:"2026",overview:"Actual context",challenges:["One problem"],approach:["One approach"],outcomes:["One documented result"],lessons:""};
+ const projected=applyEditorial([source],[entry]);assert.equal(projected[0].id,source.id);assert.equal(projected[0].solution,entry.summary);assert.equal(projected[0].caseStudy.overview,entry.overview);assert.equal(source.caseStudy,undefined);
+ assert.deepEqual(featuredProjects(projected,[{...entry,featured:false}]),[]);assert.equal(featuredProjects(projected,[entry])[0].id,source.id);
+ assert.deepEqual(featuredProjects([], [entry]),[]);
+});
+
+test("summary-only edits preserve a seeded curated study and RIVA aliases",async()=>{
+ const {applyEditorial}=await vite.ssrLoadModule("/src/data/editorial.ts");
+ const source=localized.getPublicProject("curated-apexsions");
+ const entry={project_key:source.id,summary:"Ringkasan baru pemilik",featured:true,sort_order:0,role:"",period:"",overview:"",challenges:[],approach:[],outcomes:[],lessons:""};
+ const [view]=applyEditorial([source],[entry]);assert.equal(view.solution,entry.summary);assert.deepEqual(view.caseStudy,source.caseStudy);
+ assert.match(riva.publicRivaReply("minecraft",[view]),/Ringkasan baru pemilik/);
+});
+
+test("owned catalog respects renames, edits and deletions while retaining canonical studies", async () => {
+ const {resolveProjectCatalog,applyEditorial}=await vite.ssrLoadModule("/src/data/editorial.ts");
+ const original=projects.curatedProjects[0];
+ const edited={...original,title:"Renamed by owner",problem:"Owner supplied problem",solution:"Owner supplied solution"};
+ delete edited.caseStudy;
+ const resolved=resolveProjectCatalog([edited,edited]);
+ assert.equal(resolved.length,1);assert.equal(resolved[0].id,original.id);
+ assert.equal(resolved[0].title,edited.title);assert.equal(resolved[0].problem,edited.problem);assert.equal(resolved[0].solution,edited.solution);
+ assert.deepEqual(resolved[0].caseStudy,localized.getPublicProject(original.id).caseStudy);
+ assert.deepEqual(applyEditorial(resolved,[])[0].caseStudy,resolved[0].caseStudy);
+ assert.deepEqual(resolveProjectCatalog([]),[]);
+ assert.equal(resolveProjectCatalog().length,projects.curatedProjects.length);
+ assert.equal(resolveProjectCatalog([original])[0].problem,localized.getPublicProject(original.id).problem);
+});
+
+test("CMS query keeps filters, ordering and credentials on the owned API", async (t) => {
+  const calls = [];
+  t.mock.method(globalThis, "fetch", async (url, options) => {
+    calls.push({ url, options });
+    return Response.json({ data: [{ id: "owner-project" }], error: null });
+  });
+  const result = await api.from("projects").select("*").eq("category", "tools")
+    .order("created_at", { ascending: false }).limit(20);
+  assert.deepEqual(result.data, [{ id: "owner-project" }]);
+  assert.equal(calls[0].url, "/api/data/projects");
+  assert.equal(calls[0].options.credentials, "same-origin");
+  assert.deepEqual(JSON.parse(calls[0].options.body), {
+    operation: "select", filters: [{ field: "category", operator: "eq", value: "tools" }],
+    order: { field: "created_at", ascending: false }, limit: 20,
+  });
+});
+
+test("rate-limit and unavailable-service failures remain failures for forms", async (t) => {
+  t.mock.method(globalThis, "fetch", async () => Response.json(
+    { message: "Tunggu sebelum mencoba lagi." }, { status: 429 },
+  ));
+  assert.equal((await api.auth.signInWithPassword({ email: "a@example.com", password: "password" })).error.message,
+    "Tunggu sebelum mencoba lagi.");
+  globalThis.fetch = async () => { throw new Error("offline"); };
+  assert.equal((await api.functions.invoke("send-contact-email", { body: {} })).data, null);
+});
+
+test("only a successful login/logout announces an auth-state change", async (t) => {
+  const session = { user: { id: "admin-id", email: "owner@example.com" } };
+  const events = [];
+  const { data: { subscription } } = api.auth.onAuthStateChange((event, value) => events.push([event, value]));
+  t.mock.method(globalThis, "fetch", async url => Response.json({
+    data: url.endsWith("login") ? { session, user: session.user } : null, error: null,
+  }));
+  try {
+    await api.auth.signInWithPassword({ email: session.user.email, password: "password" });
+    await api.auth.signOut();
+    globalThis.fetch = async () => Response.json({ error: { message: "Sesi tidak tersedia." } }, { status: 503 });
+    await api.auth.signOut();
+    assert.deepEqual(events, [["SIGNED_IN", session], ["SIGNED_OUT", null]]);
+  } finally { subscription.unsubscribe(); }
+});
+
+test("upload uses multipart without JSON headers and returns a same-origin media path", async (t) => {
+  t.mock.method(globalThis, "fetch", async (url, options) => {
+    assert.equal(url, "/api/storage/resume/upload?path=owner%2Fcv.pdf");
+    assert.ok(options.body instanceof FormData);
+    assert.deepEqual(options.headers, {});
+    return Response.json({ data: { path: "owner/cv.pdf" }, error: null });
+  });
+  const bucket = api.storage.from("resume");
+  assert.equal((await bucket.upload("owner/cv.pdf", new Blob(["%PDF-1.7"], { type: "application/pdf" }))).error, null);
+  assert.equal(bucket.getPublicUrl("owner/cv.pdf").data.publicUrl, "/api/storage/resume/owner/cv.pdf");
 });

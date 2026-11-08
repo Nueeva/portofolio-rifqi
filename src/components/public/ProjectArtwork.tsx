@@ -40,7 +40,7 @@ export function ProjectActions({ project, showStudy = true }: {
     showStudy?: boolean;
 }) {
     return <div className="project-actions">
-    {showStudy && caseStudyIds.has(project.id) && <Link to={`/projects/${project.id}`}>Baca studi kasus <ArrowUpRight aria-hidden="true"/></Link>}
+    {showStudy && (caseStudyIds.has(project.id) || !!(project as import("@/data/projects").CuratedProject).caseStudy) && <Link to={`/projects/${project.id}`}>Baca studi kasus <ArrowUpRight aria-hidden="true"/></Link>}
     {project.github_url && <a href={project.github_url} target="_blank" rel="noopener noreferrer" aria-label={`Kode ${project.title} di GitHub`}><Github aria-hidden="true"/>Kode</a>}
     {project.demo_url && <a href={project.demo_url} target="_blank" rel="noopener noreferrer" aria-label={`Buka situs ${project.title}`}><ExternalLink aria-hidden="true"/>Situs proyek</a>}
   </div>;

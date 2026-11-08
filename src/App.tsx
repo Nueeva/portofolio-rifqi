@@ -28,11 +28,11 @@ const ServiceUnavailable = lazy(routeImporters.serviceUnavailable);
 const TooManyRequests = lazy(routeImporters.tooManyRequests);
 // Cache query results briefly: back-and-forth navigation re-renders from
 // cache instantly instead of refetching (and flashing) on every visit.
-const queryClient = new QueryClient({
+const createQueryClient = () => new QueryClient({
     defaultOptions: {
         queries: {
             staleTime: 60000,
-            gcTime: 5 * 60000,
+            gcTime: typeof window === "undefined" ? Infinity : 5 * 60000,
             refetchOnWindowFocus: false,
         },
     },
@@ -41,11 +41,7 @@ function AnimatedRoutes() {
     const location = useLocation();
     const legacy = /^\/(admin|auth)\/?$/.test(location.pathname);
     const content = (<AnimatePresence mode="wait">
-      {/* No loading fallback on purpose: route chunks are prefetched
-            (idle + link intent), so Suspense resolving is instant in
-            practice. If a chunk ever is still in flight, rendering nothing
-            for a beat beats flashing a full-screen spinner — the curtain
-            exit finishes and the new page wipes in the moment it is ready. */}
+      {/* Keep the shell visible while a prefetched route chunk resolves. */}
       <Suspense fallback={<div className="public-container public-page" role="status">Memuat halaman…</div>} key={location.pathname}>
         <RouteFailureBoundary key={location.pathname}>
         <Routes location={location} key={location.pathname}>
@@ -71,6 +67,8 @@ function AnimatedRoutes() {
 const App = ({ ssrPath }: {
     ssrPath?: string;
 } = {}) => {
+    // Each SSR request owns its cache; browser navigation retains this instance.
+    const [queryClient] = useState(createQueryClient);
     // Flipped in an effect after mount (never on the server, never on
     // the first render): from then on, client-side navigations animate
     // through the PageTransition camera lift, while the first page — server

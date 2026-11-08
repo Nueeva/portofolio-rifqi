@@ -1,10 +1,12 @@
-import { useEffect, useState, type ReactNode } from "react";
-import { useReducedMotion } from "motion/react";
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
+import { MotionConfig } from "motion/react";
+const query = "(prefers-reduced-motion: reduce)";
+const subscribe = (notify: () => void) => { const media = matchMedia(query); media.addEventListener("change", notify); return () => media.removeEventListener("change", notify); };
 import { MotionPolicyContext as Context } from "./motionPolicyContext";
 export function MotionPolicyProvider({ children }: {
     children: ReactNode;
 }) {
-    const reduce = useReducedMotion();
+    const reduce = useSyncExternalStore(subscribe, () => matchMedia(query).matches, () => true);
     const [eligible, setEligible] = useState(false);
     useEffect(() => {
         const media = matchMedia("(min-width: 1024px) and (pointer: fine)");
@@ -20,5 +22,5 @@ export function MotionPolicyProvider({ children }: {
         connection?.addEventListener("change", sync);
         return () => { media.removeEventListener("change", sync); connection?.removeEventListener("change", sync); };
     }, []);
-    return <Context.Provider value={{ reduced: reduce !== false, allowWebGL: eligible && reduce === false }}>{children}</Context.Provider>;
+    return <Context.Provider value={{ reduced: reduce !== false, allowWebGL: eligible && reduce === false }}><MotionConfig reducedMotion={reduce ? "always" : "never"}>{children}</MotionConfig></Context.Provider>;
 }

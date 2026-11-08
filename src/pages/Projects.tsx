@@ -1,29 +1,21 @@
+import { usePortfolioContent } from "@/hooks/usePortfolioContent";
 import * as m from "motion/react-m";
 import { ProjectArtwork, ProjectActions } from "@/components/public/ProjectArtwork";
 import { caseStudyIds } from "@/data/projects";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+
 import { Layout } from "@/components/layout/Layout";
-import { supabase } from "@/integrations/supabase/client";
+
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
-import { categoryLabels, filterProjects, mergeProjects } from "@/data/projectCopy.id";
-import type { Project } from "@/data/projects";
+import { categoryLabels, filterProjects } from "@/data/projectCopy.id";
+
 type ProjectCategory = "all" | "pentesting" | "tools" | "web-security";
 const categories: ProjectCategory[] = ["all", "tools", "web-security", "pentesting"];
 export default function Projects() {
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [activeCategory, setActiveCategory] = useState<ProjectCategory>("all");
     usePageAnalytics("/projects");
-    const { data, isError } = useQuery({
-        queryKey: ["projects"],
-        queryFn: async () => {
-            const { data, error } = await supabase.from("projects").select("*").order("created_at", { ascending: false });
-            if (error)
-                throw error;
-            return data;
-        },
-    });
-    const projects = mergeProjects((data ?? []) as Project[]);
+    const {projects,isError} = usePortfolioContent();
     const filteredProjects = filterProjects(projects, activeCategory);
     const selected = filteredProjects.find(p => p.id === selectedId) ?? filteredProjects[0];
     return <Layout><div className="public-container public-page">

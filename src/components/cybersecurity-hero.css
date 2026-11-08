@@ -99,5 +99,5 @@
 .optical-poster,.optical-field{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}.optical-field{z-index:1;opacity:.88}.optical-field canvas{display:block;width:100%;height:100%}.cyber-heading,.cyber-body,.cyber-bottom{z-index:3}.cyber-body{position:relative!important;padding-top:510px;padding-bottom:100px;top:auto!important;bottom:auto!important}.cyber-bottom{bottom:20px}.cyber-project>a+a{font-size:14px;margin-top:16px}.cyber-seam-frame{pointer-events:none}
 @media(max-width:767px){.public-design .cyber-stage{min-height:780px}.public-design .cyber-body{padding-top:460px;padding-bottom:160px}.public-design .cyber-heading{top:120px}.optical-poster{opacity:.65}.cyber-bottom{flex-wrap:wrap;gap:16px}.cyber-description{max-width:65ch}}
 
-.public-design .cyber-body{left:auto;right:auto;width:86%;margin-inline:auto}.public-design .cyber-seam-copy{color:var(--site-ink)}
+.public-design .cyber-body{left:auto;right:auto;width:86%;margin-inline:auto}.public-design .cyber-seam-copy{color:var(--site-cavity-ink)}
 @media(max-width:767px){.public-design .cyber-body{width:88%}}

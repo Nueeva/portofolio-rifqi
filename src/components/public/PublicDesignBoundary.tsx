@@ -16,6 +16,7 @@ export function PublicDesignBoundary({ children, pathname }: { children: ReactNo
     if (!isPublic) return;
     const titles: Record<string, string> = { "/": "Cybersecurity Engineer", "/about": "Tentang", "/projects": "Karya", "/contact": "Kontak", "/403": "403 — Akses terbatas", "/500": "500 — Kendala sistem", "/502": "502 — Layanan belum terhubung", "/503": "503 — Layanan tidak tersedia", "/429": "429 — Terlalu banyak permintaan" };
     const project = pathname.startsWith("/projects/") ? getPublicProject(pathname.split("/")[2]) : undefined;
+    if(pathname.startsWith("/projects/")&&!project)return;
     document.title = `${titles[pathname.replace(/\/$/, "") || "/"] ?? project?.title ?? "404 — Halaman tidak ditemukan"} — Rifqi Ariansyah`;
   }, [isPublic, pathname]);
 

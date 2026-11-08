@@ -51,7 +51,3 @@ for (const route of ROUTES) {
   console.log(`prerender-body: ${route.path} -> ${route.file} (+${body.length} bytes of body)`);
 }
 console.log(`prerender-body: ${ROUTES.length} route bodies prerendered`);
-// The rendered tree creates the Supabase client at module scope; in Node
-// its auth auto-refresh timer holds the event loop open forever, so this
-// build script exits explicitly instead of hanging the build.
-process.exit(0);

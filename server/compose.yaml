@@ -1,0 +1,56 @@
+services:
+  database:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: portfolio
+      POSTGRES_USER: portfolio_owner
+      POSTGRES_PASSWORD: ${PG_OWNER_PASSWORD:?required}
+      APP_DB_PASSWORD: ${PG_APP_PASSWORD:?required}
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - portfolio_pg:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+      - ./init-role.sh:/docker-entrypoint-initdb.d/002-role.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portfolio_owner -d portfolio"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  api:
+    build: .
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      TRUSTED_PROXY: ${TRUSTED_PROXY:-127.0.0.1}
+      HOST: 0.0.0.0
+      PORT: 8788
+      NODE_ENV: production
+      PUBLIC_ORIGIN: https://rifqi.apexsions.com
+      DATABASE_URL: postgresql://portfolio_app:${PG_APP_PASSWORD:?required}@database:5432/portfolio
+      COOKIE_SECRET: ${COOKIE_SECRET:?required}
+      UPLOAD_DIR: /uploads
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM: ${SMTP_FROM:-}
+      CONTACT_TO: ${CONTACT_TO:-}
+      TURNSTILE_SITE_KEY: ${TURNSTILE_SITE_KEY:-}
+      TURNSTILE_SECRET_KEY: ${TURNSTILE_SECRET_KEY:-}
+    ports:
+      - "127.0.0.1:8788:8788"
+    volumes:
+      - ./uploads:/uploads
+volumes:
+  portfolio_pg:

@@ -1,5 +1,7 @@
 # Celah public portfolio
 
+Historical receipt for the first public-site unification. Its Supabase and unchanged-backend boundaries describe that earlier pass. For the current same-origin API, content-growth workflow and pending release gates, use [the editorial release handoff](celah-editorial-release.md) and [the self-hosted migration receipt](celah-selfhosted-postgres.md).
+
 ## Accepted direction
 
 Rifqi Ariansyah is presented as a **Cybersecurity Engineer**, for recruiters and security teams. Celah extends across every public route: petrol–champagne in dark mode and ivory–petrol with bronze accents in light mode. Public interface copy is Indonesian; project names, technical terms, source IDs, links, categories, technologies and quantities remain intact.

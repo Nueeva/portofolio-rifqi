@@ -23,8 +23,8 @@ export function ProjectDiagram({ id }: {
    {apex && Array.from({ length: 9 }, (_, i) => <g key={i}><rect x={36 + (i % 3) * 39} y={106 + Math.floor(i / 3) * 39} width="26" height="26" rx="3" className="plugin-cell"/></g>)}
    {apex && <g className="host-frames"><rect x="16" y="77" width="166" height="137" rx="4"/><rect x="225" y="77" width="165" height="137" rx="4"/><text x="98" y="62" textAnchor="middle">Host game</text><text x="308" y="62" textAnchor="middle">Host website</text><text x="523" y="62" textAnchor="middle">Fallback database</text></g>}
    {xss && <g className="context-brackets"><path d="M58 85H30V245H58 M562 85H590V245H562"/><text x="310" y="68" textAnchor="middle">REFLECTION CONTEXT</text></g>}
-   {["M140 165H265", "M355 165H480"].map((d, i) => <g key={d}><path d={d} className="diagram-wire"/><m.path key={`${replay}-${selected}-${i}`} d={d} fill="none" stroke={`url(#${uid}-flow)`} strokeWidth="3" initial={false} animate={reduced ? { pathLength: 1 } : { pathLength: [0, 1] }} transition={{ duration: .4, delay: i * .08 }}/></g>)}
-   {nodes.map((node, i) => {
+   {apex && ["M140 165Q215 70 310 165", "M355 165Q420 265 525 165"].map((d, i) => <g key={d}><path d={d} className="diagram-wire"/><m.path key={`${replay}-${selected}-${i}`} d={d} fill="none" stroke={`url(#${uid}-flow)`} strokeWidth="3" initial={false} animate={reduced ? { pathLength: 1 } : { pathLength: [0, 1] }} transition={{ duration: .4, delay: i * .08 }}/></g>)}
+   {apex && nodes.map((node, i) => {
             const cx = nodes.length === 4 ? 82 + i * 152 : 95 + i * 215;
             const active = xss ? i === 1 : selected === i;
             return <g key={node} className={active ? "diagram-node is-selected" : "diagram-node"}>
@@ -32,8 +32,9 @@ export function ProjectDiagram({ id }: {
      {(!apex || i !== 0) && <><circle cx={cx} cy="165" r="4" className="node-core"/><path d={`M${cx - 18} 165h36 M${cx} 147v36`} className="node-cross"/></>}
      <text x={cx} y="244" textAnchor="middle">{node}</text></g>;
         })}
-   {portfolio && Array.from({ length: 5 }, (_, i) => <rect key={i} x={210 + i * 40} y="285" width="24" height="4" className={selected === 1 ? "workflow-stage active" : "workflow-stage"}/>)}
-   {xss && <text x="310" y="290" textAnchor="middle" className="diagram-code">{selected === 0 ? '<body> input </body>' : selected === 1 ? 'attribute="input"' : 'const value = "input"'}</text>}
+   {xss && <g className="inspection-window"><rect x="30" y="88" width="560" height="205" rx="8"/><m.rect x="44" width="532" height="45" rx="4" initial={false} animate={{ y: 115 + selected * 53 }} transition={{ duration: reduced ? 0 : .45 }} className="context-focus"/>{['<body> input </body>', 'attribute="input"', 'const value = "input"'].map((line, i) => <text x="70" y={145 + i * 53} key={line} className="diagram-code">{line}</text>)}</g>}
+   {portfolio && <g className="role-lanes">{spec.options.map((role, i) => <g key={role}><path d={`M40 ${100 + i * 73}H580`} className="diagram-wire"/><text x="45" y={90 + i * 73}>{role}</text>{Array.from({ length: 5 }, (_, j) => <rect key={j} x={210 + j * 70} y={75 + i * 73} width="42" height="28" rx="3" className="workflow-stage"/>)}</g>)}<m.rect x="200" width="340" height="50" rx="5" className="context-focus" initial={false} animate={{ y: 64 + selected * 73 }} transition={{ duration: reduced ? 0 : .4 }}/></g>}
+   {!xss && !portfolio && !apex && <g className="category-map">{spec.options.map((name, i) => { const x = 50 + (i % 2) * 295, y = 85 + Math.floor(i / 2) * 115; return <g key={name}><m.rect x={x} y={y} width="230" height="80" rx="4" initial={false} animate={{ fill: i === selected ? 'var(--site-surface)' : 'var(--site-low)', stroke: i === selected ? 'var(--site-cyan)' : 'var(--site-line)' }} transition={{ duration: .35 }}/><text x={x + 115} y={y + 45} textAnchor="middle">{name}</text></g>; })}</g>}
    {apex && <text x="310" y="300" textAnchor="middle" className="diagram-result">13 critical + 19 major / diperbaiki</text>}
   </svg>
   <div className="diagram-controls" role="group" aria-label={`Pilih konteks ${spec.title}`}>{spec.options.map((option, i) => <button type="button" key={option} aria-pressed={selected === i} onClick={() => setSelected(i)}>{option}{selected === i && <m.span layoutId={`${uid}-selection`} className="diagram-indicator"/>}</button>)}</div>

@@ -5,16 +5,21 @@ import { Layout } from "@/components/layout/Layout";
 import { ProjectActions, ProjectArtwork } from "@/components/public/ProjectArtwork";
 import { Aperture } from "@/components/public/PublicMotion";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
-import { publicProjects, getPublicProject } from "@/data/projectCopy.id";
+import { usePortfolioContent } from "@/hooks/usePortfolioContent";
 
 export default function ProjectCaseStudy() {
   const { id } = useParams<{ id: string }>();
-  const project = id ? getPublicProject(id) : undefined;
+  const {projects,loading,isError} = usePortfolioContent();
+  const project = projects.find(p=>p.id===id);
   const study = project?.caseStudy;
   usePageAnalytics(`/projects/${id ?? ""}`);
+  const pageTitle=project?.title;
+  useEffect(()=>{if(pageTitle)document.title=`${pageTitle} — Rifqi Ariansyah`;},[pageTitle]);
   useEffect(() => { window.scrollTo({ top: 0, behavior: "instant" }); }, [id]);
+  if(!project && loading) return <Layout><div className="public-container public-page" role="status">Memuat studi kasus…</div></Layout>;
+  if(!project && isError) return <Layout><div className="public-container public-page" role="alert"><h1>Studi kasus belum dapat dimuat.</h1><a href="/projects">Kembali ke karya</a></div></Layout>;
   if (!project || !study) return <Navigate to="/projects" replace />;
-  const studies = publicProjects.filter(item => item.caseStudy);
+  const studies = projects.filter(item => item.caseStudy);
   const index = studies.findIndex(item => item.id === project.id);
   const prev = studies[index - 1];
   const next = studies[index + 1];

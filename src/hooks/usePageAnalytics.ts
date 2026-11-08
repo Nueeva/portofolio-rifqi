@@ -19,7 +19,7 @@ export const usePageAnalytics = (pagePath: string) => {
             try {
                 const visitorId = getVisitorId();
                 // Call the edge function with rate limiting
-                const { supabase } = await import("@/integrations/supabase/client");
+                const { supabase } = await import("@/integrations/api/client");
                 const { error } = await supabase.functions.invoke('track-analytics', {
                     body: {
                         page_path: pagePath,
@@ -53,7 +53,7 @@ export const trackPageVisit = async (pagePath: string) => {
     try {
         const visitorId = getVisitorId();
         // Call the edge function with rate limiting
-        const { supabase } = await import("@/integrations/supabase/client");
+        const { supabase } = await import("@/integrations/api/client");
         const { error } = await supabase.functions.invoke('track-analytics', {
             body: {
                 page_path: pagePath,
