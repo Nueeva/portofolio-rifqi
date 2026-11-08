@@ -1,3 +1,4 @@
+import type { ProjectEditorial, SkillGroup } from "@/data/editorial";
 export type Json =
   | string
   | number
@@ -14,6 +15,9 @@ export type Database = {
   }
   public: {
     Tables: {
+      portfolio_project_content: {Row:ProjectEditorial;Insert:ProjectEditorial;Update:Partial<ProjectEditorial>;Relationships:[]}
+      portfolio_skill_groups: {Row:SkillGroup;Insert:SkillGroup;Update:Partial<SkillGroup>;Relationships:[]}
+
       activity_logs: {
         Row: {
           action: string

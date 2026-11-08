@@ -1,7 +1,9 @@
 import { useToast } from "@/hooks/use-toast";
 import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from "@/components/ui/toast";
+import { usePublicDesign } from "@/components/public/PublicDesignContext";
 
 export function Toaster() {
+  const { isPublic } = usePublicDesign();
   const { toasts } = useToast();
 
   return (
@@ -14,11 +16,11 @@ export function Toaster() {
               {description && <ToastDescription>{description}</ToastDescription>}
             </div>
             {action}
-            <ToastClose />
+            <ToastClose aria-label={isPublic ? "Tutup notifikasi" : "Close notification"} />
           </Toast>
         );
       })}
-      <ToastViewport />
+      <ToastViewport label={isPublic ? "Notifikasi ({hotkey})" : undefined} />
     </ToastProvider>
   );
 }

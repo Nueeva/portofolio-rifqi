@@ -1,279 +1,60 @@
-import { useState, useEffect, useRef } from "react";
-import { motion, useScroll, useSpring, type Variants } from "motion/react";
+import { usePortfolioContent } from "@/hooks/usePortfolioContent";
+import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { ArrowUpRight, Download, ExternalLink } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ScrollReveal } from "@/components/ScrollReveal";
-import { ScrambleText } from "@/components/ScrambleText";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
-import { Download, Award, CheckCircle } from "lucide-react";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
-
-const defaultCertifications = [
-  { name: "Founder & Lead Developer — Apexsions Plugin Ecosystem (9 plugins, full security audit)", issuer: "Personal Project", year: "2025", status: "active" },
-  { name: "Lead Developer — Portfolio 71, Student Portfolio Platform of SMKN 71 Jakarta", issuer: "School Project", year: "2026", status: "active" },
-  { name: "Open-Source Security Tooling — xssscope & CTF-Toolkit", issuer: "GitHub", year: "2026", status: "active" },
-];
-
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
-
-const badgeContainer: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.05 } },
-};
-
-const badgeItem: Variants = {
-  hidden: { opacity: 0, scale: 0.85, y: 8 },
-  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.35, ease: EASE } },
-};
-
-const CERTS_KEY = "portfolio_certifications";
-// The CV is a static file shipped with the site (public/cv-rifqi-ariansyah.pdf).
-// It previously came from a Supabase Storage public URL whose object does not
-// exist (the storage API answers "Object not found"), which left the download
-// button silently pointing at "#". A same-origin static file cannot rot that way.
-const CV_URL = "/cv-rifqi-ariansyah.pdf";
-
-const defaultSecuritySkills = ["Penetration Testing", "Vulnerability Assessment", "Web Application Security", "Network Security", "Secure Code Review", "Threat Modeling"];
-const defaultDevSkills = ["TypeScript", "React", "Python", "Node.js", "Go", "Bash"];
-const defaultTools = ["Burp Suite", "Wireshark", "Nmap", "OWASP ZAP", "Metasploit", "Ghidra", "sqlmap", "Hashcat"];
-
-const About = () => {
-  usePageAnalytics("/about");
-  const { getList } = useSiteSettings();
-
-  // Approach timeline rail fills as the section scrolls through view
-  const approachRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress: approachProgress } = useScroll({
-    target: approachRef,
-    offset: ["start 0.85", "end 0.55"],
-  });
-  const approachScaleY = useSpring(approachProgress, { stiffness: 90, damping: 25 });
-
-  const securitySkills = getList("skills_security", defaultSecuritySkills);
-  const devSkills = getList("skills_dev", defaultDevSkills);
-  const tools = getList("skills_tools", defaultTools);
-
-  const [certifications, setCertifications] = useState(defaultCertifications);
-
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(CERTS_KEY);
-      if (stored) setCertifications(JSON.parse(stored));
-    } catch { /* use defaults */ }
-  }, []);
-
-  return (
-    <Layout>
-      <div className="min-h-[calc(100vh-4rem)] py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <ScrollReveal>
-            <div className="mb-16">
-              <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-                <ScrambleText parts={[{ text: "About " }, { text: "Me", className: "text-primary" }]} />
-              </h1>
-              <div className="w-20 h-1 bg-primary rounded-full" />
-            </div>
-          </ScrollReveal>
-
-          {/* Introduction */}
-          <ScrollReveal delay={100}>
-            <section className="mb-16">
-              <p className="text-lg text-muted-foreground leading-relaxed mb-6">
-                I'm a cybersecurity-focused developer with a passion for finding and fixing 
-                security vulnerabilities before they can be exploited. My work spans penetration 
-                testing, security tool development, and building secure web applications.
-              </p>
-              <p className="text-lg text-muted-foreground leading-relaxed">
-                I approach security as both an attacker and defender—understanding offensive 
-                techniques to build better defensive solutions. Every vulnerability I find is 
-                an opportunity to make systems more resilient.
-              </p>
-            </section>
-          </ScrollReveal>
-
-          {/* Skills Section */}
-          <section className="mb-16">
-            <ScrollReveal>
-              <h2 className="text-2xl font-semibold mb-8">Skills & Expertise</h2>
-            </ScrollReveal>
-            
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Security Skills */}
-              <ScrollReveal delay={100}>
-                <div className="p-6 rounded-lg bg-card border border-border h-full">
-                  <h3 className="text-lg font-medium text-primary mb-4">Security</h3>
-                  <motion.div
-                    className="flex flex-wrap gap-2"
-                    variants={badgeContainer}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-60px" }}
-                  >
-                    {securitySkills.map((skill) => (
-                      <motion.span key={skill} variants={badgeItem} className="inline-flex">
-                        <Badge variant="secondary" className="font-normal">
-                          {skill}
-                        </Badge>
-                      </motion.span>
-                    ))}
-                  </motion.div>
-                </div>
-              </ScrollReveal>
-
-              {/* Development Skills */}
-              <ScrollReveal delay={200}>
-                <div className="p-6 rounded-lg bg-card border border-border h-full">
-                  <h3 className="text-lg font-medium text-primary mb-4">Development</h3>
-                  <motion.div
-                    className="flex flex-wrap gap-2"
-                    variants={badgeContainer}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true, margin: "-60px" }}
-                  >
-                    {devSkills.map((skill) => (
-                      <motion.span key={skill} variants={badgeItem} className="inline-flex">
-                        <Badge variant="secondary" className="font-normal">
-                          {skill}
-                        </Badge>
-                      </motion.span>
-                    ))}
-                  </motion.div>
-                </div>
-              </ScrollReveal>
-            </div>
-          </section>
-
-          {/* Tools Section */}
-          <section className="mb-16">
-            <ScrollReveal>
-              <h2 className="text-2xl font-semibold mb-8">Tools & Technologies</h2>
-            </ScrollReveal>
-            
-            <ScrollReveal delay={100}>
-              <div className="p-6 rounded-lg bg-card border border-border">
-                <motion.div
-                  className="flex flex-wrap gap-3"
-                  variants={badgeContainer}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, margin: "-60px" }}
-                >
-                  {tools.map((tool) => (
-                    <motion.div
-                      key={tool}
-                      variants={badgeItem}
-                      className="px-4 py-2 rounded-md bg-secondary/50 border border-border font-mono text-sm"
-                    >
-                      {tool}
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </div>
-            </ScrollReveal>
-          </section>
-
-          {/* Certifications Section */}
-          <section className="mb-16">
-            <ScrollReveal>
-              <h2 className="text-2xl font-semibold mb-8 flex items-center gap-2">
-                <Award className="h-6 w-6 text-primary" />
-                Certifications & Milestones
-              </h2>
-            </ScrollReveal>
-
-            <div className="grid gap-4">
-              {certifications.map((cert, index) => (
-                <ScrollReveal key={cert.name} delay={index * 100}>
-                  <div className="relative p-5 rounded-lg bg-card border border-border flex items-center justify-between gap-4 hover:border-primary/50 transition-colors">
-                    <div className="line-accent" />
-                    <div className="flex-1 ml-2">
-                      <h3 className="font-medium">{cert.name}</h3>
-                      <p className="text-sm text-muted-foreground">{cert.issuer} · {cert.year}</p>
-                    </div>
-                    {cert.status === "active" ? (
-                      <Badge className="bg-primary/10 text-primary border-primary/30">
-                        <CheckCircle className="h-3 w-3 mr-1" /> Active
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary">In Progress</Badge>
-                    )}
-                  </div>
-                </ScrollReveal>
-              ))}
-            </div>
-          </section>
-
-          {/* Approach Section */}
-          <section>
-            <ScrollReveal>
-              <h2 className="text-2xl font-semibold mb-8">My Approach</h2>
-            </ScrollReveal>
-            
-            <div ref={approachRef} className="relative grid gap-6 pl-10">
-              {/* Timeline rail — fills with scroll progress */}
-              <div className="absolute left-[7px] top-2 bottom-2 w-px bg-border" />
-              <motion.div
-                className="absolute left-[7px] top-2 bottom-2 w-px bg-primary origin-top"
-                style={{ scaleY: approachScaleY }}
-              />
-              <ScrollReveal delay={0} direction="right">
-                <div className="relative p-6 rounded-lg bg-card border border-border">
-                  <span className="absolute -left-10 top-7 h-[15px] w-[15px] rounded-full border-2 border-primary bg-background" />
-                  <div className="line-accent" />
-                  <h3 className="text-lg font-medium mb-2">1. Reconnaissance</h3>
-                  <p className="text-muted-foreground">
-                    Thoroughly understand the target system, its architecture, and potential 
-                    attack surfaces before testing begins.
-                  </p>
-                </div>
-              </ScrollReveal>
-
-              <ScrollReveal delay={100} direction="right">
-                <div className="relative p-6 rounded-lg bg-card border border-border">
-                  <span className="absolute -left-10 top-7 h-[15px] w-[15px] rounded-full border-2 border-primary bg-background" />
-                  <div className="line-accent" />
-                  <h3 className="text-lg font-medium mb-2">2. Analysis</h3>
-                  <p className="text-muted-foreground">
-                    Identify vulnerabilities through a combination of automated scanning 
-                    and manual testing, focusing on high-impact issues.
-                  </p>
-                </div>
-              </ScrollReveal>
-
-              <ScrollReveal delay={200} direction="right">
-                <div className="relative p-6 rounded-lg bg-card border border-border">
-                  <span className="absolute -left-10 top-7 h-[15px] w-[15px] rounded-full border-2 border-primary bg-background" />
-                  <div className="line-accent" />
-                  <h3 className="text-lg font-medium mb-2">3. Documentation</h3>
-                  <p className="text-muted-foreground">
-                    Provide clear, actionable reports with severity ratings, proof-of-concept 
-                    demonstrations, and practical remediation guidance.
-                  </p>
-                </div>
-              </ScrollReveal>
-            </div>
-          </section>
-
-          {/* Download CV CTA */}
-          <ScrollReveal delay={100}>
-            <section className="mt-16 p-8 rounded-lg bg-card border border-border text-center">
-              <h2 className="text-2xl font-semibold mb-3">Interested in working together?</h2>
-              <p className="text-muted-foreground mb-6">Download my CV for more details about my experience and qualifications.</p>
-              <Button asChild size="lg" className="glow-primary">
-                <a href={CV_URL} download="cv-rifqi-ariansyah.pdf">
-                  <Download className="mr-2 h-5 w-5" />
-                  Download CV / Resume
-                </a>
-              </Button>
-            </section>
-          </ScrollReveal>
-        </div>
-      </div>
-    </Layout>
-  );
-};
-
-export default About;
+import { usePublicSettings } from "@/hooks/usePublicSettings";
+import { supabase } from "@/integrations/api/client";
+import { ProjectDiagram } from "@/components/public/ProjectDiagram";
+import { publicProjects } from "@/data/projectCopy.id";
+const security = ["Penetration Testing", "Vulnerability Assessment", "Web Application Security", "Network Security", "Secure Code Review", "Threat Modeling"];
+const development = ["TypeScript", "React", "Python", "Node.js", "Go", "Bash"];
+const instruments = ["Burp Suite", "Wireshark", "Nmap", "OWASP ZAP", "Metasploit", "Ghidra", "sqlmap", "Hashcat"];
+export default function About() {
+    usePageAnalytics("/about");
+    const { getList,get } = usePublicSettings();
+    const catalog=usePortfolioContent();
+    const skills = catalog.skillsReady ? catalog.skills : [
+        { title: "Keamanan", items: getList("skills_security", security) },
+        { title: "Pengembangan", items: getList("skills_dev", development) },
+        { title: "Tools", items: getList("skills_tools", instruments) },
+    ];
+    const { data: certifications, isError } = useQuery({
+        queryKey: ["public-certifications"],
+        queryFn: async () => {
+            const { data, error } = await supabase.from("certifications").select("*").order("created_at", { ascending: false });
+            if (error)
+                throw error;
+            return data;
+        },
+    });
+    return <Layout><div className="public-container public-page">
+    <header className="about-intro"><h1>Rifqi Ariansyah.<br /><em>Cybersecurity<br />Engineer.</em></h1><div>
+      <p>Saya menelusuri celah aplikasi, membangun security tooling, dan memperbaiki sistem sampai ke produksi. Pekerjaan saya menghubungkan pengujian keamanan dengan pengembangan dan operasi.</p>
+      <p>Dari reflected XSS di xssscope sampai audit ekosistem Apexsions, saya ingin memahami penyebab masalah dan memastikan perbaikannya bisa digunakan.</p>
+      <a className="public-text-link" href={get("portfolio_cv_url","/cv-rifqi-ariansyah.pdf")} download="cv-rifqi-ariansyah.pdf">Unduh CV <Download /></a>
+    </div></header>
+    <section className="about-section" aria-labelledby="about-skills"><h2 id="about-skills">Keahlian & <em>perangkat kerja.</em></h2>
+      {catalog.skillsReady&&!skills.length&&<p>Belum ada kelompok keahlian yang dipublikasikan.</p>}{skills.map(group => <div className="skill-line" key={group.title}><h3>{group.title}</h3><ul>{group.items.map(item => <li key={item}>{item}</li>)}</ul></div>)}
+    </section>
+    <section className="about-section capability-proof" aria-label="Keahlian dalam praktik"><div><h2>Batas akses,<br /><em>dalam praktik.</em></h2><p>Web Application Security bertemu pengembangan aplikasi: peran siswa, guru, dan admin pada Portfolio 71.</p><Link className="public-text-link" to="/projects/curated-portfolio71">Telusuri implementasi <ArrowUpRight /></Link></div><ProjectDiagram id="curated-portfolio71"/></section>
+    <section className="about-section" aria-labelledby="about-experience"><h2 id="about-experience">Pengalaman melalui<br /><em>sistem yang dibangun.</em></h2>
+      {catalog.featured.map(project => <article className="experience-entry" key={project.id}><div><h3>{project.title.split(" — ")[0]}</h3><p>{project.caseStudy?.role}</p><p className="experience-period">{project.caseStudy?.period}</p></div><div><p>{project.solution}</p><Link className="public-text-link" to={`/projects/${project.id}`}>Baca studi kasus <ArrowUpRight /></Link></div></article>)}
+    </section>
+    <section className="about-section" aria-labelledby="about-outcomes"><h2 id="about-outcomes">Pencapaian yang<br /><em>bisa ditelusuri.</em></h2><div className="personal-story">
+      <p>Audit Apexsions menemukan dan memperbaiki 13 temuan critical serta 19 major melalui 16 commit. Sembilan plugin internalnya berjalan di produksi.</p>
+      <p>Pada 29 Oktober 2026, Portfolio 71 memuat 51 karya dari 28 siswa, didampingi 4 guru pembimbing. Termasuk 5 proyek lintas jurusan yang melibatkan 10 siswa.</p>
+      <p>xssscope dan CTF-Toolkit tersedia sebagai proyek open source. Proyek dan pencapaian ini menjadi bukti pekerjaan saya.</p>
+    </div></section>
+    <section className="about-section" aria-labelledby="about-certifications"><h2 id="about-certifications">Sertifikasi.</h2>
+      {certifications?.length ? certifications.map(cert => <article className="experience-entry" key={cert.id}><div><h3>{cert.name}</h3><p>{cert.issuer} · {cert.year}</p></div><div><p>{cert.status === "active" ? "Aktif" : cert.status === "in-progress" || cert.status === "in_progress" ? "Dalam proses" : cert.status}</p>{(cert.credential_url || cert.image_url) && <a className="public-text-link" href={cert.credential_url || cert.image_url!} target="_blank" rel="noopener noreferrer">Lihat kredensial <ExternalLink /></a>}</div></article>) : <p className="public-lede">{isError ? "Data sertifikasi belum dapat dimuat. Silakan coba lagi nanti." : "Belum ada sertifikasi yang dipublikasikan."}</p>}
+    </section>
+    <section className="about-section" aria-labelledby="about-story"><h2 id="about-story">Berawal dari rumah.<br /><em>Berlanjut ke sistem.</em></h2><div className="personal-story">
+      <p>Saya mulai menghasilkan uang sejak SMP. Totalnya sekitar Rp5 juta; lebih dari Rp2 juta di antaranya datang dari server Minecraft yang saya jalankan. Uang itu dipakai orang tua untuk cicilan keluarga.</p>
+      <p>Perjalanan itu membawa saya ke Apexsions: merancang sistem, menulis plugin, membangun website komunitas, melakukan audit, dan menjalankan infrastrukturnya. Saya juga membangun Portfolio 71, platform portofolio yang digunakan di SMKN 71 Jakarta.</p>
+      <p>Untuk routing dan orkestrasi model AI, saya mengoperasikan stack gateway pribadi 9Router + Hermes. Agen AI menjadi mitra engineering dalam pekerjaan dari desain sampai operasi.</p>
+      <Link className="public-text-link" to="/contact">Mari bicara tentang pekerjaan berikutnya <ArrowUpRight /></Link>
+    </div></section>
+  </div></Layout>;
+}

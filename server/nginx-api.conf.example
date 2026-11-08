@@ -1,0 +1,24 @@
+# Include inside the existing rifqi.apexsions.com server block at full release cutover.
+# Keep the current server-level security headers. Do not add this to other sites.
+# For this host's local Cloudflare Tunnel, trust only its loopback connection.
+# Set these at server scope, before the location block; never trust all peers.
+set_real_ip_from 127.0.0.1;
+set_real_ip_from ::1;
+real_ip_header CF-Connecting-IP;
+
+location ^~ /api/ {
+    proxy_pass http://127.0.0.1:8788;
+    proxy_http_version 1.1;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    # Overwrite an untrusted incoming chain; API trusts only its Docker gateway.
+    proxy_set_header X-Forwarded-For $remote_addr;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Connection "";
+    proxy_buffering off;
+    proxy_cache off;
+    # Reset/verification links contain one-time tokens; API logs omit query strings.
+    access_log off;
+    proxy_read_timeout 70s;
+    client_max_body_size 11m;
+}

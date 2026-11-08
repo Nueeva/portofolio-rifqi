@@ -8,13 +8,13 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { Shield, LogIn, UserPlus, Loader2, Clock, AlertTriangle, CheckCircle2, XCircle, ShieldAlert, UserCheck, ShieldX, Mail, KeyRound, ArrowLeft } from "lucide-react";
 import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/api/client";
 import { TurnstileCaptcha, TurnstileCaptchaRef } from "@/components/TurnstileCaptcha";
 import { Progress } from "@/components/ui/progress";
 
 const authSchema = z.object({
   email: z.string().trim().email({ message: "Email tidak valid" }),
-  password: z.string().min(6, { message: "Password minimal 6 karakter" }),
+  password: z.string().min(12, { message: "Password minimal 12 karakter" }),
 });
 
 const emailSchema = z.object({
@@ -22,8 +22,8 @@ const emailSchema = z.object({
 });
 
 const passwordSchema = z.object({
-  password: z.string().min(6, { message: "Password minimal 6 karakter" }),
-  confirmPassword: z.string().min(6, { message: "Password minimal 6 karakter" }),
+  password: z.string().min(12, { message: "Password minimal 12 karakter" }),
+  confirmPassword: z.string().min(12, { message: "Password minimal 12 karakter" }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Password tidak cocok",
   path: ["confirmPassword"],
@@ -168,7 +168,7 @@ export default function Auth() {
     remainingSeconds?: number;
   }> => {
     try {
-      const { data, error } = await supabase.functions.invoke('check-rate-limit', {
+      const { data, error } = await supabase.functions.invoke<{blocked:boolean;blockedType?:'ip'|'email';message?:string;remainingSeconds?:number}>('check-rate-limit', {
         body: { identifier, action: 'check' },
       });
       
@@ -186,7 +186,7 @@ export default function Auth() {
 
   const recordLoginAttempt = async (identifier: string, success: boolean) => {
     try {
-      await supabase.functions.invoke('check-rate-limit', {
+      await supabase.functions.invoke<{blocked:boolean;blockedType?:'ip'|'email';message?:string;remainingSeconds?:number}>('check-rate-limit', {
         body: { 
           identifier, 
           action: 'record', 
@@ -246,18 +246,6 @@ export default function Auth() {
           icon: <XCircle className="h-5 w-5" />,
         });
       } else {
-        // Send password changed notification email
-        try {
-          await supabase.functions.invoke('send-auth-email', {
-            body: {
-              type: 'password_changed',
-              email: user?.email || '',
-            },
-          });
-        } catch (emailErr) {
-          console.log("Password change notification email skipped:", emailErr);
-        }
-        
         toast.success("Password Berhasil Diubah", {
           description: "Silakan login dengan password baru",
           icon: <CheckCircle2 className="h-5 w-5" />,

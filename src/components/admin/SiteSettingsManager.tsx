@@ -1,5 +1,6 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/api/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +48,7 @@ const fieldIcons: Record<string, React.ReactNode> = {
 
 export const SiteSettingsManager = () => {
   const { toast } = useToast();
+  const queryCache = useQueryClient();
   const [settings, setSettings] = useState<SettingRow[]>([]);
   const [editedValues, setEditedValues] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -58,6 +60,7 @@ export const SiteSettingsManager = () => {
   }, []);
 
   const fetchSettings = async () => {
+    void queryCache.invalidateQueries({queryKey:["public-site-settings"]});
     try {
       const { data, error } = await supabase
         .from("site_settings")
@@ -104,7 +107,8 @@ export const SiteSettingsManager = () => {
         return;
       }
 
-      await Promise.all(updates);
+      const results=await Promise.all(updates);
+      const failed=results.find(result=>result.error);if(failed?.error)throw failed.error;
       await fetchSettings();
       setHasChanges(false);
       toast({ title: "Berhasil", description: `${updates.length} setting berhasil disimpan` });

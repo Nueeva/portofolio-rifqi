@@ -1,609 +1,150 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Mail, Github, Linkedin, Send, CheckCircle, Sparkles, Check } from "lucide-react";
+import { useTheme } from "next-themes";
+import { CheckCircle, Github, Linkedin, Mail, Send } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
+import { TurnstileCaptcha, type TurnstileCaptchaRef } from "@/components/TurnstileCaptcha";
 import { useToast } from "@/hooks/use-toast";
-import { useTypingPlaceholder } from "@/hooks/useTypingPlaceholder";
-import { supabase } from "@/integrations/supabase/client";
-import { z } from "zod";
-import { ScrollReveal } from "@/components/ScrollReveal";
-import { ScrambleText } from "@/components/ScrambleText";
 import { usePageAnalytics } from "@/hooks/usePageAnalytics";
-import { TurnstileCaptcha, TurnstileCaptchaRef } from "@/components/TurnstileCaptcha";
-import { useSiteSettings } from "@/hooks/useSiteSettings";
-
-const contactSchema = z.object({
-  name: z.string().trim().min(2, "Nama minimal 2 karakter").max(50, "Nama maksimal 50 karakter"),
-  email: z
-    .string()
-    .trim()
-    .min(5, "Email minimal 5 karakter")
-    .max(100, "Email maksimal 100 karakter")
-    .email("Format email tidak valid")
-    .refine((email) => {
-      // Stricter validation: no consecutive dots, valid TLD, proper structure
-      const strictEmailRegex =
-        /^[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9._%+-]*[a-zA-Z0-9]@[a-zA-Z0-9](?!.*\.\.)[a-zA-Z0-9.-]*[a-zA-Z0-9]\.[a-zA-Z]{2,}$/;
-      // Reject common typos
-      const commonTypos = ["@gmial.com", "@gmal.com", "@gamil.com", "@yaho.com", "@hotmal.com"];
-      const hasTypo = commonTypos.some((typo) => email.toLowerCase().includes(typo));
-      return strictEmailRegex.test(email) && !hasTypo;
-    }, "Format email tidak valid (contoh: nama@gmail.com)"),
-  message: z.string().trim().min(10, "Pesan minimal 10 karakter").max(1000, "Pesan maksimal 1000 karakter"),
-});
-
-// Client-side topic prefill texts for /contact?topic=<slug> (see Contact).
-const TOPIC_PREFILLS: Record<string, string> = {
-  "penetration-testing":
-    "Hi, I'd like to discuss a penetration testing engagement.",
-  "security-tools": "Hi, I'd like to discuss building a custom security tool.",
-  "web-security": "Hi, I'd like to discuss securing a web application.",
-};
-
-const EMAIL_DOMAINS = [
-  "@gmail.com",
-  "@yahoo.com",
-  "@hotmail.com",
-  "@outlook.com",
-  "@icloud.com",
-  "@protonmail.com",
-  "@mail.com",
-  "@live.com",
-  "@ymail.com",
-  "@aol.com",
-];
-
-const Contact = () => {
-  usePageAnalytics("/contact");
-  const { get } = useSiteSettings();
-
-  const contactEmail = get("contact_email", "contact@rifqi.tech");
-  const githubUrl = get("social_github", "https://github.com/Nueeva");
-  const linkedinUrl = get("social_linkedin", "https://linkedin.com/rifqia");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    message: "",
-  });
-  // Topic prefill (client-side only, backlog item 13): service cards on
-  // `/` link here as /contact?topic=<slug>. There is no topic/subject
-  // field on this form — it is a single step (name/email/message) that
-  // submits unchanged to the existing Edge Function — so the topic
-  // pre-fills the message instead, and only when it is still empty, so
-  // nothing the visitor typed is ever overwritten. Unknown topics are
-  // ignored. Applied in an effect (after hydration) on purpose: the
-  // prerendered HTML is built without a query string, and an initial
-  // value read from the URL would mismatch it.
-  const [searchParams] = useSearchParams();
-  useEffect(() => {
-    const prefill = TOPIC_PREFILLS[searchParams.get("topic") ?? ""];
-    if (!prefill) return;
-    setFormData((prev) =>
-      prev.message ? prev : { ...prev, message: prefill }
-    );
-  }, [searchParams]);
-
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [shakeFields, setShakeFields] = useState<Record<string, boolean>>({});
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileError, setTurnstileError] = useState(false);
-  const [showEmailSuggestions, setShowEmailSuggestions] = useState(false);
-  const [emailSuggestions, setEmailSuggestions] = useState<string[]>([]);
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
-  const turnstileRef = useRef<TurnstileCaptchaRef>(null);
-  const emailInputRef = useRef<HTMLInputElement>(null);
-  const formStartTime = useRef<number>(Date.now());
-  const { toast } = useToast();
-
-  // Honeypot field (hidden from users, bots will fill it)
-  const [honeypot, setHoneypot] = useState("");
-
-  // Typing placeholder animations
-  const namePlaceholder = useTypingPlaceholder({
-    texts: ["John Doe", "Ahmad Rizki", "Sarah Johnson", "Budi Santoso"],
-    typingSpeed: 80,
-    deletingSpeed: 40,
-    pauseDuration: 1500,
-  });
-
-  const emailPlaceholder = useTypingPlaceholder({
-    texts: ["john@gmail.com", "ahmad@yahoo.com", "sarah@outlook.com", "budi@mail.com"],
-    typingSpeed: 70,
-    deletingSpeed: 35,
-    pauseDuration: 1500,
-  });
-
-  const messagePlaceholder = useTypingPlaceholder({
-    texts: [
-      "Halo, saya tertarik untuk bekerja sama...",
-      "Hi, I have a question about security...",
-      "Saya ingin mendiskusikan proyek baru...",
-      "Hello, I would like to collaborate...",
-    ],
-    typingSpeed: 50,
-    deletingSpeed: 25,
-    pauseDuration: 2000,
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrors({});
-
-    // Anti-spam: Check honeypot
-    if (honeypot) {
-      toast({
-        title: "Message sent!",
-        description: "Thank you for reaching out.",
-      });
-      return; // Silently reject spam
-    }
-
-    // Anti-spam: Check submission time (bots submit too fast)
-    const timeTaken = Date.now() - formStartTime.current;
-    if (timeTaken < 3000) {
-      toast({
-        title: "Please slow down",
-        description: "Please take a moment to fill out the form.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Validate form data
-    const result = contactSchema.safeParse(formData);
-    if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      const fieldsToShake: Record<string, boolean> = {};
-      result.error.errors.forEach((err) => {
-        if (err.path[0]) {
-          fieldErrors[err.path[0] as string] = err.message;
-          fieldsToShake[err.path[0] as string] = true;
+import { usePublicSettings } from "@/hooks/usePublicSettings";
+import { supabase } from "@/integrations/api/client";
+import { contactSchema, prefillContact, sendContactMessage, suggestEmails, type ContactData } from "@/lib/contactForm";
+const emptyForm: ContactData = { name: "", email: "", message: "" };
+type CaptchaStatus = "unverified" | "verified" | "expired" | "error";
+export default function Contact() {
+    usePageAnalytics("/contact");
+    const { get } = usePublicSettings();
+    const { resolvedTheme } = useTheme();
+    const { toast } = useToast();
+    const [searchParams] = useSearchParams();
+    const [formData, setFormData] = useState<ContactData>(emptyForm);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [honeypot, setHoneypot] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [sendError, setSendError] = useState("");
+    const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+    const [captchaStatus, setCaptchaStatus] = useState<CaptchaStatus>("unverified");
+    const [captchaRetry, setCaptchaRetry] = useState(0);
+    const [captchaTheme, setCaptchaTheme] = useState<"light" | "dark" | "auto">("auto");
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [selectedSuggestion, setSelectedSuggestion] = useState(-1);
+    const turnstileRef = useRef<TurnstileCaptchaRef>(null);
+    const formRef = useRef<HTMLFormElement>(null);
+    const formStartTime = useRef(0);
+    const suggestions = suggestEmails(formData.email);
+    const suggestionsOpen = showSuggestions && suggestions.length > 0;
+    const contactEmail = get("contact_email", "contact@rifqi.tech");
+    useEffect(() => { formStartTime.current = Date.now(); }, []);
+    useEffect(() => { setFormData(previous => prefillContact(previous, searchParams.get("topic") ?? "")); }, [searchParams]);
+    useEffect(() => {
+        setCaptchaTheme(resolvedTheme === "light" ? "light" : resolvedTheme === "dark" ? "dark" : "auto");
+        setTurnstileToken(null);
+        setCaptchaStatus("unverified");
+    }, [resolvedTheme]);
+    function change(name: keyof ContactData, value: string) {
+        setFormData(previous => ({ ...previous, [name]: value }));
+        const result = contactSchema.shape[name].safeParse(value);
+        setErrors(previous => ({ ...previous, [name]: result.success ? "" : result.error.errors[0]?.message }));
+        if (name === "email") {
+            setShowSuggestions(true);
+            setSelectedSuggestion(-1);
         }
-      });
-      setErrors(fieldErrors);
-      setShakeFields(fieldsToShake);
-      // Remove shake after animation completes
-      setTimeout(() => setShakeFields({}), 500);
-      return;
     }
-
-    // Verify Turnstile token exists
-    if (!turnstileToken) {
-      setTurnstileError(true);
-      toast({
-        title: "Verification required",
-        description: "Please complete the CAPTCHA verification.",
-        variant: "destructive",
-      });
-      return;
+    function selectEmail(value: string) {
+        change("email", value);
+        setShowSuggestions(false);
+        setSelectedSuggestion(-1);
     }
-
-    setIsSubmitting(true);
-
-    try {
-      const { error } = await supabase.functions.invoke("send-contact-email", {
-        body: { ...result.data, turnstileToken },
-      });
-
-      if (error) throw error;
-
-      setIsSubmitted(true);
-      setFormData({ name: "", email: "", message: "" });
-      toast({
-        title: "Message sent!",
-        description: "Thank you for reaching out. I'll get back to you soon.",
-      });
-    } catch (error) {
-      console.error("Error sending message:", error);
-      toast({
-        title: "Failed to send message",
-        description: "Please try again or contact me directly via email.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
+    function emailKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+        if (!suggestionsOpen)
+            return;
+        if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+            event.preventDefault();
+            setSelectedSuggestion(previous => event.key === "ArrowDown" ? Math.min(previous + 1, suggestions.length - 1) : Math.max(previous - 1, -1));
+        }
+        else if ((event.key === "Enter" && selectedSuggestion >= 0) || event.key === "Tab") {
+            event.preventDefault();
+            selectEmail(suggestions[Math.max(0, selectedSuggestion)]);
+        }
+        else if (event.key === "Escape")
+            setShowSuggestions(false);
     }
-  };
-
-  const validateField = (name: string, value: string) => {
-    const fieldSchema = contactSchema.shape[name as keyof typeof contactSchema.shape];
-    if (!fieldSchema) return "";
-
-    const result = fieldSchema.safeParse(value);
-    if (!result.success) {
-      return result.error.errors[0]?.message || "";
+    function invalidateCaptcha(status: CaptchaStatus) {
+        setTurnstileToken(null);
+        setCaptchaStatus(status);
     }
-    return "";
-  };
-
-  const isFieldValid = (name: string) => {
-    const value = formData[name as keyof typeof formData];
-    if (!value) return false;
-    return !validateField(name, value);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Real-time validation
-    const error = validateField(name, value);
-    setErrors((prev) => ({ ...prev, [name]: error }));
-
-    // Email auto-suggest logic
-    if (name === "email") {
-      const atIndex = value.indexOf("@");
-      if (atIndex !== -1 && !value.includes(" ")) {
-        const localPart = value.substring(0, atIndex);
-        const domainPart = value.substring(atIndex);
-
-        // Filter domains that match what user is typing
-        const filteredDomains = EMAIL_DOMAINS.filter((domain) =>
-          domain.toLowerCase().startsWith(domainPart.toLowerCase()),
-        );
-
-        // Create full email suggestions
-        const suggestions = filteredDomains.map((domain) => localPart + domain);
-        setEmailSuggestions(suggestions);
-        setShowEmailSuggestions(suggestions.length > 0 && domainPart !== suggestions[0]?.substring(atIndex));
-        setSelectedSuggestionIndex(-1);
-      } else {
-        setShowEmailSuggestions(false);
-        setEmailSuggestions([]);
-      }
+    async function handleSubmit(event: FormEvent) {
+        event.preventDefault();
+        if (isSubmitting)
+            return;
+        setErrors({});
+        setSendError("");
+        if (honeypot) {
+            toast({ title: "Pesan terkirim", description: "Terima kasih sudah menghubungi." });
+            return;
+        }
+        if (Date.now() - formStartTime.current < 3000) {
+            toast({ title: "Tunggu sebentar", description: "Luangkan waktu untuk melengkapi formulir.", variant: "destructive" });
+            return;
+        }
+        const result = contactSchema.safeParse(formData);
+        if (!result.success) {
+            const fieldErrors = Object.fromEntries(result.error.errors.map(error => [String(error.path[0]), error.message]));
+            setErrors(fieldErrors);
+            formRef.current?.querySelector<HTMLElement>(`[name="${result.error.errors[0]?.path[0]}"]`)?.focus();
+            return;
+        }
+        if (!turnstileToken) {
+            setSendError("Selesaikan verifikasi keamanan sebelum mengirim pesan.");
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            await sendContactMessage(result.data, turnstileToken, (name, options) => supabase.functions.invoke(name, options));
+            setIsSubmitted(true);
+            setFormData(emptyForm);
+            toast({ title: "Pesan terkirim", description: "Terima kasih. Saya akan membaca dan membalas pesanmu." });
+        }
+        catch {
+            const message = "Pesan belum terkirim. Coba lagi atau hubungi saya langsung melalui email.";
+            setSendError(message);
+            toast({ title: "Gagal mengirim pesan", description: message, variant: "destructive" });
+        }
+        finally {
+            setIsSubmitting(false);
+            invalidateCaptcha("unverified");
+            turnstileRef.current?.reset();
+        }
     }
-  };
-
-  const handleEmailKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (!showEmailSuggestions || emailSuggestions.length === 0) return;
-
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSelectedSuggestionIndex((prev) => (prev < emailSuggestions.length - 1 ? prev + 1 : prev));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSelectedSuggestionIndex((prev) => (prev > 0 ? prev - 1 : -1));
-    } else if (e.key === "Enter" && selectedSuggestionIndex >= 0) {
-      e.preventDefault();
-      selectEmailSuggestion(emailSuggestions[selectedSuggestionIndex]);
-    } else if (e.key === "Tab" && emailSuggestions.length > 0) {
-      e.preventDefault();
-      selectEmailSuggestion(emailSuggestions[selectedSuggestionIndex >= 0 ? selectedSuggestionIndex : 0]);
-    } else if (e.key === "Escape") {
-      setShowEmailSuggestions(false);
+    function anotherMessage() {
+        formStartTime.current = Date.now();
+        setIsSubmitted(false);
+        setSendError("");
+        setErrors({});
     }
-  };
-
-  const selectEmailSuggestion = (suggestion: string) => {
-    setFormData((prev) => ({ ...prev, email: suggestion }));
-    setShowEmailSuggestions(false);
-    setEmailSuggestions([]);
-    setSelectedSuggestionIndex(-1);
-
-    // Validate the selected email
-    const error = validateField("email", suggestion);
-    setErrors((prev) => ({ ...prev, email: error }));
-  };
-
-  return (
-    <Layout>
-      <div className="min-h-[calc(100vh-4rem)] py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <ScrollReveal>
-            <div className="mb-12">
-              <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-                <ScrambleText parts={[{ text: "Get in " }, { text: "Touch", className: "text-primary" }]} />
-              </h1>
-              <p className="text-muted-foreground max-w-2xl">
-                Interested in working together or have a security question? Feel free to reach out. I'm always open to
-                discussing new projects and opportunities.
-              </p>
-              <div className="w-20 h-1 bg-primary rounded-full mt-4" />
-            </div>
-          </ScrollReveal>
-
-          <div className="grid md:grid-cols-2 gap-12">
-            {/* Contact Info */}
-            <ScrollReveal delay={100}>
-              <div>
-                <h2 className="text-xl font-semibold mb-6">Connect With Me</h2>
-
-                <div className="space-y-4">
-                  <a
-                    href={`mailto:${contactEmail}`}
-                    className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group"
-                  >
-                    <div className="p-2 rounded-md bg-primary/10">
-                      <Mail className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="font-medium group-hover:text-primary transition-colors">{contactEmail}</p>
-                    </div>
-                  </a>
-
-                  <a
-                    href={githubUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group"
-                  >
-                    <div className="p-2 rounded-md bg-primary/10">
-                      <Github className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">GitHub</p>
-                      <p className="font-medium group-hover:text-primary transition-colors">{githubUrl.replace("https://", "")}</p>
-                    </div>
-                  </a>
-
-                  <a
-                    href={linkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-colors group"
-                  >
-                    <div className="p-2 rounded-md bg-primary/10">
-                      <Linkedin className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">LinkedIn</p>
-                      <p className="font-medium group-hover:text-primary transition-colors">{linkedinUrl.replace("https://", "")}</p>
-                    </div>
-                  </a>
-                </div>
-              </div>
-            </ScrollReveal>
-
-            {/* Contact Form */}
-            <ScrollReveal delay={200}>
-              <div className="p-6 rounded-lg bg-card border border-border">
-                <h2 className="text-xl font-semibold mb-6">Send a Message</h2>
-
-                {isSubmitted ? (
-                  <div className="p-8 rounded-lg bg-card border border-primary/50 text-center animate-scale-in">
-                    <div className="relative inline-block mb-4">
-                      <CheckCircle className="h-16 w-16 text-primary animate-[pulse_2s_ease-in-out_infinite]" />
-                      <Sparkles className="h-6 w-6 text-primary absolute -top-1 -right-1 animate-[bounce_1s_ease-in-out_infinite]" />
-                    </div>
-                    <h3 className="text-xl font-semibold mb-2 animate-fade-in">Message Sent Successfully!</h3>
-                    <p className="text-muted-foreground mb-6 animate-fade-in">
-                      Thank you for reaching out. I'll respond as soon as possible.
-                    </p>
-                    <Button
-                      variant="outline"
-                      onClick={() => {
-                        setIsSubmitted(false);
-                        formStartTime.current = Date.now();
-                      }}
-                      className="animate-fade-in"
-                    >
-                      Send Another Message
-                    </Button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Honeypot field - hidden from users */}
-                    <input
-                      type="text"
-                      name="website"
-                      value={honeypot}
-                      onChange={(e) => setHoneypot(e.target.value)}
-                      className="absolute opacity-0 pointer-events-none"
-                      tabIndex={-1}
-                      autoComplete="off"
-                    />
-
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="flex items-center gap-2">
-                        Name
-                        <span
-                          className={`transition-all duration-300 ${isFieldValid("name") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
-                        >
-                          <Check className="h-4 w-4 text-green-500" />
-                        </span>
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          id="name"
-                          name="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          placeholder={namePlaceholder || "Nama Anda"}
-                          required
-                          minLength={2}
-                          maxLength={50}
-                          className={`pr-10 transition-all ${shakeFields.name ? "animate-shake" : ""} ${errors.name ? "border-destructive" : isFieldValid("name") ? "border-green-500" : ""}`}
-                        />
-                        <div
-                          className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ${isFieldValid("name") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
-                        >
-                          <Check className="h-5 w-5 text-green-500" />
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center min-h-[20px]">
-                        <div
-                          className={`overflow-hidden transition-all duration-300 ease-out ${errors.name ? "max-h-6 opacity-100" : "max-h-0 opacity-0"}`}
-                        >
-                          <p className="text-sm text-destructive">{errors.name}</p>
-                        </div>
-                        <span
-                          className={`text-xs transition-colors duration-200 ${formData.name.length > 50 ? "text-destructive" : "text-muted-foreground"}`}
-                        >
-                          {formData.name.length}/50
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="email" className="flex items-center gap-2">
-                        Email
-                        <span
-                          className={`transition-all duration-300 ${isFieldValid("email") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
-                        >
-                          <Check className="h-4 w-4 text-green-500" />
-                        </span>
-                      </Label>
-                      <div className="relative">
-                        <Input
-                          ref={emailInputRef}
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          onKeyDown={handleEmailKeyDown}
-                          onBlur={() => setTimeout(() => setShowEmailSuggestions(false), 150)}
-                          onFocus={() => {
-                            if (emailSuggestions.length > 0) setShowEmailSuggestions(true);
-                          }}
-                          placeholder={emailPlaceholder || "email@domain.com"}
-                          required
-                          minLength={5}
-                          maxLength={100}
-                          autoComplete="off"
-                          className={`pr-10 transition-all ${shakeFields.email ? "animate-shake" : ""} ${errors.email ? "border-destructive" : isFieldValid("email") ? "border-green-500" : ""}`}
-                        />
-                        <div
-                          className={`absolute right-3 top-1/2 -translate-y-1/2 transition-all duration-300 ${isFieldValid("email") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
-                        >
-                          <Check className="h-5 w-5 text-green-500" />
-                        </div>
-
-                        {/* Email suggestions dropdown */}
-                        {showEmailSuggestions && emailSuggestions.length > 0 && (
-                          <div className="absolute z-50 w-full mt-1 top-full left-0 bg-card border border-border rounded-md shadow-lg overflow-hidden animate-fade-in">
-                            {emailSuggestions.map((suggestion, index) => (
-                              <button
-                                key={suggestion}
-                                type="button"
-                                className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-primary/10 ${
-                                  index === selectedSuggestionIndex ? "bg-primary/10 text-primary" : ""
-                                }`}
-                                onMouseDown={(e) => {
-                                  e.preventDefault();
-                                  selectEmailSuggestion(suggestion);
-                                }}
-                                onMouseEnter={() => setSelectedSuggestionIndex(index)}
-                              >
-                                <span className="font-medium">{suggestion.split("@")[0]}</span>
-                                <span className="text-primary">@{suggestion.split("@")[1]}</span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex justify-between items-center min-h-[20px]">
-                        <div
-                          className={`overflow-hidden transition-all duration-300 ease-out ${errors.email ? "max-h-6 opacity-100" : "max-h-0 opacity-0"}`}
-                        >
-                          <p className="text-sm text-destructive">{errors.email}</p>
-                        </div>
-                        <span
-                          className={`text-xs transition-colors duration-200 ${formData.email.length > 100 ? "text-destructive" : "text-muted-foreground"}`}
-                        >
-                          {formData.email.length}/100
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="message" className="flex items-center gap-2">
-                        Message
-                        <span
-                          className={`transition-all duration-300 ${isFieldValid("message") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
-                        >
-                          <Check className="h-4 w-4 text-green-500" />
-                        </span>
-                      </Label>
-                      <div className="relative">
-                        <Textarea
-                          id="message"
-                          name="message"
-                          value={formData.message}
-                          onChange={handleChange}
-                          placeholder={messagePlaceholder || "Tulis pesan Anda..."}
-                          required
-                          minLength={10}
-                          maxLength={1000}
-                          rows={5}
-                          className={`pr-10 transition-all ${shakeFields.message ? "animate-shake" : ""} ${errors.message ? "border-destructive" : isFieldValid("message") ? "border-green-500" : ""}`}
-                        />
-                        <div
-                          className={`absolute right-3 top-3 transition-all duration-300 ${isFieldValid("message") ? "opacity-100 scale-100" : "opacity-0 scale-75"}`}
-                        >
-                          <Check className="h-5 w-5 text-green-500" />
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center min-h-[20px]">
-                        <div
-                          className={`overflow-hidden transition-all duration-300 ease-out ${errors.message ? "max-h-6 opacity-100" : "max-h-0 opacity-0"}`}
-                        >
-                          <p className="text-sm text-destructive">{errors.message}</p>
-                        </div>
-                        <span
-                          className={`text-xs transition-colors duration-200 ${formData.message.length > 1000 ? "text-destructive" : "text-muted-foreground"}`}
-                        >
-                          {formData.message.length}/1000
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Turnstile CAPTCHA */}
-                    <div className="space-y-2">
-                      <TurnstileCaptcha
-                        ref={turnstileRef}
-                        onVerify={(token) => {
-                          setTurnstileToken(token);
-                          setTurnstileError(false);
-                        }}
-                        onExpire={() => setTurnstileToken(null)}
-                        onError={() => setTurnstileError(true)}
-                        theme="dark"
-                      />
-                      <div
-                        className={`overflow-hidden transition-all duration-300 ease-out ${turnstileError || (!turnstileToken && formData.name && formData.email && formData.message) ? "max-h-6 opacity-100" : "max-h-0 opacity-0"}`}
-                      >
-                        <p className="text-sm text-destructive text-center">
-                          {turnstileError
-                            ? "Verifikasi gagal, silakan coba lagi"
-                            : "Silakan selesaikan verifikasi CAPTCHA"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <Button type="submit" className="w-full glow-primary" disabled={isSubmitting || !turnstileToken}>
-                      {isSubmitting ? (
-                        <span className="flex items-center gap-2">
-                          <span className="h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                          Sending...
-                        </span>
-                      ) : (
-                        <>
-                          Send Message
-                          <Send className="ml-2 h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
-                  </form>
-                )}
-              </div>
-            </ScrollReveal>
-          </div>
+    return <Layout><div className="public-container public-page">
+    <header className="public-page-heading"><h1>Percakapan yang<br /><em>membuka peluang.</em></h1><p className="public-lede">Punya kebutuhan security engineering, ingin membahas proyek, atau mengenalkan timmu? Ceritakan konteksnya di sini.</p></header>
+    <div className="contact-grid"><aside className="contact-details"><h2>Terhubung langsung.</h2>
+      <a href={`mailto:${contactEmail}`}><Mail aria-hidden="true"/><span>{contactEmail}</span></a>
+      <a href={get("social_github", "https://github.com/Nueeva")} target="_blank" rel="noopener noreferrer"><Github aria-hidden="true"/><span>GitHub</span></a>
+      <a href={get("social_linkedin", "https://linkedin.com/rifqia")} target="_blank" rel="noopener noreferrer"><Linkedin aria-hidden="true"/><span>LinkedIn</span></a>
+      <p>Untuk peluang kerja, sertakan peran dan kebutuhan tim. Untuk proyek, gambaran sistem dan lingkup pekerjaan akan membantu saya memahami konteksnya.</p>
+    </aside><section className="contact-form" aria-labelledby="contact-form-title"><h2 id="contact-form-title">Kirim pesan.</h2>
+      {isSubmitted ? <div className="contact-success" role="status"><CheckCircle aria-hidden="true"/><h3>Pesanmu sudah terkirim.</h3><p>Terima kasih sudah menghubungi. Saya akan membaca dan membalasnya melalui email.</p><button className="public-text-link" type="button" onClick={anotherMessage}>Tulis pesan lain <Send /></button></div> : <form ref={formRef} onSubmit={handleSubmit} noValidate aria-busy={isSubmitting}>
+        <div hidden aria-hidden="true"><label htmlFor="website">Website</label><input id="website" name="website" tabIndex={-1} autoComplete="off" value={honeypot} onChange={event => setHoneypot(event.target.value)}/></div>
+        <div className="contact-field"><label htmlFor="name">Nama</label><input id="name" name="name" value={formData.name} onChange={event => change("name", event.target.value)} placeholder="Nama lengkapmu" autoComplete="name" required minLength={2} maxLength={50} aria-invalid={!!errors.name} aria-describedby="name-info" disabled={isSubmitting}/><div id="name-info" className="contact-field-info"><span className="field-error">{errors.name}</span><span>{formData.name.length}/50</span></div></div>
+        <div className="contact-field"><label htmlFor="email">Email</label><div className="email-combobox"><input id="email" name="email" type="email" role="combobox" aria-autocomplete="list" aria-expanded={suggestionsOpen} aria-controls={suggestionsOpen ? "email-suggestions" : undefined} aria-activedescendant={suggestionsOpen && selectedSuggestion >= 0 ? `email-option-${selectedSuggestion}` : undefined} value={formData.email} onChange={event => change("email", event.target.value)} onKeyDown={emailKeyDown} onBlur={() => setShowSuggestions(false)} onFocus={() => setShowSuggestions(true)} placeholder="nama@domain.com" autoComplete="email" required minLength={5} maxLength={100} aria-invalid={!!errors.email} aria-describedby="email-info" disabled={isSubmitting}/>
+          {suggestionsOpen && <ul id="email-suggestions" className="email-suggestions" role="listbox" aria-label="Saran alamat email">{suggestions.map((suggestion, index) => <li key={suggestion} id={`email-option-${index}`} role="option" aria-selected={selectedSuggestion === index} onPointerDown={event => { event.preventDefault(); selectEmail(suggestion); }} onPointerEnter={() => setSelectedSuggestion(index)}>{suggestion}</li>)}</ul>}
+        </div><div id="email-info" className="contact-field-info"><span className="field-error">{errors.email}</span><span>{formData.email.length}/100</span></div></div>
+        <div className="contact-field"><label htmlFor="message">Pesan</label><textarea id="message" name="message" value={formData.message} onChange={event => change("message", event.target.value)} placeholder="Ceritakan kebutuhan dan konteksnya…" required minLength={10} maxLength={1000} rows={6} aria-invalid={!!errors.message} aria-describedby="message-info" disabled={isSubmitting}/><div id="message-info" className="contact-field-info"><span className="field-error">{errors.message}</span><span>{formData.message.length}/1000</span></div></div>
+        <div className="contact-captcha"><TurnstileCaptcha key={captchaRetry} ref={turnstileRef} theme={captchaTheme} onVerify={token => { setTurnstileToken(token); setCaptchaStatus("verified"); setSendError(""); }} onExpire={() => invalidateCaptcha("expired")} onError={() => invalidateCaptcha("error")}/>
+          <p className="captcha-help" role="status">{captchaStatus === "verified" ? "Verifikasi selesai. Pesan siap dikirim." : captchaStatus === "expired" ? "Verifikasi kedaluwarsa. Selesaikan kembali verifikasi keamanan." : captchaStatus === "error" ? "Verifikasi belum berhasil. Coba lagi atau gunakan email langsung." : "Selesaikan verifikasi keamanan sebelum mengirim."}</p>
+          {captchaStatus === "error" && <button type="button" className="public-text-link" onClick={() => { invalidateCaptcha("unverified"); setCaptchaRetry(current => current + 1); }}>Ulangi verifikasi</button>}
         </div>
-      </div>
-    </Layout>
-  );
-};
-
-export default Contact;
+        {sendError && <p className="contact-send-error" role="alert">{sendError}</p>}
+        <button className="public-submit" type="submit" disabled={isSubmitting || !turnstileToken}>{isSubmitting ? "Mengirim pesan…" : "Kirim pesan"}<Send aria-hidden="true"/></button>
+      </form>}
+    </section></div>
+  </div></Layout>;
+}

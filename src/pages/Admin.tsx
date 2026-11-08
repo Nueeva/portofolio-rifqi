@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -8,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/api/client";
 import { 
   Shield, 
   LogOut, 
@@ -124,7 +125,7 @@ const projectSchema = z.object({
   problem: z.string().trim().min(1, "Problem harus diisi").max(500, "Problem maksimal 500 karakter"),
   solution: z.string().trim().min(1, "Solusi harus diisi").max(1000, "Solusi maksimal 1000 karakter"),
   tech_stack: z.string().trim().min(1, "Tech stack harus diisi"),
-  category: z.string().trim().min(1, "Kategori harus diisi").max(50, "Kategori maksimal 50 karakter"),
+  category: z.string().trim().refine(value=>["pentesting","tools","web-security"].includes(value),"Pilih kategori yang tersedia"),
   github_url: z.string().url("URL GitHub tidak valid").optional().or(z.literal("")),
   demo_url: z.string().url("URL Demo tidak valid").optional().or(z.literal("")),
 });
@@ -174,6 +175,7 @@ export default function Admin() {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const queryCache = useQueryClient();
 
   // Get unique categories
   const categories = useMemo(() => {
@@ -266,6 +268,7 @@ export default function Admin() {
   }, [user, isAdmin, loading, navigate, toast]);
 
   const fetchProjects = async () => {
+    void queryCache.invalidateQueries({queryKey:["projects"]});
     try {
       const { data, error } = await supabase
         .from("projects")
@@ -1427,13 +1430,7 @@ export default function Admin() {
 
               <div className="space-y-2">
                 <Label htmlFor="category">Kategori *</Label>
-                <Input
-                  id="category"
-                  placeholder="e.g., Web Security, Penetration Testing"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className={errors.category ? "border-destructive" : ""}
-                />
+                <select id="category" className="w-full border bg-background p-3" value={formData.category} onChange={e=>setFormData({...formData,category:e.target.value})}><option value="">Pilih kategori</option><option value="tools">Tools</option><option value="web-security">Web Security</option><option value="pentesting">Pentesting</option></select>
                 {errors.category && (
                   <p className="text-sm text-destructive">{errors.category}</p>
                 )}
