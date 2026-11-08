@@ -1,0 +1,478 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-08T01:27:03.695Z",
+  "title": "Design System: Celah — Rifqi Ariansyah",
+  "extensions": {
+    "colorMeta": {
+      "petrol": {
+        "role": "neutral",
+        "displayName": "Petrol",
+        "tonalRamp": [
+          "oklch(15% 0.0200 219.44)",
+          "oklch(27% 0.0200 219.44)",
+          "oklch(38% 0.0200 219.44)",
+          "oklch(49% 0.0200 219.44)",
+          "oklch(60% 0.0200 219.44)",
+          "oklch(72% 0.0200 219.44)",
+          "oklch(84% 0.0200 219.44)",
+          "oklch(95% 0.0200 219.44)"
+        ]
+      },
+      "petrol-surface": {
+        "role": "neutral",
+        "displayName": "Petrol Surface",
+        "tonalRamp": [
+          "oklch(15% 0.0361 215.98)",
+          "oklch(27% 0.0361 215.98)",
+          "oklch(38% 0.0361 215.98)",
+          "oklch(49% 0.0361 215.98)",
+          "oklch(60% 0.0361 215.98)",
+          "oklch(72% 0.0361 215.98)",
+          "oklch(84% 0.0361 215.98)",
+          "oklch(95% 0.0361 215.98)"
+        ]
+      },
+      "petrol-low": {
+        "role": "neutral",
+        "displayName": "Petrol Low",
+        "tonalRamp": [
+          "oklch(15% 0.0234 209.95)",
+          "oklch(27% 0.0234 209.95)",
+          "oklch(38% 0.0234 209.95)",
+          "oklch(49% 0.0234 209.95)",
+          "oklch(60% 0.0234 209.95)",
+          "oklch(72% 0.0234 209.95)",
+          "oklch(84% 0.0234 209.95)",
+          "oklch(95% 0.0234 209.95)"
+        ]
+      },
+      "ivory": {
+        "role": "neutral",
+        "displayName": "Ivory",
+        "tonalRamp": [
+          "oklch(15% 0.0156 86.43)",
+          "oklch(27% 0.0156 86.43)",
+          "oklch(38% 0.0156 86.43)",
+          "oklch(49% 0.0156 86.43)",
+          "oklch(60% 0.0156 86.43)",
+          "oklch(72% 0.0156 86.43)",
+          "oklch(84% 0.0156 86.43)",
+          "oklch(95% 0.0156 86.43)"
+        ]
+      },
+      "champagne": {
+        "role": "primary",
+        "displayName": "Champagne",
+        "tonalRamp": [
+          "oklch(15% 0.0493 82.63)",
+          "oklch(27% 0.0493 82.63)",
+          "oklch(38% 0.0493 82.63)",
+          "oklch(49% 0.0493 82.63)",
+          "oklch(60% 0.0493 82.63)",
+          "oklch(72% 0.0493 82.63)",
+          "oklch(84% 0.0493 82.63)",
+          "oklch(95% 0.0493 82.63)"
+        ]
+      },
+      "cool-reflection": {
+        "role": "secondary",
+        "displayName": "Cool Reflection",
+        "tonalRamp": [
+          "oklch(15% 0.0517 186.52)",
+          "oklch(27% 0.0517 186.52)",
+          "oklch(38% 0.0517 186.52)",
+          "oklch(49% 0.0517 186.52)",
+          "oklch(60% 0.0517 186.52)",
+          "oklch(72% 0.0517 186.52)",
+          "oklch(84% 0.0517 186.52)",
+          "oklch(95% 0.0517 186.52)"
+        ]
+      },
+      "dark-muted": {
+        "role": "neutral",
+        "displayName": "Dark Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0095 150.66)",
+          "oklch(27% 0.0095 150.66)",
+          "oklch(38% 0.0095 150.66)",
+          "oklch(49% 0.0095 150.66)",
+          "oklch(60% 0.0095 150.66)",
+          "oklch(72% 0.0095 150.66)",
+          "oklch(84% 0.0095 150.66)",
+          "oklch(95% 0.0095 150.66)"
+        ]
+      },
+      "dark-line": {
+        "role": "neutral",
+        "displayName": "Dark Line",
+        "tonalRamp": [
+          "oklch(15% 0.0324 210.82)",
+          "oklch(27% 0.0324 210.82)",
+          "oklch(38% 0.0324 210.82)",
+          "oklch(49% 0.0324 210.82)",
+          "oklch(60% 0.0324 210.82)",
+          "oklch(72% 0.0324 210.82)",
+          "oklch(84% 0.0324 210.82)",
+          "oklch(95% 0.0324 210.82)"
+        ]
+      },
+      "dark-input": {
+        "role": "neutral",
+        "displayName": "Dark Input",
+        "tonalRamp": [
+          "oklch(15% 0.0271 202.92)",
+          "oklch(27% 0.0271 202.92)",
+          "oklch(38% 0.0271 202.92)",
+          "oklch(49% 0.0271 202.92)",
+          "oklch(60% 0.0271 202.92)",
+          "oklch(72% 0.0271 202.92)",
+          "oklch(84% 0.0271 202.92)",
+          "oklch(95% 0.0271 202.92)"
+        ]
+      },
+      "dark-cavity": {
+        "role": "neutral",
+        "displayName": "Dark Cavity",
+        "tonalRamp": [
+          "oklch(15% 0.0153 220.17)",
+          "oklch(27% 0.0153 220.17)",
+          "oklch(38% 0.0153 220.17)",
+          "oklch(49% 0.0153 220.17)",
+          "oklch(60% 0.0153 220.17)",
+          "oklch(72% 0.0153 220.17)",
+          "oklch(84% 0.0153 220.17)",
+          "oklch(95% 0.0153 220.17)"
+        ]
+      },
+      "light-surface": {
+        "role": "neutral",
+        "displayName": "Light Surface",
+        "tonalRamp": [
+          "oklch(15% 0.0167 91.56)",
+          "oklch(27% 0.0167 91.56)",
+          "oklch(38% 0.0167 91.56)",
+          "oklch(49% 0.0167 91.56)",
+          "oklch(60% 0.0167 91.56)",
+          "oklch(72% 0.0167 91.56)",
+          "oklch(84% 0.0167 91.56)",
+          "oklch(95% 0.0167 91.56)"
+        ]
+      },
+      "light-low": {
+        "role": "neutral",
+        "displayName": "Light Low",
+        "tonalRamp": [
+          "oklch(15% 0.0122 116.82)",
+          "oklch(27% 0.0122 116.82)",
+          "oklch(38% 0.0122 116.82)",
+          "oklch(49% 0.0122 116.82)",
+          "oklch(60% 0.0122 116.82)",
+          "oklch(72% 0.0122 116.82)",
+          "oklch(84% 0.0122 116.82)",
+          "oklch(95% 0.0122 116.82)"
+        ]
+      },
+      "petrol-ink": {
+        "role": "neutral",
+        "displayName": "Petrol Ink",
+        "tonalRamp": [
+          "oklch(15% 0.0317 220.04)",
+          "oklch(27% 0.0317 220.04)",
+          "oklch(38% 0.0317 220.04)",
+          "oklch(49% 0.0317 220.04)",
+          "oklch(60% 0.0317 220.04)",
+          "oklch(72% 0.0317 220.04)",
+          "oklch(84% 0.0317 220.04)",
+          "oklch(95% 0.0317 220.04)"
+        ]
+      },
+      "bronze": {
+        "role": "primary",
+        "displayName": "Bronze",
+        "tonalRamp": [
+          "oklch(15% 0.0567 68.73)",
+          "oklch(27% 0.0567 68.73)",
+          "oklch(38% 0.0567 68.73)",
+          "oklch(49% 0.0567 68.73)",
+          "oklch(60% 0.0567 68.73)",
+          "oklch(72% 0.0567 68.73)",
+          "oklch(84% 0.0567 68.73)",
+          "oklch(95% 0.0567 68.73)"
+        ]
+      },
+      "light-muted": {
+        "role": "neutral",
+        "displayName": "Light Muted",
+        "tonalRamp": [
+          "oklch(15% 0.0223 208.76)",
+          "oklch(27% 0.0223 208.76)",
+          "oklch(38% 0.0223 208.76)",
+          "oklch(49% 0.0223 208.76)",
+          "oklch(60% 0.0223 208.76)",
+          "oklch(72% 0.0223 208.76)",
+          "oklch(84% 0.0223 208.76)",
+          "oklch(95% 0.0223 208.76)"
+        ]
+      },
+      "light-line": {
+        "role": "neutral",
+        "displayName": "Light Line",
+        "tonalRamp": [
+          "oklch(15% 0.0217 88.74)",
+          "oklch(27% 0.0217 88.74)",
+          "oklch(38% 0.0217 88.74)",
+          "oklch(49% 0.0217 88.74)",
+          "oklch(60% 0.0217 88.74)",
+          "oklch(72% 0.0217 88.74)",
+          "oklch(84% 0.0217 88.74)",
+          "oklch(95% 0.0217 88.74)"
+        ]
+      },
+      "light-input": {
+        "role": "neutral",
+        "displayName": "Light Input",
+        "tonalRamp": [
+          "oklch(15% 0.0228 81.74)",
+          "oklch(27% 0.0228 81.74)",
+          "oklch(38% 0.0228 81.74)",
+          "oklch(49% 0.0228 81.74)",
+          "oklch(60% 0.0228 81.74)",
+          "oklch(72% 0.0228 81.74)",
+          "oklch(84% 0.0228 81.74)",
+          "oklch(95% 0.0228 81.74)"
+        ]
+      },
+      "light-cool": {
+        "role": "secondary",
+        "displayName": "Light Cool",
+        "tonalRamp": [
+          "oklch(15% 0.0322 180.09)",
+          "oklch(27% 0.0322 180.09)",
+          "oklch(38% 0.0322 180.09)",
+          "oklch(49% 0.0322 180.09)",
+          "oklch(60% 0.0322 180.09)",
+          "oklch(72% 0.0322 180.09)",
+          "oklch(84% 0.0322 180.09)",
+          "oklch(95% 0.0322 180.09)"
+        ]
+      },
+      "light-reflection": {
+        "role": "neutral",
+        "displayName": "Light Reflection",
+        "tonalRamp": [
+          "oklch(15% 0.0398 83.81)",
+          "oklch(27% 0.0398 83.81)",
+          "oklch(38% 0.0398 83.81)",
+          "oklch(49% 0.0398 83.81)",
+          "oklch(60% 0.0398 83.81)",
+          "oklch(72% 0.0398 83.81)",
+          "oklch(84% 0.0398 83.81)",
+          "oklch(95% 0.0398 83.81)"
+        ]
+      },
+      "light-danger": {
+        "displayName": "Light Danger",
+        "tonalRamp": [
+          "oklch(15% 0.1604 28.70)",
+          "oklch(27% 0.1604 28.70)",
+          "oklch(38% 0.1604 28.70)",
+          "oklch(49% 0.1604 28.70)",
+          "oklch(60% 0.1604 28.70)",
+          "oklch(72% 0.1604 28.70)",
+          "oklch(84% 0.1604 28.70)",
+          "oklch(95% 0.1604 28.70)"
+        ]
+      },
+      "dark-danger": {
+        "displayName": "Dark Danger",
+        "tonalRamp": [
+          "oklch(15% 0.1184 24.66)",
+          "oklch(27% 0.1184 24.66)",
+          "oklch(38% 0.1184 24.66)",
+          "oklch(49% 0.1184 24.66)",
+          "oklch(60% 0.1184 24.66)",
+          "oklch(72% 0.1184 24.66)",
+          "oklch(84% 0.1184 24.66)",
+          "oklch(95% 0.1184 24.66)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Hero Display",
+        "purpose": "First line of the cybersecurity role."
+      },
+      "headline": {
+        "displayName": "Page Heading",
+        "purpose": "Public page introductions."
+      },
+      "section": {
+        "displayName": "Section Heading",
+        "purpose": "Home editorial sections."
+      },
+      "accent": {
+        "displayName": "Italic Accent",
+        "purpose": "Instrument Serif italic emphasis; contextual sizing."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Reading copy and interface defaults."
+      },
+      "lede": {
+        "displayName": "Lede",
+        "purpose": "Introductory copy with a 65ch limit."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Navigation, categories and metadata."
+      },
+      "code": {
+        "displayName": "Code and Data",
+        "purpose": "Code and data only; no ordinary public labels."
+      }
+    },
+    "shadows": [
+      {
+        "name": "lower-plane",
+        "value": "0 -16px 30px var(--site-shadow)",
+        "purpose": "Depth beneath the hero lower plane."
+      },
+      {
+        "name": "cavity-inset",
+        "value": "inset 0 12px 20px #03090bcc",
+        "purpose": "Inset depth in the decorative hero cavity."
+      },
+      {
+        "name": "email-suggestions",
+        "value": "0 12px 24px var(--site-shadow)",
+        "purpose": "Functional separation for the email suggestion list."
+      }
+    ],
+    "motion": [
+      {
+        "name": "control-feedback",
+        "value": "180ms",
+        "purpose": "Most public hover and control feedback."
+      },
+      {
+        "name": "route-transition",
+        "value": "450ms cubic-bezier(0.22, 1, 0.36, 1)",
+        "purpose": "Visible camera lift and blur; filter and transform clear on completion."
+      },
+      {
+        "name": "pointer-glint",
+        "value": "spring(stiffness: 90, damping: 28)",
+        "purpose": "Damped decorative hero glint only."
+      },
+      {
+        "name": "hero-scroll-gate",
+        "value": "(min-width: 768px) and (min-height: 780px) and (prefers-reduced-motion: no-preference)",
+        "purpose": "Only this configuration enables the hero scroll timeline."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "mobile-max",
+        "value": "767px"
+      },
+      {
+        "name": "hero-short-max-height",
+        "value": "779px"
+      },
+      {
+        "name": "hero-small-max-width",
+        "value": "480px"
+      },
+      {
+        "name": "riva-short-max-height",
+        "value": "600px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Text Link",
+      "kind": "button",
+      "refersTo": "text-link",
+      "description": "Underlined editorial action with an expanding arrow gap.",
+      "html": "<a class=\"ds-text-link\" href=\"#xssscope\">Telusuri xssscope <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M7 17 17 7M7 7h10v10\"/></svg></a>",
+      "css": ".ds-text-link{display:inline-flex;align-items:center;gap:22px;min-height:44px;border-bottom:1px solid var(--site-metal,#725739);padding:9px 0;font:14px Inter,sans-serif;color:var(--site-ink,#10272e);text-decoration:none;transition:color .18s,gap .18s}.ds-text-link:hover{color:var(--site-metal,#725739);gap:29px}.ds-text-link svg{width:19px;height:19px;flex:none}.ds-text-link:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}@media(prefers-reduced-motion:reduce){.ds-text-link{transition:none}}"
+    },
+    {
+      "name": "Submit Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Filled form action with brightness hover and disabled feedback.",
+      "html": "<button type=\"button\" class=\"ds-submit\">Kirim pesan <svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m22 2-7 20-4-9-9-4Z\"/><path d=\"M22 2 11 13\"/></svg></button>",
+      "css": ".ds-submit{min-height:48px;padding:10px 22px;display:inline-flex;align-items:center;justify-content:center;gap:22px;background:var(--site-metal,#725739);color:var(--site-bg,#f1ece1);border:0;border-radius:3px;font:14px Inter,sans-serif;cursor:pointer;transition:filter .18s}.ds-submit:hover{filter:brightness(1.1)}.ds-submit:disabled{opacity:.55;cursor:not-allowed}.ds-submit svg{width:18px;height:18px}.ds-submit:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}@media(prefers-reduced-motion:reduce){.ds-submit{transition:none}}"
+    },
+    {
+      "name": "Contact Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Visible label and transparent input with a reserved validation/count line.",
+      "html": "<div class=\"ds-field\"><label for=\"ds-contact-name\">Nama</label><input id=\"ds-contact-name\" name=\"name\" placeholder=\"Nama lengkapmu\" aria-describedby=\"ds-name-info\" maxlength=\"50\"/><div class=\"ds-field-info\" id=\"ds-name-info\"><span></span><span>0/50</span></div></div>",
+      "css": ".ds-field{display:grid;gap:9px;color:var(--site-ink,#10272e);font-family:Inter,sans-serif}.ds-field label{font-size:13px;font-weight:500}.ds-field input{width:100%;border:1px solid var(--site-input,#8a8274);padding:13px 15px;border-radius:3px;background:transparent;color:var(--site-ink,#10272e);font:16px Inter,sans-serif;caret-color:var(--site-metal,#725739)}.ds-field input::placeholder{color:var(--site-muted,#536568)}.ds-field input[aria-invalid=true]{border-color:hsl(var(--destructive,4 66% 39%))}.ds-field input:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}.ds-field-info{display:flex;justify-content:space-between;gap:12px;min-height:20px;font-size:12px;color:var(--site-muted,#536568)}"
+    },
+    {
+      "name": "Public Navigation",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Official mark, full name and ruled active state from the public desktop shell.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Navigasi utama\"><a class=\"ds-brand\" href=\"#beranda\"><svg viewBox=\"0 0 256 256\" fill=\"currentColor\" aria-hidden=\"true\"><path d=\"M144 176L144 160L176 160L176 144L128 144L128 112L144 112L144 32L224 32L224 224L144 224L144 208L176 208L176 176Z M32 32L96 32L96 96L128 96L128 112L96 112L96 144L128 144L128 176L144 176L144 208L96 208L96 224L32 224Z\"/></svg><span>Rifqi Ariansyah</span></a><div class=\"ds-nav-links\"><a href=\"#beranda\">Beranda</a><a href=\"#karya\" aria-current=\"page\">Karya</a><a href=\"#tentang\">Tentang</a><a href=\"#kontak\">Kontak</a></div></nav>",
+      "css": ".ds-nav{min-height:64px;display:flex;align-items:center;justify-content:space-between;gap:24px;background:var(--site-bg,#f1ece1);border-bottom:1px solid var(--site-line,#c9c3b4);font-family:Inter,sans-serif}.ds-brand{display:inline-flex;align-items:center;gap:11px;min-height:44px;font-size:13px;font-weight:500;white-space:nowrap;color:var(--site-ink,#10272e);text-decoration:none}.ds-brand svg{width:28px;height:28px;color:var(--site-metal,#725739);flex:none}.ds-nav-links{display:flex;align-items:center;flex-wrap:wrap;gap:28px;font-size:12px}.ds-nav-links a{min-height:44px;display:inline-flex;align-items:center;color:var(--site-muted,#536568);text-decoration:none;transition:color .18s}.ds-nav-links a:hover,.ds-nav-links a[aria-current]{color:var(--site-metal,#725739)}.ds-nav-links a[aria-current]{text-decoration:underline;text-underline-offset:8px}.ds-nav a:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}@media(prefers-reduced-motion:reduce){.ds-nav-links a{transition:none}}"
+    },
+    {
+      "name": "Category Filter",
+      "kind": "chip",
+      "refersTo": "filter",
+      "description": "Wrapping text filter; the selected state uses metal color and an underline.",
+      "html": "<div class=\"ds-filter\" role=\"group\" aria-label=\"Filter kategori proyek\"><button type=\"button\" aria-pressed=\"true\">Semua karya</button><button type=\"button\" aria-pressed=\"false\">Security Tools</button><button type=\"button\" aria-pressed=\"false\">Web Security</button><button type=\"button\" aria-pressed=\"false\">Penetration Testing</button></div>",
+      "css": ".ds-filter{display:flex;flex-wrap:wrap;gap:12px 28px;padding-bottom:22px;border-bottom:1px solid var(--site-line,#c9c3b4)}.ds-filter button{min-height:44px;color:var(--site-muted,#536568);background:transparent;border:0;border-bottom:1px solid transparent;font:13px Inter,sans-serif;cursor:pointer}.ds-filter button[aria-pressed=true]{color:var(--site-metal,#725739);border-bottom-color:var(--site-metal,#725739)}.ds-filter button:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}"
+    },
+    {
+      "name": "Process Artwork",
+      "kind": "card",
+      "refersTo": "artwork",
+      "description": "Decorative diagram of xssscope reasoning, with the recurring diagonal highlight.",
+      "html": "<div class=\"ds-artwork\" aria-hidden=\"true\"><div class=\"ds-process\"><span>Parameter</span><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M12 5v14m-6-6 6 6 6-6\"/></svg><span>Konteks refleksi</span><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"M12 5v14m-6-6 6 6 6-6\"/></svg><em>Verifikasi.</em></div><p class=\"ds-art-detail\">HTML · Atribut · Script<br/>JavaScript / Node.js</p></div>",
+      "css": ".ds-artwork{min-height:340px;position:relative;overflow:hidden;background:var(--site-surface,#e4e0d4);padding:clamp(25px,5vw,56px);display:flex;flex-direction:column;justify-content:center;color:var(--site-ink,#10272e)}.ds-artwork::after{content:\"\";position:absolute;left:-12%;right:-12%;bottom:19%;height:1px;background:linear-gradient(90deg,transparent,var(--site-cool,#6a857f),var(--site-metal,#725739),transparent);transform:rotate(-8deg)}.ds-process{display:flex;flex-direction:column;align-items:flex-start;gap:8px;font:clamp(1.4rem,2.6vw,2.5rem)/1.2 \"Space Grotesk\",sans-serif;letter-spacing:-.025em}.ds-process svg{width:18px;height:18px;color:var(--site-cool,#6a857f);margin-left:12px}.ds-process em{margin-left:12%;font-family:\"Instrument Serif\",serif;font-style:italic;font-size:1.4em;color:var(--site-metal,#725739)}.ds-art-detail{font:12px Inter,sans-serif;margin-top:28px;color:var(--site-muted,#536568);max-width:32ch}@media(max-width:767px){.ds-artwork{min-height:290px}}"
+    },
+    {
+      "name": "RIVA Message Panel",
+      "kind": "custom",
+      "refersTo": "riva-dialog",
+      "description": "Token-scoped information panel with a scrollable conversation and compact input.",
+      "html": "<section class=\"ds-riva\" aria-label=\"RIVA\"><h2>RIVA</h2><p class=\"ds-riva-description\">Asisten informasi portofolio Rifqi.</p><div class=\"ds-messages\" role=\"log\"><p>Halo, saya RIVA. Saya bisa membantu mengenalkan pekerjaan Rifqi, keahlian, dan cara menghubunginya. Pilih topik atau tulis pertanyaanmu.</p></div><div class=\"ds-riva-shortcuts\"><button type=\"button\">xssscope</button><button type=\"button\">Apexsions</button><button type=\"button\">Keahlian</button><button type=\"button\">Kontak</button></div><form class=\"ds-riva-form\"><label class=\"ds-riva-label\" for=\"ds-riva-input\">Pertanyaan untuk RIVA</label><input id=\"ds-riva-input\" placeholder=\"Tanya tentang karya Rifqi\" maxlength=\"500\"/><button type=\"button\" aria-label=\"Kirim pertanyaan\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" aria-hidden=\"true\"><path d=\"m22 2-7 20-4-9-9-4Z\"/><path d=\"M22 2 11 13\"/></svg></button></form></section>",
+      "css": ".ds-riva{width:min(410px,calc(100vw - 32px));height:min(570px,calc(100dvh - 110px));max-height:calc(100dvh - 110px);padding:24px;border:1px solid var(--site-line,#c9c3b4);border-radius:8px;background:var(--site-bg,#f1ece1);color:var(--site-ink,#10272e);font-family:Inter,sans-serif;display:grid;grid-template-rows:auto auto minmax(65px,1fr) auto auto;gap:16px}.ds-riva h2{margin:0;font:400 18px \"Space Grotesk\",sans-serif}.ds-riva-description{font-size:14px;color:var(--site-muted,#536568);margin:0}.ds-messages{min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:18px;padding-right:8px;font-size:13px}.ds-messages p{margin:0;padding:12px;background:var(--site-surface,#e4e0d4);border-radius:4px}.ds-messages p[data-from=user]{margin-left:30px;background:var(--site-metal,#725739);color:var(--site-bg,#f1ece1)}.ds-riva-form{display:flex;gap:8px}.ds-riva-label{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.ds-riva-form input{min-width:0;flex:1;padding:10px;border:1px solid var(--site-input,#8a8274);border-radius:3px;background:var(--site-bg,#f1ece1);color:var(--site-ink,#10272e);font:16px Inter,sans-serif}.ds-riva-form button{width:44px;height:44px;display:grid;place-items:center;background:var(--site-metal,#725739);color:var(--site-bg,#f1ece1);border:0;border-radius:3px}.ds-riva-form svg{width:18px;height:18px}.ds-riva-form button:disabled{opacity:.5}.ds-riva-form input:focus-visible,.ds-riva-form button:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px;}.ds-riva-shortcuts{display:flex;gap:14px;flex-wrap:wrap;font-size:12px}.ds-riva-shortcuts button{font:inherit;background:transparent;border:0;color:inherit;text-decoration:underline;text-underline-offset:4px;min-height:40px}.ds-riva-shortcuts button:focus-visible{outline:2px solid var(--site-metal,#725739);outline-offset:5px}@media(max-height:600px){.ds-riva{height:calc(100dvh - 24px);max-height:calc(100dvh - 24px);padding:18px;gap:10px;grid-template-rows:auto auto minmax(40px,1fr) auto auto}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "Celah",
+    "overview": "Two diagonal material planes open a narrow seam of light. This motif connects the cybersecurity hero to project artwork, while generous editorial spacing and restrained type keep the work readable. Rifqi is presented as a Cybersecurity Engineer; the official TembusMark and full name anchor the shared shell.\n\nThis system covers all public pages, case studies and errors. A route-scoped boundary contains its CSS variables, notification roots and portal host. Dialog, AlertDialog and Select portals inherit that scope. Exact `/admin` and `/auth` routes retain their legacy shell and root theme tokens; unknown nested paths use the public error design.",
+    "keyCharacteristics": [
+      "Petrol and warm ivory, with champagne or bronze interaction accents.",
+      "Alternating editorial compositions and diagrams of documented work.",
+      "Selectable, visible reading content with decorative motion around it."
+    ],
+    "rules": [
+      {
+        "name": "The Scope Rule",
+        "body": "Apply Celah through the public boundary and its portal host; preserve the legacy root palette for admin and authentication.",
+        "section": "colors"
+      }
+    ],
+    "dos": [
+      "**Do** keep every public route and overlay in the Celah scope, with both themes and visible keyboard focus.",
+      "**Do** keep Indonesian interface copy, the Cybersecurity Engineer role, and the official TembusMark geometry.",
+      "**Do** preserve canonical project facts, names, IDs, technical terms, quantities and links from `src/data/projects.ts`; use `projectCopy.id.ts` for presentation text and preserve future CMS edits.",
+      "**Do** keep reading content visible on first render and provide complete static compositions for mobile, short screens and reduced motion."
+    ],
+    "donts": [
+      "**Don't** apply the public theme to legacy admin/auth, or change contact payloads, validation, Turnstile, honeypot or timing contracts as a design edit.",
+      "**Don't** invent screenshots, scanner output, logs, diffs, credentials, certifications or performance claims; project accomplishments remain separate from fetched certifications.",
+      "**Don't** add replacement monograms, chapter/progress rails, global glitch effects or decorative mono labels.",
+      "**Don't** treat source checks or generated component previews as visual approval; complete the documented browser review before releasing this revision."
+    ]
+  }
+}
