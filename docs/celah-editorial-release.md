@@ -6,11 +6,11 @@ Motion fixes include an independent finite hero entrance, non-sticky scroll prog
 
 Editorial management provides project summaries/studies, featured selection/order, arbitrary skill groups and persistent CV publication. Certifications use the real database editor; the misleading localStorage certification editor was removed. Frontend now uses the same-origin API for content, sessions, storage, security events, contact and analytics.
 
-Backend is staged privately; SMTP and CAPTCHA configuration are deferred at the owner's request. Browser QA and public cutover are pending, not approved or verified by build/tests alone.
+Frontend and API are deployed publicly. The owner explicitly authorized deployment with visual QA deferred; SMTP and CAPTCHA configuration remain deferred. Build/tests do not establish visual quality.
 
 ## Content growth workflow
 
-These steps describe the candidate admin interface backed by the same-origin API. After public cutover, content updates use persisted records without rebuilding the frontend. A successful save publishes to the selected backend; **Pratinjau isi** is a local content preview, not a separate draft or scheduled-publishing system. The current public deployment remains unchanged until cutover.
+These steps describe the deployed admin interface backed by the same-origin API. Content updates use persisted records without rebuilding the frontend. A successful save publishes to the selected backend; **Pratinjau isi** is a local content preview, not a separate draft or scheduled-publishing system. The new public deployment uses this backend.
 
 | Content | Admin workflow | Public result to check |
 | --- | --- | --- |
@@ -21,8 +21,8 @@ These steps describe the candidate admin interface backed by the same-origin API
 
 Keep existing project IDs and URLs when editing. Verify facts and links before publishing; do not add invented metrics, credentials or screenshots. When editorial records exist, unchecking every featured project intentionally leaves the featured sections empty; the four-project fallback applies only when no editorial rows are available. Reload a public page after saving to check fresh content rather than relying on an already cached view.
 
-## Pending release verification
+## Pending browser verification
 
-Browser preview remains denied by the saved permission gate. **No screenshots, interactive browser validation or public cutover approval exist for this revision.** The workflow above is derived from source and has not been exercised in a browser in this session.
+Preview and live browser access remain denied by the saved permission gate. **The owner approved public cutover before visual QA; no screenshots or interactive browser validation exist for this revision.** The workflow above is derived from source and has not been exercised in a browser in this session.
 
-Before cutover, use authorized test content to check project/editorial create and edit, featured ordering and empty states, a managed project's case-study URL, skills publication/removal, persisted certification links/images and CV replacement. Confirm persistence after reload and in a fresh authenticated session, then restore test content. Check API-unavailable states, long content and failed images/uploads alongside desktop/mobile layouts, both themes, keyboard focus, reduced motion, theme/canvas fallback, RIVA and form/admin flows. Keep database/upload backups and the operational gates in the migration receipt. Do not send real email while SMTP is unconfigured; delivery checks require the owner's later configuration and explicit request.
+During the deferred browser check, use authorized test content to check project/editorial create and edit, featured ordering and empty states, a managed project's case-study URL, skills publication/removal, persisted certification links/images and CV replacement. Confirm persistence after reload and in a fresh authenticated session, then restore test content. Check API-unavailable states, long content and failed images/uploads alongside desktop/mobile layouts, both themes, keyboard focus, reduced motion, theme/canvas fallback, RIVA and form/admin flows. Keep database/upload backups and the operational gates in the migration receipt. Do not send real email while SMTP is unconfigured; delivery checks require the owner's later configuration and explicit request.

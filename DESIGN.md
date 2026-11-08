@@ -140,7 +140,7 @@ This system covers all public pages, case studies and errors. A persistent publi
 - Editorial sections, a selectable project gallery and accessible process diagrams.
 - Complete HTML/SVG content with optional optical depth and user-driven motion.
 
-Source-derived snapshot (2026-11-08): saved browser permissions deny preview access, so no screenshots or browser visual approval exist for this update. This document records source behavior, not visual validation or release approval. The browser and finish-review gate in [the current release handoff](docs/celah-editorial-release.md) remains pending; earlier verification records do not validate these new enhancements.
+Source-derived snapshot (2026-11-08): saved browser permissions deny preview access, so no screenshots or browser visual approval exist for this update. This document records source behavior, not visual validation. Public deployment was subsequently authorized with visual QA deferred; see the release receipt. The browser and finish-review gate in [the current release handoff](docs/celah-editorial-release.md) remains pending; earlier verification records do not validate these new enhancements.
 
 Public content now uses the same-origin API. Runtime migration and cutover status belong to [the self-hosted migration receipt](docs/celah-selfhosted-postgres.md); this visual specification does not assert a completed public deployment.
 

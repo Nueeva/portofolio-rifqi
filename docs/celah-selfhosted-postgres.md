@@ -2,9 +2,9 @@
 
 ## Current state
 
-The candidate frontend now calls only the same-origin /api backend. The Supabase runtime SDK was removed. The old public deployment is still intact pending visual QA and cutover; no Supabase project or old account/history was deleted.
+The frontend is publicly deployed at https://rifqi.apexsions.com and calls only the same-origin /api backend. The Supabase runtime SDK was removed. On 8 November 2026 the owner explicitly chose “Deploy sekarang; QA visual menyusul”. The former deployment and provider data are retained for rollback; no Supabase project or old account/history was deleted.
 
-A dedicated PostgreSQL 17 container and Node 22 API are running privately on the portfolio VPS. Other applications' MariaDB/PostgreSQL services were not modified. API is bound to host127.0.0.1:8788; database to127.0.0.1:5434. The API runs as a non-root container user with a separate non-superuser database role.
+A dedicated PostgreSQL 17 container and Node 22 API are running on the portfolio VPS behind nginx. Other applications' MariaDB/PostgreSQL services were not modified. API is bound to host127.0.0.1:8788; database to127.0.0.1:5434. The API runs as a non-root container user with a separate non-superuser database role.
 
 Public migration imported 4 curated project records plus 3 existing managed project records, 11 settings, 4 editorial studies, 3 skills groups and one public media object. Stable curated-* IDs and existing UUIDs are retained. Import scripts do not overwrite existing records on rerun. Old public data was backed up before conversion; storage links use same-origin API paths.
 
@@ -43,10 +43,23 @@ SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM and CONTACT_TO can be conf
 
 TRUSTED_PROXY must match the controlled Docker gateway used by nginx. nginx must overwrite X-Forwarded-For with the visitor address rather than trust a client-supplied chain. /api should have no-store headers and SSE buffering disabled. Database/API ports remain loopback-only.
 
-server/nginx-api.conf.example is the prepared API location snippet, not an applied VPS configuration. At cutover, first copy the current nginx site configuration and frontend directory, then install the complete frontend and API proxy together, run nginx -t, and reload only after it passes. Rollback restores both the former site configuration and frontend directory; the old Supabase-backed deployment remains compatible with its untouched provider. Preserve the new database/uploads during rollback. Do not remove the old provider in this release.
+The nginx API snippet is applied to the portfolio virtual host. The host-local Cloudflare Tunnel connection is trusted only from loopback for CF-Connecting-IP; nginx overwrites X-Forwarded-For before forwarding to the controlled Docker gateway. API access logging is disabled in nginx to avoid recording reset tokens in query strings; the application logs sanitized paths. See [Cloudflare HTTP header documentation](https://developers.cloudflare.com/fundamentals/reference/http-headers/). Other virtual hosts were not changed.
 
 Reproducible checks: npm run build, npx tsc --noEmit, node --test tests/*.test.mjs at the repository root; npm test and npm run test:integration inside server. The integration test requires server/.env pointing to the isolated PostgreSQL schema and creates/deletes only a unique temporary user; it sends no email. Whole-repository lint still reports four errors in inactive legacy Supabase edge functions and twelve pre-existing warnings.
 
 Candidate verification on 8 November 2026: client/SSR/postbuild and TypeScript passed, 46 frontend checks passed, 10 backend tests passed and one PostgreSQL integration test passed. Real private API checks covered admin login, unauthenticated rejection, project CRUD, logout revocation, public file upload/read/delete, reset replay denial and forwarded visitor IP. Initial/Home bundle budgets passed. SSR caches are request-local with no server garbage-collection timer; prerender exits naturally after removal of the old forced-exit workaround. Browser appearance, motion smoothness and Core Web Vitals remain unverified.
 
-Required before public cutover: verify reverse-proxy visitor IPs, real database CRUD/editorial/file sessions, database/upload backups, desktop/mobile theme/motion/forms and admin flows. Browser Use remains denied; no browser/headless bypass was used. Public deployment is deliberately not marked complete. Email delivery tests must remain simulated until the owner configures SMTP and explicitly requests a real delivery check.
+Remaining verification: desktop/mobile themes, motion, keyboard/forms and admin workflows in a real browser. Both preview and live origins were rejected by saved Browser Use permissions; no browser/headless bypass was used. The owner authorized deployment before that visual check. Email delivery tests remain simulated until SMTP is configured and a real delivery check is explicitly requested.
+
+## Production deployment receipt
+
+- Frontend artifact: 1a1c1846f599b0e6bd0fd60d7e1dfba946db0fa1. Root: /var/www/rifqi-releases/1a1c1846f599b0e6bd0fd60d7e1dfba946db0fa1. release.json records the artifact hash and deferred visual QA.
+- Full rollback backup: /var/backups/rifqi-portfolio/20261108T153558Z, containing nginx.conf, frontend.tar.gz, portfolio.dump, uploads.tar.gz, private runtime configuration and SHA256SUMS. Archive contents were checked; this is not a full database restore drill.
+- nginx -t passed before reload. A failed first verification automatically restored the former configuration; the checker was corrected to send an explicit HTTP virtual-host header, then cutover and all checks passed.
+- Eight prerendered pages and critical assets/PDF/icons/OG/manifest/registerSW/service-worker responses matched release-file hashes through the local nginx virtual host. HTML and the service worker return no-cache. Previous immutable chunks remain available to existing tabs.
+- Through nginx, PostgreSQL public content, admin login/session/logout, anonymous/private denial and uploaded media passed. A controlled forwarding probe confirmed CF-Connecting-IP reached the API and a supplied X-Forwarded-For was overwritten; probe records were removed.
+- SMTP and Turnstile remain unconfigured as requested. Contact delivery, email verification and email password recovery are unavailable until SMTP is added. Existing bootstrap admin password login works.
+
+server/verify-release.mjs reproduces the origin-side HTTP integrity and API checks using RELEASE_ROOT plus the existing private ADMIN_EMAIL/ADMIN_PASSWORD. It prints no credentials or page content. These checks do not establish browser appearance, Cloudflare edge/browser-cache behavior, FPS or field Web Vitals.
+
+Rollback: restore the backup nginx.conf to /etc/nginx/sites-enabled/rifqi-portfolio, run nginx -t, then reload nginx. That configuration points to the untouched former /var/www/rifqi-portfolio directory. Keep the new PostgreSQL/uploads and the old provider intact; do not delete data during rollback.
