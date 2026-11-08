@@ -1,0 +1,2 @@
+# Keep PDF offsets and original asset bytes intact on Windows checkouts.
+*.pdf binary
