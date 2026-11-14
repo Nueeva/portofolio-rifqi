@@ -1,5 +1,13 @@
 # Riset motion dan finishing visual — Celah
 
+## Status against current source — 15 November 2026
+
+This is design research, not a current implementation or benchmark report. CybersecurityHero and HomeMotion implement the current hero/landing choreography; readable text remains available without WebGL. Use the current source and design specification for actual timing and eligibility. Public theme reveal uses a 780 ms atlas, not the prototype timings proposed below. See [the current codebase guide](current-codebase.md) and [the repository README](../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 Tanggal: 8 November 2026. Cakupan: riset sumber primer dan pemetaan teknik ke desain Celah yang sudah dipilih. Belum mengubah motion pada preview atau aplikasi.
 
 ## Kesimpulan desain

@@ -1,4 +1,5 @@
-import {validateRecord} from './records.mjs';
+import {validateRecord,normalizeRecord} from './records.mjs';
+import {analyticsSummary} from './analytics.mjs';
 import Fastify from 'fastify';
 import cookie from '@fastify/cookie';import multipart from '@fastify/multipart';import rateLimit from '@fastify/rate-limit';
 import {randomUUID} from 'node:crypto';import {isIP} from 'node:net';import {join,resolve} from 'node:path';import {mkdir,writeFile,readFile,unlink} from 'node:fs/promises';
@@ -24,6 +25,15 @@ export async function buildApp({db,config,mailer,verifyCaptcha}){
  const sendMail=async(to,subject,text)=>{emailReady();await mailer({from:config.mailFrom,to,subject,text});};
  const authToken=async(user,purpose)=>{const value=token();await db.query('INSERT INTO auth_tokens(token_hash,user_id,purpose,expires_at) VALUES($1,$2,$3,now()+interval \'30 minutes\')',[digest(value),user.id,purpose]);return value;};
  app.get('/api/config',async()=>({captchaEnabled:!!verifyCaptcha,captchaSiteKey:verifyCaptcha?config.captchaSiteKey:null}));
+ app.get('/api/public-content',async()=>{
+  const resources=[...publicResources];
+  const {rows}=await db.query('SELECT resource,data FROM content_records WHERE resource=ANY($1::text[]) ORDER BY resource,id',[resources]);
+  const content=Object.fromEntries(resources.map(resource=>[resource,[]]));
+  for(const row of rows)content[row.resource].push(normalizeRecord(row.resource,row.data));
+  for(const resource of ['projects','certifications'])content[resource].sort((a,b)=>String(b.created_at??'').localeCompare(String(a.created_at??''))||a.id.localeCompare(b.id));
+  for(const resource of ['portfolio_project_content','portfolio_skill_groups'])content[resource].sort((a,b)=>(a.sort_order??0)-(b.sort_order??0));
+  return {data:content,error:null};
+ });
  app.get('/api/health',async()=>{await db.query('SELECT 1');return {ok:true,emailConfigured:!!mailer,captchaConfigured:!!verifyCaptcha};});
  app.get('/api/auth/session',async req=>{const user=await currentUser(req);return {data:{session:user?{user:publicUser(user)}:null},error:null};});
  app.post('/api/auth/logout',async(req,reply)=>{if(req.cookies.portfolio_session)await db.query('DELETE FROM app_sessions WHERE token_hash=$1',[digest(req.cookies.portfolio_session)]);reply.clearCookie('portfolio_session',cookieOptions);return {data:null,error:null};});
@@ -32,7 +42,7 @@ export async function buildApp({db,config,mailer,verifyCaptcha}){
   const address=email.toLowerCase();const emailHash=digest(address);
   const {rows:attempts}=await db.query('SELECT count(*)::int AS count FROM login_attempts WHERE (ip=$1 OR email_hash=$2) AND created_at>now()-interval \'15 minutes\'',[req.ip,emailHash]);if(attempts[0].count>=5)throw fail(429,'Terlalu banyak percobaan. Coba lagi dalam 15 menit.');
   const {rows}=await db.query('SELECT * FROM app_users WHERE email=$1',[address]);const user=rows[0];const passwordMatches=await verifyPassword(password,user?.password_hash??dummyPassword);const ok=!!user&&passwordMatches;
-  const logId=randomUUID();await record('ip_logs',logId,{id:logId,ip_address:req.ip,event_type:ok?'login_success':'login_failed',email:address,user_agent:req.headers['user-agent']??'',created_at:new Date().toISOString()});
+  const logId=randomUUID();await record('ip_logs',logId,{id:logId,ip_address:req.ip,action:'login',success:!!(ok&&user.verified),identifier:address,event_type:ok&&user.verified?'login_success':'login_failed',email:address,user_agent:req.headers['user-agent']??'',created_at:new Date().toISOString()});
   if(!ok){await db.query('INSERT INTO login_attempts(ip,email_hash) VALUES($1,$2)',[req.ip,emailHash]);throw fail(401,'Email atau password salah.');}if(!user.verified)throw fail(403,'Verifikasi email terlebih dahulu.');
   const session=token();await db.query('INSERT INTO app_sessions(token_hash,user_id,expires_at) VALUES($1,$2,now()+interval \'8 hours\')',[digest(session),user.id]);reply.setCookie('portfolio_session',session,{...cookieOptions,maxAge:28800});return {data:{session:{user:publicUser(user)},user:publicUser(user)},error:null};
  });
@@ -48,7 +58,8 @@ export async function buildApp({db,config,mailer,verifyCaptcha}){
 
   throw fail(404,'Fungsi tidak tersedia.');
  });
- app.post('/api/rpc/:name',async req=>{const name=req.params.name,body=req.body??{};const user=await currentUser(req);if(name==='has_role')return {data:!!user?.is_admin&&body._user_id===user.id&&body._role==='admin',error:null};await admin(req);if(name==='block_ip'){if(body.p_ip_address===req.ip)throw fail(400,'IP sesi admin aktif tidak dapat diblokir.');if(!isIP(body.p_ip_address)||!Number.isInteger(body.p_hours)||body.p_hours<1||body.p_hours>8760)throw fail(400,'IP atau durasi tidak valid.');const id=body.p_ip_address;await record('blocked_ips',id,{id,ip_address:id,reason:String(body.p_reason??'').slice(0,500),blocked_at:new Date().toISOString(),expires_at:new Date(Date.now()+body.p_hours*3600000).toISOString()});}else if(name==='unblock_ip'){const {rows}=await db.query("DELETE FROM content_records WHERE resource='blocked_ips' AND id=$1 RETURNING data",[body.p_ip_address]);for(const row of rows)emit('blocked_ips','DELETE',row.data);}else throw fail(404,'Operasi tidak tersedia.');return {data:true,error:null};});
+ app.post('/api/analytics/summary',async req=>{await admin(req);return {data:await analyticsSummary(db,req.body??{}),error:null};});
+ app.post('/api/rpc/:name',async req=>{const name=req.params.name,body=req.body??{};const user=await currentUser(req);if(name==='has_role')return {data:!!user?.is_admin&&body._user_id===user.id&&body._role==='admin',error:null};await admin(req);if(name==='block_ip'){if(body.p_ip_address===req.ip)throw fail(400,'IP sesi admin aktif tidak dapat diblokir.');if(!isIP(body.p_ip_address)||!Number.isInteger(body.p_hours)||body.p_hours<1||body.p_hours>8760)throw fail(400,'IP atau durasi tidak valid.');const id=body.p_ip_address;await record('blocked_ips',id,{id,created_by:user.id,ip_address:id,reason:String(body.p_reason??'').slice(0,500),blocked_at:new Date().toISOString(),expires_at:new Date(Date.now()+body.p_hours*3600000).toISOString()});}else if(name==='unblock_ip'){const {rows}=await db.query("DELETE FROM content_records WHERE resource='blocked_ips' AND id=$1 RETURNING data",[body.p_ip_address]);for(const row of rows)emit('blocked_ips','DELETE',row.data);}else throw fail(404,'Operasi tidak tersedia.');return {data:true,error:null};});
 
  app.post('/api/data/:resource',async req=>{
   const resource=req.params.resource,body=req.body??{};if(!allowedResource(resource))throw fail(404,'Data tidak tersedia.');
@@ -58,11 +69,26 @@ export async function buildApp({db,config,mailer,verifyCaptcha}){
   const field=name=>{if(typeof name!=='string'||!/^[_a-zA-Z][_a-zA-Z0-9]{0,60}$/.test(name))throw fail(400,'Kolom tidak valid.');return `(data->>${bind(name)})`;};
   for(const filter of filters){const column=field(filter.field);if(filter.operator==='eq')clauses.push(`${column}=${bind(String(filter.value))}`);else if(filter.operator==='gte')clauses.push(`${column}>=${bind(String(filter.value))}`);else if(filter.operator==='in'&&Array.isArray(filter.value)&&filter.value.length<=1000)clauses.push(`${column}=ANY(${bind(filter.value.map(String))}::text[])`);else throw fail(400,'Filter tidak didukung.');}
   const where=clauses.join(' AND ');const limit=Math.max(1,Math.min(2000,Number.isInteger(body.limit)?body.limit:1000));
-  if(operation==='select'){let order='';if(body.order){const f=field(body.order.field);order=` ORDER BY ${body.order.field==='sort_order'?`(${f})::integer`:f} ${body.order.ascending===false?'DESC':'ASC'}`;}const {rows}=await db.query(`SELECT data FROM content_records WHERE ${where}${order} LIMIT ${limit}`,params);return {data:rows.map(row=>row.data),error:null};}
+  if(operation==='select'){let order='';if(body.order){const f=field(body.order.field);order=` ORDER BY ${body.order.field==='sort_order'?`(${f})::integer`:f} ${body.order.ascending===false?'DESC':'ASC'}`;}const {rows}=await db.query(`SELECT data FROM content_records WHERE ${where}${order} LIMIT ${limit}`,params);return {data:rows.map(row=>normalizeRecord(resource,row.data)),error:null};}
   if(operation==='delete'||operation==='update'){
    if(!filters.length)throw fail(400,'Filter perubahan wajib diisi.');
    if(operation==='delete'){const {rows}=await db.query(`DELETE FROM content_records WHERE ${where} RETURNING data`,params);for(const row of rows)emit(resource,'DELETE',row.data);}
-   else{if(!validateRecord(resource,body.values,true))throw fail(400,'Data perubahan tidak valid.');const value=bind(JSON.stringify(body.values));const {rows}=await db.query(`UPDATE content_records SET data=data || ${value}::jsonb,updated_at=now() WHERE ${where} RETURNING data`,params);for(const row of rows)emit(resource,'UPDATE',row.data);}
+   else {
+    if(!validateRecord(resource,body.values,true))throw fail(400,'Data perubahan tidak valid.');
+    const client=await db.connect();let changed=[];
+    try {
+     await client.query('BEGIN');
+     const {rows}=await client.query(`SELECT id,data FROM content_records WHERE ${where} FOR UPDATE`,params);
+     for(const row of rows){
+      const data={...normalizeRecord(resource,row.data),...body.values,updated_at:new Date().toISOString()};
+      if(!validateRecord(resource,data))throw fail(400,'Record hasil perubahan tidak valid.');
+      await client.query('UPDATE content_records SET data=$3::jsonb,updated_at=now() WHERE resource=$1 AND id=$2',[resource,row.id,JSON.stringify(data)]);
+      changed.push(data);
+     }
+     await client.query('COMMIT');
+    }catch(error){await client.query('ROLLBACK');throw error;}finally{client.release();}
+    for(const data of changed)emit(resource,'UPDATE',data);
+   }
    return {data:null,error:null};
   }
   if(operation!=='insert'&&operation!=='upsert')throw fail(400,'Operasi tidak valid.');const items=Array.isArray(body.values)?body.values:[body.values];if(!items.length||items.length>100)throw fail(400,'Jumlah record tidak valid.');

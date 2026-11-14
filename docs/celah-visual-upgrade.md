@@ -1,5 +1,13 @@
 # Celah visual upgrade — implementation receipt
 
+## Status against current source — 15 November 2026
+
+The persistent shell, optional optical renderer and final-HTML PWA generation remain implemented. Runtime integration has since moved to Fastify/PostgreSQL. CMS-aware prerender now generates metadata and routes from a shared public snapshot. Historical references to release 015e427, unchanged Supabase integrations and previous lint failures do not describe this revision. See [the current codebase guide](current-codebase.md) and [the repository README](../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 Status: implemented in source; browser QA and deployment pending. The public VPS remains on release 015e427.
 
 ## Implemented

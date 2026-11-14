@@ -534,9 +534,9 @@ https://rifqi.tech
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in send-contact-email function:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error instanceof Error ? error.message : "Failed to send email" }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });

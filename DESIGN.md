@@ -6,6 +6,8 @@ colors:
   petrol-surface: "#18343b"
   petrol-low: "#102124"
   ivory: "#f8f6f1"
+  dark-ink: "#f1ece1"
+  light-cavity: "#ece7dc"
   champagne: "#c7b594"
   cool-reflection: "#83b3ad"
   dark-muted: "#c1c7c2"
@@ -140,9 +142,7 @@ This system covers all public pages, case studies and errors. A persistent publi
 - Editorial sections, a selectable project gallery and accessible process diagrams.
 - Complete HTML/SVG content with optional optical depth and user-driven motion.
 
-Source-derived snapshot (2026-11-08): saved browser permissions deny preview access, so no screenshots or browser visual approval exist for this update. This document records source behavior, not visual validation. Public deployment was subsequently authorized with visual QA deferred; see the release receipt. The browser and finish-review gate in [the current release handoff](docs/celah-editorial-release.md) remains pending; earlier verification records do not validate these new enhancements.
-
-Public content now uses the same-origin API. Runtime migration and cutover status belong to [the self-hosted migration receipt](docs/celah-selfhosted-postgres.md); this visual specification does not assert a completed public deployment.
+Current source review: 15 November 2026. See [the current codebase guide](docs/current-codebase.md) for runtime contracts, build snapshots, checks and known limits. Supabase-named exports bridge to Fastify/PostgreSQL. This document specifies source behavior; historical screenshots and deployments in other documents do not establish fresh visual approval or live version identity.
 
 ## Colors
 
@@ -158,7 +158,7 @@ Cool reflection and light cool retain the original seam highlights. The added cy
 
 | Role | Dark | Light |
 | --- | --- | --- |
-| Page / primary text | petrol / ivory | ivory / petrol-ink |
+| Page / primary text | petrol / dark-ink | ivory / petrol-ink |
 | Raised tonal surface | petrol-surface | light-surface |
 | Quiet section / footer | petrol-low | light-low |
 | Supporting text | dark-muted | light-muted |
@@ -181,7 +181,7 @@ The frontmatter records the hero, page and home-section scales. Gallery selector
 
 A centered container stops at (1280px), with fluid gutters from (20px) to (64px). The fixed navbar occupies (64px), matched by the main-content offset. Public pages use vertical padding (76px / 120px); home sections use (110px).
 
-Home moves from the hero through featured projects, the personal story and the shared contact invitation. Featured order comes from editorial metadata; repeated project sections alternate copy and visual, resetting to ordinary stacking on mobile. Titles use the name before the dash, and summaries shorten after (25 words). Without editorial rows, the first four merged project records remain the fallback. Projects use a selected visual stage beside a ruled project index: unequal columns (1.1fr / 1fr), a gap (64px), and a sticky stage offset (100px). Hover, focus or a selector button changes the selected project. Native details elements disclose the problem and approach. Category filters remain a wrapping text rail. Case studies separate metadata from a narrow reading column. About combines ruled skill/experience rows with a Portfolio 71 process example. Contact keeps its smaller details column beside a larger form. Errors retain explanations and recovery actions; route-load failure adds reload and home actions within the public shell.
+Home moves from the hero through featured projects, the personal story and the shared contact invitation. Featured order comes from editorial metadata; repeated project sections alternate copy and visual, resetting to ordinary stacking on mobile. Titles use the name before the dash, and summaries shorten after (25 words). Without editorial rows, the first four resolved project records remain the fallback. Projects use a selected visual stage beside a ruled project index: unequal columns (1.1fr / 1fr), a gap (64px), and a sticky stage offset (100px). Hover, focus or a selector button changes the selected project. Native details elements disclose the problem and approach. Category filters remain a wrapping text rail. Case studies separate metadata from a narrow reading column. About combines ruled skill/experience rows with a Portfolio 71 process example. Contact keeps its smaller details column beside a larger form. Errors retain explanations and recovery actions; route-load failure adds reload and home actions within the public shell.
 
 Below (1024px), the gallery becomes one column: the sticky stage is hidden and every project gains an inline visual. Diagram padding reduces from (28px) to (20px). Below (768px), home, about and contact columns stack; page padding becomes (50px / 80px), home sections (75px), and navigation becomes a full-width dialog below the navbar. At (480px) or less, diagrams use padding (16px), larger SVG labels and tighter controls. Long titles, technologies and contact details wrap. Filters and action groups wrap naturally.
 
@@ -195,13 +195,13 @@ The hero has an independent decorative entrance (1100ms) and diagonal light pass
 
 The xssscope inspection focus moves between code contexts (450ms); Portfolio 71 moves a role-lane focus (400ms); CTF-Toolkit changes tile fill/stroke (350ms). Apexsions retains curved wire draws (400ms) and node feedback (350ms). Captions stay visible and are announced. General control feedback remains (180ms). Navigation, filter and diagram indicators use shared layout movement, as does the gallery preview. Route content lifts vertically (400ms), with no blur or opacity gate, while the shell persists. Scroll reset or history restoration waits for the destination to mount, then synchronizes smooth scrolling; the new heading receives focus. A native media-query subscription responds to reduced-motion changes while the page is open and uses a conservative reduced server snapshot. Reduced motion removes the hero enhancement and entrance, positional diagram feedback and route transforms, and skips Lenis. There is no fullscreen welcome overlay.
 
-Theme changes use a diagonal View Transition reveal (500ms), waiting for an optical-canvas render acknowledgement or a short timeout (100ms) before capturing the new theme. Browsers without View Transitions use a brief color transition (200ms); reduced motion applies the theme immediately. The theme icon turns slightly on press. These are source-defined behaviors awaiting browser verification.
+Public theme changes use a procedural ink-mask atlas: 64 frames, 780 ms reveal and 390 ms fallback midpoint, with worker preparation and decoded-cache reuse. The View Transition update callback synchronously applies the theme; it must not wait for requestAnimationFrame while rendering is suspended. Browsers without the native API use inert, scoped presentation copies. Reduced motion uses a brief opacity crossfade (approximately 150 ms) without an atlas. Scroll does not cancel the reveal. The legacy admin/auth ThemeToggle remains separate. These timings are source constants, not a guarantee of cold-click latency or physical-device FPS.
 
 **The Readable Base Rule.** Keep HTML content, SVG diagrams and the hero poster complete when animation or WebGL is unavailable.
 
 ## Shapes
 
-Editorial sections, diagram figures and the gallery remain rectangular, separated by fine rules. The recurring diagonal stays in the hero seam, poster, theme reveal and fallback artwork. SVG figures have distinct structures: an inspection window with a translucent cyan focus band, curved architecture connections with plugin cells and dashed host frames, five-stage role lanes, and a two-by-two category map. Fields and submit buttons use a small radius (3px), RIVA messages (4px), general public dialogs (6px), and RIVA's panel (8px). Theme, menu, RIVA-launcher and back-to-top controls are circular. The mobile navigation panel is square-edged.
+Editorial sections, diagram figures and the gallery remain rectangular, separated by fine rules. The recurring diagonal stays in the hero seam, poster and fallback artwork; the public theme reveal uses organic ink growth. SVG figures have distinct structures: an inspection window with a translucent cyan focus band, curved architecture connections with plugin cells and dashed host frames, five-stage role lanes, and a two-by-two category map. Fields and submit buttons use a small radius (3px), RIVA messages (4px), general public dialogs (6px), and RIVA's panel (8px). Theme, menu, RIVA-launcher and back-to-top controls are circular. The mobile navigation panel is square-edged.
 
 ## Components
 
@@ -228,3 +228,8 @@ Editorial sections, diagram figures and the gallery remain rectangular, separate
 - **Don't** invent screenshots, scanner output, logs, diffs, credentials, certifications or performance claims; project accomplishments remain separate from fetched certifications.
 - **Don't** add replacement monograms, chapter/progress rails, global glitch effects or decorative mono labels.
 - **Don't** treat source checks or generated component previews as visual approval; complete the documented browser review before releasing this revision.
+
+
+## Content consistency
+
+A successful API catalog is authoritative, including an empty response. New API writes reject null required content; historical editorial rows are normalized before rendering. A CMS-aware build (`PUBLIC_CONTENT_API_URL=... npm run build`) uses one snapshot for route enumeration, metadata, SSR bodies and hydration data. Rebuild and deploy after CMS changes to refresh static SEO and offline pages. This visual specification does not imply automatic publication.

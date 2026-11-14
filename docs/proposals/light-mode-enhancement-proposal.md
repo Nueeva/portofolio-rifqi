@@ -1,4 +1,13 @@
 # Proposal Solusi Desain Visual & Teknis: Peningkatan Light Mode Portofolio Rifqi Ariansyah
+
+## Status against current source — 15 November 2026
+
+This is an archived proposal, not an installation guide or proof of zero overhead. Current public light tokens include #F8F6F1 page, #14171A ink, #ECE7DC cavity, #0F766E cyan and #92400E metal; the code does not implement every alternative palette proposed here. Current theme timing is 780 ms/64 frames with native and inert-layer fallback paths. Do not apply the proposed diffs automatically. See [the current codebase guide](../current-codebase.md) and [the repository README](../../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 **Subjudul**: Transformasi Estetika High-End Engineering, Resolusi Defek Lubang Hitam (Black Cavity), dan Pemetaan Token Semantik Berbasis 0-Cost Performance Overhead  
 **Dokumen**: `docs/proposals/light-mode-enhancement-proposal.md`  
 **Target Repository**: `c:\Users\Friel\Documents\Projects\portofolio-rifqi`  

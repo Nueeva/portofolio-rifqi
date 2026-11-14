@@ -1,5 +1,13 @@
 # Self-hosted PostgreSQL migration receipt
 
+## Status against current source — 15 November 2026
+
+Fastify and PostgreSQL remain the current runtime; Supabase is an archive/compatibility vocabulary only. New content validation, normalized login logs, full-period analytics aggregation and public build snapshots are described in the current guide. A local isolated PostgreSQL instance is sufficient; VPS access or an SSH tunnel is not required for development. Paths, releases, SMTP state and backups below are historical receipts, not observations of the current server. See [the current codebase guide](current-codebase.md) and [the repository README](../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 ## Current state
 
 The frontend is publicly deployed at https://rifqi.apexsions.com and calls only the same-origin /api backend. The Supabase runtime SDK was removed. On 8 November 2026 the owner explicitly chose “Deploy sekarang; QA visual menyusul”. The former deployment and provider data are retained for rollback; no Supabase project or old account/history was deleted.

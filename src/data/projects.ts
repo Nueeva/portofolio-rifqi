@@ -1,6 +1,6 @@
-import type { Database } from "@/integrations/supabase/types";
+import type { ProjectRecord } from "@/integrations/api/types";
 
-export type Project = Database["public"]["Tables"]["projects"]["Row"];
+export type Project = ProjectRecord;
 
 /**
  * Long-form case study attached to a curated project. Rendered on the
@@ -21,9 +21,8 @@ export type CuratedProject = Project & { caseStudy?: CaseStudy };
 
 /**
  * Rifqi's real projects, curated from his GitHub (github.com/Nueeva).
- * These render first on the Projects page; anything managed through the
- * admin panel (Supabase `projects` table) is appended after them, and this
- * list doubles as the fallback when the database is unreachable.
+ * These supply offline/build fallback content. A successful API catalog is
+ * authoritative, including edits, removals and an intentionally empty list.
  */
 export const curatedProjects: CuratedProject[] = [
   {

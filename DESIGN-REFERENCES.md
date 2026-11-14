@@ -1,5 +1,11 @@
 # Design References — disimpan user 2026-10-25
 
+## Current use — 15 November 2026
+
+These links remain inspiration, not runtime dependencies or requirements to copy another site. The current public design is Celah: CybersecurityHero, optional OpticalField, HomeMotion, process figures, scoped themes and readable HTML fallbacks. HeroHoloScene and the emerald/terminal composition described below belong to the earlier design. See [DESIGN.md](DESIGN.md) for the current specification and [the codebase guide](docs/current-codebase.md) for implementation limits.
+
+## Historical reference application — 25 October 2026
+
 "If you design with AI, this is all you need"
 
 1. **getlayers.ai** — prompts for cinematic 3D websites

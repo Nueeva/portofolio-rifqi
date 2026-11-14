@@ -1,5 +1,13 @@
 # Master Research & Architectural Evaluation Report: Advanced Fluid Dynamics, Optical Sheen, and Multi-Sensory Theme Transition Pipeline
 
+## Status against current source — 15 November 2026
+
+This is archived research. The actual implementation uses a 780 ms/64-frame alpha atlas, a 390 ms midpoint, worker preparation, decoded-cache reuse and optional procedural audio. It retains the inert DOM-copy fallback. Proposed 533 ms cadence, multichannel sheen, singleton/ImageBitmap pipeline and universal 120 Hz/zero-frame-drop guarantees are not the current contract. Numerical projections and suggested code below are research claims, not current benchmark evidence. See [the current codebase guide](../current-codebase.md) and [the repository README](../../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 **Document Status**: Complete, Revised & Multi-Agent Verified  
 **Author**: Worker 2 (Master Research Report Revision Author, incorporating Challenger 1, Challenger 2, Reviewer 1 & Reviewer 2 audits)  
 **Target Repository**: `c:\Users\Friel\Documents\Projects\portofolio-rifqi`  

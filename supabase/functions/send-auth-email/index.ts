@@ -694,7 +694,12 @@ const handler = async (req: Request): Promise<Response> => {
     const payload = await req.text();
     console.log("Received auth email request");
     
-    let emailData: any;
+    type AuthEmailPayload = {
+      type?: string; email?: string; redirectUrl?: string;
+      user?: { email: string };
+      email_data?: { token_hash: string; redirect_to: string; email_action_type: string; site_url: string };
+    };
+    let emailData: AuthEmailPayload;
     
     // Try to parse as JSON first (direct frontend call)
     try {
@@ -763,7 +768,7 @@ const handler = async (req: Request): Promise<Response> => {
       try {
         const headers = Object.fromEntries(req.headers);
         const wh = new Webhook(HOOK_SECRET);
-        emailData = wh.verify(payload, headers) as any;
+        emailData = wh.verify(payload, headers) as AuthEmailPayload;
       } catch (verifyError) {
         console.error("Webhook verification failed:", verifyError);
         // Already parsed above, continue
@@ -828,13 +833,13 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({ success: true }),
       { status: 200, headers: { "Content-Type": "application/json", ...corsHeaders } }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("Error in send-auth-email function:", error);
     return new Response(
       JSON.stringify({ 
         error: { 
-          http_code: error.code || 500, 
-          message: error.message || "Failed to send email" 
+          http_code: error && typeof error === "object" && "code" in error ? error.code : 500,
+          message: error instanceof Error ? error.message : "Failed to send email"
         } 
       }),
       { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }

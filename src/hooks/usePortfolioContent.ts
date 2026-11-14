@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { applyEditorial, featuredProjects, resolveProjectCatalog } from "@/data/editorial";
+import { applyEditorial, normalizeEditorial, featuredProjects, resolveProjectCatalog } from "@/data/editorial";
 export function usePortfolioContent() {
     const projects = useQuery({ queryKey: ["projects"], queryFn: async () => { const { supabase } = await import("@/integrations/api/client"); const { data, error } = await supabase.from("projects").select("*").order("created_at", { ascending: false }); if (error)
             throw error; return data; } });
     const editorial = useQuery({ queryKey: ["project-editorial"], queryFn: async () => { const { supabase } = await import("@/integrations/api/client"); const { data, error } = await supabase.from("portfolio_project_content").select("*").order("sort_order"); if (error)
-            throw error; return data; }, retry: false });
+            throw error; return (data ?? []).map(normalizeEditorial); }, retry: false });
     const skills = useQuery({ queryKey: ["skill-groups"], queryFn: async () => { const { supabase } = await import("@/integrations/api/client"); const { data, error } = await supabase.from("portfolio_skill_groups").select("*").order("sort_order"); if (error)
             throw error; return data; }, retry: false });
     const base = resolveProjectCatalog(projects.data === undefined ? undefined : projects.data ?? []);

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { 
   BarChart3, 
@@ -18,22 +18,13 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { supabase } from "@/integrations/api/client";
+import { api } from "@/integrations/api/client";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from "recharts";
-
-interface PageAnalytics {
-  id: string;
-  page_path: string;
-  visitor_id: string;
-  user_agent: string | null;
-  referrer: string | null;
-  created_at: string;
-}
 
 type TimeRange = "7d" | "30d" | "90d" | "all";
 
@@ -57,117 +48,17 @@ export const AnalyticsDashboard = () => {
   const [timeRange, setTimeRange] = useState<TimeRange>("30d");
   const [pageFilter, setPageFilter] = useState<string>("all");
 
-  const getDateFilter = () => {
-    const now = new Date();
-    switch (timeRange) {
-      case "7d":
-        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
-      case "30d":
-        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
-      case "90d":
-        return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString();
-      default:
-        return null;
-    }
-  };
-
-  const { data: analytics, isLoading, refetch, isRefetching } = useQuery({
+  const { data: stats, isLoading, error, refetch, isRefetching } = useQuery({
     queryKey: ["page-analytics", timeRange, pageFilter],
     queryFn: async () => {
-      let query = supabase
-        .from("page_analytics")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      const dateFilter = getDateFilter();
-      if (dateFilter) {
-        query = query.gte("created_at", dateFilter);
-      }
-
-      if (pageFilter !== "all") {
-        query = query.eq("page_path", pageFilter);
-      }
-
-      const { data, error } = await query.limit(1000);
-      if (error) throw error;
-      return data as PageAnalytics[];
+      const { data, error } = await api.analytics.summary({ timeRange, page: pageFilter });
+      if (error) throw new Error(error.message);
+      if (!data) throw new Error("Statistik belum tersedia.");
+      return { ...data, viewsByDate: data.viewsByDate.map(row => ({ ...row,
+        date: new Date(row.date + "T00:00:00+07:00").toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Jakarta" }),
+      })) };
     },
   });
-
-  const stats = useMemo(() => {
-    if (!analytics || analytics.length === 0) {
-      return {
-        totalViews: 0,
-        uniqueVisitors: 0,
-        viewsByPage: [] as { page: string; views: number }[],
-        viewsByDate: [] as { date: string; views: number }[],
-        topReferrers: [] as { referrer: string; count: number }[],
-        avgViewsPerDay: 0,
-      };
-    }
-
-    // Total views
-    const totalViews = analytics.length;
-
-    // Unique visitors
-    const uniqueVisitors = new Set(analytics.map((a) => a.visitor_id)).size;
-
-    // Views by page
-    const pageMap = new Map<string, number>();
-    analytics.forEach((a) => {
-      const page = a.page_path;
-      pageMap.set(page, (pageMap.get(page) || 0) + 1);
-    });
-    const viewsByPage = Array.from(pageMap.entries())
-      .map(([page, views]) => ({ page, views }))
-      .sort((a, b) => b.views - a.views)
-      .slice(0, 5);
-
-    // Views by date
-    const dateMap = new Map<string, number>();
-    analytics.forEach((a) => {
-      const date = new Date(a.created_at).toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "short",
-      });
-      dateMap.set(date, (dateMap.get(date) || 0) + 1);
-    });
-    const viewsByDate = Array.from(dateMap.entries())
-      .map(([date, views]) => ({ date, views }))
-      .slice(0, 14)
-      .reverse();
-
-    // Top referrers
-    const referrerMap = new Map<string, number>();
-    analytics
-      .filter((a) => a.referrer)
-      .forEach((a) => {
-        try {
-          const url = new URL(a.referrer!);
-          const domain = url.hostname;
-          referrerMap.set(domain, (referrerMap.get(domain) || 0) + 1);
-        } catch {
-          referrerMap.set(a.referrer!, (referrerMap.get(a.referrer!) || 0) + 1);
-        }
-      });
-    const topReferrers = Array.from(referrerMap.entries())
-      .map(([referrer, count]) => ({ referrer, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
-
-    // Average views per day
-    const days = timeRange === "7d" ? 7 : timeRange === "30d" ? 30 : timeRange === "90d" ? 90 : 30;
-    const avgViewsPerDay = Math.round(totalViews / days);
-
-    return {
-      totalViews,
-      uniqueVisitors,
-      viewsByPage,
-      viewsByDate,
-      topReferrers,
-      avgViewsPerDay,
-    };
-  }, [analytics, timeRange]);
 
   const chartConfig = {
     views: {
@@ -184,6 +75,8 @@ export const AnalyticsDashboard = () => {
     );
   }
 
+  if (error || !stats) return <div role="alert"><p>Statistik pengunjung belum dapat dimuat.</p><Button onClick={() => void refetch()}>Coba lagi</Button></div>;
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -195,7 +88,7 @@ export const AnalyticsDashboard = () => {
           <div>
             <h2 className="text-xl font-semibold">Visitor Analytics</h2>
             <p className="text-sm text-muted-foreground">
-              Statistik pengunjung halaman projects
+              Statistik seluruh halaman dalam periode terpilih
             </p>
           </div>
         </div>

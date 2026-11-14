@@ -1,5 +1,13 @@
 # Ink motion refinement — 14 November 2026
 
+## Status against current source — 15 November 2026
+
+Current constants are 780 ms duration, 390 ms midpoint and 64 frames. The native callback is synchronous; a decoded cache and worker preparation are present. Reduced motion is a short crossfade, and scroll does not cancel the transition. Warm-cache reuse can reduce preparation cost but does not guarantee 0 ms latency or lock to every display refresh. Deployment and browser claims below are historical receipts, not repeated verification. See [the current codebase guide](current-codebase.md) and [the repository README](../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 The theme reveal retains its 900 ms timing and existing native/layered rendering paths. This revision refines the pigment's shape, temporal sampling and preparation responsiveness.
 
 ## Changes

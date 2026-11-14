@@ -71,7 +71,7 @@ async function reveal(request: Request, signal: AbortSignal) {
         }
 
         // Trigger procedural fluid audio micro-interaction (silently handled if disabled)
-        try { playThemeInkSound(request.theme === "dark"); } catch {}
+        try { playThemeInkSound(request.theme === "dark"); } catch { /* Audio is optional; continue the visual transition. */ }
 
         await warming;
         signal.throwIfAborted();

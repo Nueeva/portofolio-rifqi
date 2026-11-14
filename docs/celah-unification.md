@@ -1,5 +1,13 @@
 # Celah public portfolio
 
+## Status against current source — 15 November 2026
+
+The public shell, scoped portals and separate exact admin/auth routes remain. A successful managed catalog now replaces the curated fallback, including deletions; title-based append/dedup is no longer the active catalog policy. Runtime requests use Fastify/PostgreSQL, and static SEO can be built from the public content snapshot. Old Supabase boundaries, force-exit commands and test counts below belong to the first unification pass. See [the current codebase guide](current-codebase.md) and [the repository README](../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 Historical receipt for the first public-site unification. Its Supabase and unchanged-backend boundaries describe that earlier pass. For the current same-origin API, content-growth workflow and pending release gates, use [the editorial release handoff](celah-editorial-release.md) and [the self-hosted migration receipt](celah-selfhosted-postgres.md).
 
 ## Accepted direction

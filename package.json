@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && vite build --config vite.ssr.config.ts",
-    "postbuild": "node scripts/generate-og-cards.mjs && node scripts/prerender-meta.mjs && node scripts/prerender-body.mjs && node scripts/finalize-pwa.mjs",
+    "postbuild": "node scripts/capture-public-content.mjs && node scripts/generate-og-cards.mjs && node scripts/prerender-meta.mjs && node scripts/prerender-body.mjs && node scripts/finalize-pwa.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"

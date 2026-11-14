@@ -1,5 +1,13 @@
 # Celah: motion, light theme, dan pertumbuhan konten
 
+## Status against current source — 15 November 2026
+
+This is an archived audit of commit 03f2aa3. The proposed hero/motion and editorial work has since evolved: current public content uses the owned API, with managed catalog authority, editable studies/skill groups and persisted CV links. Public theme transitions are implemented. Do not treat the Supabase workflow table or missing-feature findings below as current defects. See [the current codebase guide](current-codebase.md) and [the repository README](../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 Audit ulang terhadap commit `03f2aa3`, berdasarkan source, CSS hasil build, paket terpasang, dan riset sumber primer. Belum ada observasi browser baru: izin preview tetap ditolak. Dokumen ini berisi temuan dan rekomendasi; tidak ada perubahan UI, admin, database, atau deployment pada putaran riset ini.
 
 ## Temuan utama

@@ -1,5 +1,13 @@
 # Plan redesign hero — Cybersecurity Engineer
 
+## Status against current source — 15 November 2026
+
+This plan is retained as design history. Current production code uses CybersecurityHero, optional OpticalField, HomeMotion landing studies and ProjectDiagram case-study figures. No new dependency, 3D replacement or deployment is implied by this plan. Current app/backend setup and checks are in the codebase guide. See [the current codebase guide](current-codebase.md) and [the repository README](../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 Status: rencana implementasi; belum mengubah UI. Target: mengganti hero pada branch `codex/cinematic-rework`.
 
 Revisi arah visual: pengguna menekankan bahwa desainnya sendiri harus khas. Diagram kode dan alur inspeksi di bawah adalah bahan cerita, bukan komposisi hero yang sudah dipilih. Tiga studi visual telah dibuat untuk dibandingkan: **Celah** (tipografi terbelah dan bidang yang membuka), **Berkas** (editorial investigatif dengan anotasi), dan **Interferensi** (poster kinetik dengan bidang bergeser yang menyatu). Storyboard dan copy berikut tetap tentatif sampai arah komposisi dinilai. Hindari menerjemahkan rencana langsung menjadi template teks-kiri/diagram-kanan.

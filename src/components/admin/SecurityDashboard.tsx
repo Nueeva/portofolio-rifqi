@@ -1,3 +1,4 @@
+import type { IPLog } from "@/integrations/api/types";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/api/client";
 import { useToast } from "@/hooks/use-toast";
@@ -65,19 +66,7 @@ interface BlockedIP {
   created_by: string;
 }
 
-interface IPLog {
-  id: string;
-  ip_address: string;
-  identifier: string | null;
-  action: string;
-  success: boolean;
-  user_agent: string | null;
-  country: string | null;
-  city: string | null;
-  region: string | null;
-  isp: string | null;
-  created_at: string;
-}
+
 
 export function SecurityDashboard() {
   const [blockedIPs, setBlockedIPs] = useState<BlockedIP[]>([]);
@@ -347,7 +336,7 @@ export function SecurityDashboard() {
 
   // Statistics
   const activeBlocks = blockedIPs.filter((ip) => !isExpired(ip.expires_at)).length;
-  const failedAttempts = ipLogs.filter((log) => !log.success).length;
+  const failedAttempts = ipLogs.filter((log) => log.success === false).length;
   const uniqueIPs = new Set(ipLogs.map((log) => log.ip_address)).size;
   const countriesDetected = new Set(ipLogs.filter((log) => log.country).map((log) => log.country)).size;
 

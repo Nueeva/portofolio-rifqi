@@ -1,6 +1,6 @@
-import type { Database } from "@/integrations/supabase/types";
+import type { ApiTables, AnalyticsSummary } from "./types";
 import type { Session } from "./types";
-type Tables=Database["public"]["Tables"];type Failure={message:string};type Result<T>={data:T|null;error:Failure|null};
+type Tables=ApiTables;type Failure={message:string};type Result<T>={data:T|null;error:Failure|null};
 async function request<T>(path:string,body?:unknown,method=body===undefined?"GET":"POST"):Promise<Result<T>>{
  try{const response=await fetch(`/api/${path}`,{method,credentials:"same-origin",headers:body instanceof FormData?{}:{"Content-Type":"application/json"},body:body===undefined?undefined:body instanceof FormData?body:JSON.stringify(body)});const result=await response.json();return response.ok?result:{data:null,error:result.error&&typeof result.error==="object"&&typeof result.error.message==="string"?result.error:{message:typeof result.message==="string"?result.message:"Permintaan gagal."}};}catch{return {data:null,error:{message:"Layanan belum terhubung. Coba lagi nanti."}};}
 }
@@ -31,6 +31,7 @@ class Channel {
  close(){this.source?.close();}
 }
 export const api={
+ analytics:{summary:(filters:{timeRange:"7d"|"30d"|"90d"|"all";page:string})=>request<AnalyticsSummary>("analytics/summary",filters)},
  from<K extends keyof Tables>(resource:K){return new Query<Tables[K]["Row"],Tables[K]["Insert"],Tables[K]["Update"]>(resource);},
  rpc:async(name:string,body:unknown)=>request<boolean>(`rpc/${name}`,body),
  functions:{invoke:async<T=Record<string,unknown>>(name:string,options:{body?:unknown}={})=>request<T>(`functions/${name}`,options.body??{})},

@@ -1,5 +1,13 @@
 # Organic ink theme transition
 
+## Status against current source — 15 November 2026
+
+The original 48-frame/900 ms behavior below has been superseded by the 64-frame/780 ms rasterizer (390 ms midpoint), worker preparation and decoded cache. Reduced motion crossfades for approximately 150 ms; unsupported native transitions retain inert page-copy layers. Native callbacks are synchronous and scroll is not a cancellation trigger. The historical recordings and receipts remain evidence of their original revision only. See [the current codebase guide](current-codebase.md) and [the repository README](../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 Implemented and deployed on 11 November 2026 at https://rifqi.apexsions.com/.
 
 The current 14 November refinement uses 64 frames and worker preparation; see [the refinement report](ink-theme-refinement.md). This document retains the original revision's receipt and measurements.

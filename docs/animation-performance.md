@@ -1,5 +1,13 @@
 # Animation performance pass — 2026-11-08
 
+## Status against current source — 15 November 2026
+
+The cached optical renderer and hidden/offscreen lifecycle remain implemented. HomeMotion now supplies landing mechanisms. Ink timing is 780 ms with 64 frames; older cadence tables below are historical measurements, not a fresh benchmark. Backend now also has aggregate analytics and stricter content contracts. See [the current codebase guide](current-codebase.md) and [the repository README](../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 Implemented background render-target caching, one-frame invalidation, hidden/offscreen cancellation, theme-only completion events, pointer read batching, and Lenis scheduler suspension while hidden. DPR ceiling, shaders, visual composition, mobile eligibility and Lenis tuning remain unchanged.
 
 ## Validation

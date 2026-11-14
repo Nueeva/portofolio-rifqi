@@ -235,3 +235,43 @@ test("upload uses multipart without JSON headers and returns a same-origin media
   assert.equal((await bucket.upload("owner/cv.pdf", new Blob(["%PDF-1.7"], { type: "application/pdf" }))).error, null);
   assert.equal(bucket.getPublicUrl("owner/cv.pdf").data.publicUrl, "/api/storage/resume/owner/cv.pdf");
 });
+
+test('incomplete historical editorial rows render safely',async()=>{
+ const {applyEditorial}=await vite.ssrLoadModule('/src/data/editorial.ts');
+ const source=projects.curatedProjects[0];
+ const [result]=applyEditorial([source],[{project_key:source.id,overview:'Historical context',summary:null}]);
+ assert.equal(result.caseStudy.overview,'Historical context');assert.deepEqual(result.caseStudy.challenges,[]);assert.equal(result.solution,source.solution);
+});
+
+test('CMS snapshot drives new routes, deleted projects, metadata and SSR content',async()=>{
+ const {prerenderRoutes}=await import('../dist-server/entry-server.js');
+ const content={projects:[{...projects.curatedProjects[0],id:'new-owner-project',title:'New <Owner> & project',solution:'Owner edited summary'}],portfolio_project_content:[],portfolio_skill_groups:[],site_settings:[],certifications:[]};
+ const routes=prerenderRoutes(content);assert.ok(routes.some(row=>row.path==='projects/new-owner-project'&&row.title.includes('New <Owner>')));assert.ok(!routes.some(row=>row.path.includes('curated-')));
+ const html=await render('/projects/new-owner-project',content);assert.match(html,/New &lt;Owner&gt; &amp; project/);assert.match(html,/Owner edited summary/);
+ assert.deepEqual(prerenderRoutes({...content,projects:[]}).map(row=>row.path),['','about','projects','contact']);
+});
+
+test('embedded CMS snapshots escape script boundaries and fetch errors fail closed',async(t)=>{
+ const {serializePublicContent,fetchPublicContent}=await import('../scripts/public-content.mjs');
+ const data={projects:[],portfolio_project_content:[],portfolio_skill_groups:[],site_settings:[],certifications:[]};
+ const value={title:'</script><script>alert(1)</script> & \u2028'};
+ const encoded=serializePublicContent(value);assert.doesNotMatch(encoded,/<|>|&/);assert.deepEqual(JSON.parse(encoded),value);
+ t.mock.method(globalThis,'fetch',async()=>Response.json({data:{...data,ip_logs:[{secret:'private'}]}}));
+ assert.deepEqual(await fetchPublicContent('http://localhost:8788'),data);
+ globalThis.fetch=async()=>Response.json({error:'unavailable'},{status:503});
+ await assert.rejects(fetchPublicContent('http://localhost:8788'),/HTTP 503/);
+});
+
+test('snapshot hydration preserves content but immediately revalidates browser queries',async()=>{
+ const {createQueryClient}=await vite.ssrLoadModule('/src/lib/publicContentCache.ts');
+ const content={projects:[],portfolio_project_content:[],portfolio_skill_groups:[],site_settings:[],certifications:[]};
+ const browser=createQueryClient(content,true),server=createQueryClient(content,false);
+ try{
+  for(const key of ['projects','project-editorial','skill-groups','public-site-settings','public-certifications']){
+   assert.equal(browser.getQueryCache().find({queryKey:[key]}).isStaleByTime(60000),true);
+   assert.equal(server.getQueryCache().find({queryKey:[key]}).isStaleByTime(60000),false);
+  }
+  assert.deepEqual(browser.getQueryData(['projects']),[]);
+  browser.setQueryData(['projects'],[{id:'browser-only'}]);assert.deepEqual(server.getQueryData(['projects']),[]);
+ }finally{browser.clear();server.clear();}
+});

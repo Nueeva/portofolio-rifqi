@@ -1,5 +1,13 @@
 # Celah motion and editorial revision
 
+## Status against current source — 15 November 2026
+
+The editorial UI writes to Fastify/PostgreSQL. New writes require complete study fields; incomplete historical rows are normalized. CMS saves update API data, while crawler HTML and metadata require a CMS-aware rebuild with PUBLIC_CONTENT_API_URL. The build includes newly added project routes and omits removed projects. No deployment or browser QA was performed for the current source correction. See [the current codebase guide](current-codebase.md) and [the repository README](../README.md) for maintained commands and limitations.
+
+## Historical record / original research
+
+The remainder preserves the earlier revision, including its dates, observations and release receipts. Statements about “current”, “pending” or “deployed” below apply to that historical revision, not the present checkout.
+
 The owner expanded the task to remove all Supabase runtime services and use a self-hosted backend/PostgreSQL. See [the current migration receipt](celah-selfhosted-postgres.md). The earlier Supabase-specific editorial migration was not applied and has been superseded by server/schema.sql.
 
 Motion fixes include an independent finite hero entrance, non-sticky scroll progress, reactive reduced-motion policy, readable cavity/filled-button colors and a coordinated diagonal theme transition. Project figures now differentiate reflection inspection, architecture, role lanes and category exploration.
