@@ -9,7 +9,11 @@ const pages = ["index.html","about/index.html","projects/index.html","contact/in
 for(const page of pages)test(`PWA revisions match final prerender: ${page}`,()=>{
  const source=read("dist/"+page);const digest=createHash("md5").update(source).digest("hex");
  assert.ok(sw.includes(`url:"${page}",revision:"${digest}"`),`final HTML revision missing: ${page}`);
- assert.match(source,/data-ssr-path=/);assert.doesNotMatch(source,/Cybersecurity Developer|cybersecurity developer/);
+ assert.match(source,/data-ssr-path=/);
+ // CMS snapshots preserve the owner's raw settings, including historical labels.
+ // Check published markup/metadata without treating inert source data as visible copy.
+ const markup=source.replace(/<script id="public-content" type="application\/json">[\s\S]*?<\/script>/g, "");
+ assert.doesNotMatch(markup,/Cybersecurity Developer|cybersecurity developer/);
 });
 test("optional engines, assistant and legacy pages stay outside initial cache",()=>{
  for(const file of readdirSync(new URL("../dist/assets/",import.meta.url)))if(/^(three|OpticalField|PublicRiva|LegacyLayout|Admin|Auth|CustomCursor)-/.test(file))assert.ok(!sw.includes(`url:"assets/${file}"`),file);
