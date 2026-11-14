@@ -5,29 +5,29 @@ colors:
   petrol: "#0b181c"
   petrol-surface: "#18343b"
   petrol-low: "#102124"
-  ivory: "#f1ece1"
+  ivory: "#f8f6f1"
   champagne: "#c7b594"
   cool-reflection: "#83b3ad"
   dark-muted: "#c1c7c2"
   dark-line: "#385257"
   dark-input: "#607779"
   dark-cavity: "#071013"
-  light-surface: "#e4e0d4"
-  light-low: "#e6e8df"
-  petrol-ink: "#10272e"
-  bronze: "#725739"
-  light-muted: "#536568"
-  light-line: "#c9c3b4"
-  light-input: "#8a8274"
-  light-cool: "#6a857f"
-  light-reflection: "#d1c3a8"
+  light-surface: "#ffffff"
+  light-low: "#f1ede4"
+  petrol-ink: "#14171a"
+  bronze: "#92400e"
+  light-muted: "#69707a"
+  light-line: "#e3ded4"
+  light-input: "#d4cdc0"
+  light-cool: "#0f766e"
+  light-reflection: "#92400e"
   light-danger: "hsl(4 66% 39%)"
   dark-danger: "hsl(4 75% 73%)"
-  light-cyan: "#246d67"
+  light-cyan: "#0f766e"
   dark-cyan: "#8eddd5"
-  light-periwinkle: "#515e9b"
+  light-periwinkle: "#6366f1"
   dark-periwinkle: "#a9b7f6"
-  light-copper: "#8d4b32"
+  light-copper: "#b45309"
   dark-copper: "#d39576"
 typography:
   display:
@@ -163,9 +163,9 @@ Cool reflection and light cool retain the original seam highlights. The added cy
 | Quiet section / footer | petrol-low | light-low |
 | Supporting text | dark-muted | light-muted |
 | Divider / input stroke | dark-line / dark-input | light-line / light-input |
-| Decorative cavity / reflection | dark-cavity / champagne | petrol-ink / light-reflection |
+| Decorative cavity / reflection | dark-cavity / champagne | light-cavity / light-reflection |
 
-The cavity remains dark in both themes. Its scoped foreground uses ivory, with dark-muted available for supporting copy; page foreground must not replace that cavity pairing. Seam arrows follow the reflection accent.
+The cavity uses adaptive depth in both themes (dark-cavity #071013 in dark mode; recessed warm titanium #ece7dc in light mode). Seam arrows follow the reflection accent.
 
 The public stylesheet also maps semantic HSL variables for shared UI components. Its `--site-*` variables drive custom public elements. Frontmatter component examples show the default light theme; runtime components switch through the scoped variables. Sidecar tonal ramps are generated preview metadata, not additional implemented theme tokens.
 

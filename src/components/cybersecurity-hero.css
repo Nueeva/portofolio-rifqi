@@ -37,10 +37,10 @@
 .cyber-heading h1 > span { display: block; }
 .cyber-heading em { display: block; font-family: 'Instrument Serif', serif; font-size: clamp(3.5rem, 11cqw, 6rem); font-weight: 400; font-style: italic; line-height: 1.1; letter-spacing: -.025em; color: var(--cy-metal); padding-left: 28%; margin-top: 9px; }
 .cyber-seam-frame { position: absolute; top: calc(54% - 60px); left: -12%; width: 124%; height: 120px; transform: rotate(-8deg); z-index: 3; pointer-events: none; }
-.cyber-cavity { position: absolute; inset: 0; background: #071013; overflow: hidden; box-shadow: inset 0 12px 20px #03090bcc; }
+.cyber-cavity { position: absolute; inset: 0; background: var(--site-cavity, #071013); overflow: hidden; box-shadow: var(--site-cavity-shadow, inset 0 12px 20px #03090bcc); }
 .cyber-lip { position: absolute; top: 50%; left: 0; right: 0; height: 2px; }
-.cyber-lip-top { background: linear-gradient(90deg, var(--cy-line) 10%, var(--cy-cool) 30%, var(--cy-ink) 51%, var(--cy-metal) 68%, #9f6e57 85%, var(--cy-line)); box-shadow: 0 5px 12px #83b3ad20; overflow: hidden; }
-.cyber-lip-bottom { height: 1px; background: linear-gradient(90deg, transparent, #83b3ad80 40%, #c7b59480 69%, transparent); }
+.cyber-lip-top { background: linear-gradient(90deg, var(--cy-line) 10%, var(--cy-cool) 30%, var(--cy-ink) 51%, var(--cy-metal) 68%, var(--cy-metal) 85%, var(--cy-line)); box-shadow: 0 5px 12px var(--site-shadow, #83b3ad20); overflow: hidden; }
+.cyber-lip-bottom { height: 1px; background: linear-gradient(90deg, transparent, var(--cy-cool) 40%, var(--cy-metal) 69%, transparent); opacity: .7; }
 .cyber-sweep { position: absolute; inset: 0; background: linear-gradient(90deg, transparent 20%, var(--cy-ink) 49%, var(--cy-metal) 53%, transparent 80%); }
 .cyber-pointer-glint { position: absolute; top: 48%; left: 42%; width: 16%; height: 2px; background: linear-gradient(90deg, transparent, var(--cy-metal), transparent); opacity: .45; }
 .cyber-reflection { position: absolute; left: 15%; top: -19px; font-family: 'Space Grotesk', sans-serif; font-size: 48px; line-height: .95; color: var(--cy-cool); opacity: .08; filter: blur(1px); }

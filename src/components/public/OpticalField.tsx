@@ -4,8 +4,8 @@ import { Color, Mesh, OrthographicCamera, PlaneGeometry, Scene, ShaderMaterial, 
 const vertex = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`;
 const background = `varying vec2 vUv; uniform vec3 base;uniform vec3 cool;uniform vec3 violet;
 void main(){vec2 p=vUv;float field=exp(-length((p-vec2(.74,.48))*vec2(1.5,2.8))*3.);float band=.5+.5*sin(p.x*15.+p.y*9.);gl_FragColor=vec4(mix(base,mix(cool,violet,band),field*.24),1.);}`.replace(';#include', ';\n#include');
-const optical = `varying vec2 vUv;uniform sampler2D source;uniform float progress;uniform vec2 pointer;uniform vec2 resolution;uniform vec3 copper;uniform vec3 cool;
-void main(){vec2 p=vUv;float gap=.025+smoothstep(0.,.35,progress)*.07;float seam=p.y-.35-p.x*.19;float edge=abs(seam)-gap;float bevel=exp(-abs(edge)*180.);vec2 offset=vec2(bevel*.012+pointer.x*.028,bevel*.018+pointer.y*.012);vec3 col;col.r=texture2D(source,p+offset*1.7).r;col.g=texture2D(source,p+offset).g;col.b=texture2D(source,p+offset*.3).b;float cavity=1.-smoothstep(-.003,.003,edge);col*=1.-cavity*.72;float sweep=smoothstep(.35,.75,progress);float shine=exp(-pow((p.x-(sweep*1.5-.25))*.9,2.)*22.);col+=bevel*mix(cool,copper,p.x)*(.26+shine*.8);col+=exp(-abs(edge)*35.)*copper*.035;gl_FragColor=vec4(col,1.);\n#include <colorspace_fragment>\n}`;
+const optical = `varying vec2 vUv;uniform sampler2D source;uniform float progress;uniform vec2 pointer;uniform vec2 resolution;uniform vec3 copper;uniform vec3 cool;uniform vec3 base;
+void main(){vec2 p=vUv;float gap=.025+smoothstep(0.,.35,progress)*.07;float seam=p.y-.35-p.x*.19;float edge=abs(seam)-gap;float bevel=exp(-abs(edge)*180.);vec2 offset=vec2(bevel*.012+pointer.x*.028,bevel*.018+pointer.y*.012);vec3 col;col.r=texture2D(source,p+offset*1.7).r;col.g=texture2D(source,p+offset).g;col.b=texture2D(source,p+offset*.3).b;float cavity=1.-smoothstep(-.003,.003,edge);float isDark=base.r<.2?1.:0.;col*=1.-cavity*(isDark*.72+.08);float sweep=smoothstep(.35,.75,progress);float shine=exp(-pow((p.x-(sweep*1.5-.25))*.9,2.)*22.);col+=bevel*mix(cool,copper,p.x)*(.26+shine*.8);col+=exp(-abs(edge)*35.)*copper*.035;gl_FragColor=vec4(col,1.);\n#include <colorspace_fragment>\n}`;
 /** Decorative, render-on-demand optical layer. Poster and DOM remain complete on failure. */
 export default function OpticalField({ progress }: {
     progress: MotionValue<number>;
@@ -31,7 +31,7 @@ export default function OpticalField({ progress }: {
         const screen = new Scene();
         const target = new WebGLRenderTarget(1, 1, { depthBuffer: false, stencilBuffer: false });
         const bg = new ShaderMaterial({ vertexShader: vertex, fragmentShader: background, uniforms: { base: { value: new Color() }, cool: { value: new Color() }, violet: { value: new Color() } } });
-        const material = new ShaderMaterial({ vertexShader: vertex, fragmentShader: optical, uniforms: { source: { value: target.texture }, progress: { value: progress.get() }, pointer: { value: new Vector2() }, resolution: { value: new Vector2() }, copper: { value: new Color() }, cool: { value: new Color() } } });
+        const material = new ShaderMaterial({ vertexShader: vertex, fragmentShader: optical, uniforms: { source: { value: target.texture }, progress: { value: progress.get() }, pointer: { value: new Vector2() }, resolution: { value: new Vector2() }, copper: { value: new Color() }, cool: { value: new Color() }, base: { value: new Color() } } });
         scene.add(new Mesh(geometry, bg));
         screen.add(new Mesh(geometry, material));
         let raf = 0, visible = true, disposed = false, failed = false;
@@ -97,6 +97,7 @@ export default function OpticalField({ progress }: {
             bg.uniforms.violet.value.set(color("--site-violet"));
             material.uniforms.copper.value.set(color("--site-copper"));
             material.uniforms.cool.value.set(color("--site-cyan"));
+            material.uniforms.base.value.set(color("--site-bg"));
             backgroundDirty = true;
             themePending = true;
             invalidate();
@@ -116,9 +117,9 @@ export default function OpticalField({ progress }: {
         const snapshot = (event: Event) => {
             const { colors, capture } = (event as CustomEvent<{ colors: Record<string, string>; capture: (value: string) => void }>).detail;
             if (disposed || failed) return;
-            const uniforms = [bg.uniforms.base, bg.uniforms.cool, bg.uniforms.violet, material.uniforms.copper, material.uniforms.cool];
+            const uniforms = [bg.uniforms.base, bg.uniforms.cool, bg.uniforms.violet, material.uniforms.copper, material.uniforms.cool, material.uniforms.base];
             const previous = uniforms.map(uniform => uniform.value.clone());
-            const names = ["--site-bg", "--site-cyan", "--site-violet", "--site-copper", "--site-cyan"];
+            const names = ["--site-bg", "--site-cyan", "--site-violet", "--site-copper", "--site-cyan", "--site-bg"];
             const targetBefore = renderer.getRenderTarget();
             try {
                 uniforms.forEach((uniform, i) => uniform.value.set(colors[names[i]]));
