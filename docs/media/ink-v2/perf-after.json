@@ -1,0 +1,95 @@
+[
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "run": 0,
+    "steps": 64,
+    "prepareMs": 1288.7000000029802,
+    "revealMs": 965.5999999940395,
+    "frameP95": 33.19999999999982,
+    "prepLongTasks": [],
+    "revealLongTasks": [
+      {
+        "start": 3125.3999999910593,
+        "duration": 140
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "run": 1,
+    "steps": 64,
+    "prepareMs": 941.2999999970198,
+    "revealMs": 916.7999999970198,
+    "frameP95": 17.100000000000364,
+    "prepLongTasks": [],
+    "revealLongTasks": [
+      {
+        "start": 2520,
+        "duration": 87
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "run": 2,
+    "steps": 64,
+    "prepareMs": 1110.8999999910593,
+    "revealMs": 931.9000000059605,
+    "frameP95": 33.5,
+    "prepLongTasks": [],
+    "revealLongTasks": [
+      {
+        "start": 2727.1000000089407,
+        "duration": 105
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "run": 0,
+    "steps": 64,
+    "prepareMs": 770.6999999880791,
+    "revealMs": 905.9000000059605,
+    "frameP95": 17.200000000000273,
+    "prepLongTasks": [],
+    "revealLongTasks": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "run": 1,
+    "steps": 64,
+    "prepareMs": 795,
+    "revealMs": 916.7999999970198,
+    "frameP95": 17.09999999999991,
+    "prepLongTasks": [],
+    "revealLongTasks": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "run": 2,
+    "steps": 64,
+    "prepareMs": 843.2999999970198,
+    "revealMs": 931.7999999970198,
+    "frameP95": 17.300000000000182,
+    "prepLongTasks": [],
+    "revealLongTasks": []
+  }
+]

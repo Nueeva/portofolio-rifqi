@@ -1,0 +1,78 @@
+[
+  {
+    "mode": "view",
+    "direction": "light",
+    "fullCoverageMismatch": 0.007697265625,
+    "preparationMs": 1073.5999999996275
+  },
+  {
+    "mode": "view",
+    "direction": "dark",
+    "fullCoverageMismatch": 0.0088935546875,
+    "preparationMs": 255.2000000011176
+  },
+  {
+    "mode": "view",
+    "rapidClicks": "passed",
+    "resize": "passed",
+    "reducedMotion": "passed"
+  },
+  {
+    "mode": "layers",
+    "direction": "light",
+    "fullCoverageMismatch": 0.006103515625,
+    "preparationMs": 2133.800000000745
+  },
+  {
+    "mode": "layers",
+    "direction": "dark",
+    "fullCoverageMismatch": 0.0066455078125,
+    "preparationMs": 504.5
+  },
+  {
+    "mode": "layers",
+    "rapidClicks": "passed",
+    "resize": "passed",
+    "reducedMotion": "passed"
+  },
+  {
+    "mode": "layers",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "stateAndAlignment": "passed"
+  },
+  {
+    "mode": "view",
+    "viewport": {
+      "width": 1600,
+      "height": 420
+    },
+    "stateAndAlignment": "passed"
+  },
+  {
+    "mode": "layers",
+    "viewport": {
+      "width": 420,
+      "height": 1200
+    },
+    "stateAndAlignment": "passed"
+  },
+  {
+    "fault": "mask",
+    "settled": "passed"
+  },
+  {
+    "fault": "transition",
+    "settled": "passed"
+  },
+  {
+    "fault": "unmount",
+    "settled": "passed"
+  },
+  {
+    "fault": "scroll",
+    "settled": "passed"
+  }
+]

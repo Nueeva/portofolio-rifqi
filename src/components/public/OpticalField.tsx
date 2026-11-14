@@ -34,65 +34,112 @@ export default function OpticalField({ progress }: {
         const material = new ShaderMaterial({ vertexShader: vertex, fragmentShader: optical, uniforms: { source: { value: target.texture }, progress: { value: progress.get() }, pointer: { value: new Vector2() }, resolution: { value: new Vector2() }, copper: { value: new Color() }, cool: { value: new Color() } } });
         scene.add(new Mesh(geometry, bg));
         screen.add(new Mesh(geometry, material));
-        let raf = 0, visible = true, disposed = false, failed = false, dpr = Math.min(devicePixelRatio, 1.5), last = 0, slowSince = 0, activeUntil = 0;
-        const fallBack = () => { failed = true; canvas.hidden = true; canvas.style.display = "none"; el.dataset.failed = "true"; };
+        let raf = 0, visible = true, disposed = false, failed = false;
+        let dpr = Math.min(devicePixelRatio, 1.5), slowCost = 0;
+        let backgroundDirty = true, themePending = false;
+        let pointerPosition: { x: number; y: number } | null = null;
+        const cancel = () => { cancelAnimationFrame(raf); raf = 0; };
+        const fallBack = () => { failed = true; cancel(); canvas.hidden = true; canvas.style.display = "none"; el.dataset.failed = "true"; };
         const render = () => {
             raf = 0;
-            if (disposed || failed || !visible || document.hidden)
-                return;
+            if (disposed || failed || !visible || document.hidden) return;
             const start = performance.now();
+            if (pointerPosition) {
+                const bounds = el.getBoundingClientRect();
+                material.uniforms.pointer.value.set(
+                    (pointerPosition.x - bounds.left) / Math.max(1, bounds.width) - .5,
+                    (pointerPosition.y - bounds.top) / Math.max(1, bounds.height) - .5,
+                );
+                pointerPosition = null;
+            }
             try {
-                renderer.setRenderTarget(target);
-                renderer.render(scene, camera);
-                renderer.setRenderTarget(null);
-                renderer.render(screen, camera);window.dispatchEvent(new Event("celah:theme-rendered"));
-            }
-            catch {
-                fallBack();
-                return;
-            }
-            const cost = performance.now() - start;
-            const now = performance.now();
-            const interval = last ? now - last : 0;
-            last = now;
-            // Count only actively rendered adjacent frames, never idle time.
-            if (cost > 25 || (interval > 25 && interval < 100)) {
-                slowSince ||= now;
-                if (now - slowSince > 2000) {
-                    if (dpr > 1) {
-                        dpr = 1;
-                        resize();
-                        slowSince = 0;
-                    }
-                    else
-                        fallBack();
+                // The source texture depends on size and theme, never camera or pointer.
+                if (backgroundDirty) {
+                    renderer.setRenderTarget(target);
+                    renderer.render(scene, camera);
+                    backgroundDirty = false;
                 }
+                renderer.setRenderTarget(null);
+                renderer.render(screen, camera);
+                if (themePending) {
+                    themePending = false;
+                    window.dispatchEvent(new Event("celah:theme-rendered"));
+                }
+            } catch { fallBack(); return; }
+            // Accumulate actual submission cost, not gaps between sparse input events.
+            // This is CPU submission time; it is not a measurement of GPU execution.
+            const cost = performance.now() - start;
+            slowCost = cost > 25 ? slowCost + cost : 0;
+            if (slowCost > 2000) {
+                slowCost = 0;
+                if (dpr > 1) { dpr = 1; resize(); }
+                else fallBack();
             }
-            else
-                slowSince = 0;
-            if (!failed && now < activeUntil)
+        };
+        const invalidate = () => {
+            if (!raf && !disposed && !failed && visible && !document.hidden)
                 raf = requestAnimationFrame(render);
         };
-        const invalidate = () => { activeUntil = performance.now() + 100; if (!raf && !disposed && !failed)
-            raf = requestAnimationFrame(render); };
-        const resize = () => { const { width, height } = el.getBoundingClientRect(); renderer.setPixelRatio(dpr); renderer.setSize(width, height); target.setSize(Math.max(1, Math.floor(width * dpr * .5)), Math.max(1, Math.floor(height * dpr * .5))); material.uniforms.resolution.value.set(width, height); invalidate(); };
-        const theme = () => { const css = getComputedStyle(el); const color = (name: string) => css.getPropertyValue(name).trim(); bg.uniforms.base.value.set(color("--site-bg")); bg.uniforms.cool.value.set(color("--site-cyan")); bg.uniforms.violet.value.set(color("--site-violet")); material.uniforms.copper.value.set(color("--site-copper")); material.uniforms.cool.value.set(color("--site-cyan")); invalidate(); };
+        const resize = () => {
+            const { width, height } = el.getBoundingClientRect();
+            renderer.setPixelRatio(dpr);
+            renderer.setSize(width, height);
+            target.setSize(Math.max(1, Math.floor(width * dpr * .5)), Math.max(1, Math.floor(height * dpr * .5)));
+            material.uniforms.resolution.value.set(width, height);
+            backgroundDirty = true;
+            invalidate();
+        };
+        const theme = () => {
+            const css = getComputedStyle(el);
+            const color = (name: string) => css.getPropertyValue(name).trim();
+            bg.uniforms.base.value.set(color("--site-bg"));
+            bg.uniforms.cool.value.set(color("--site-cyan"));
+            bg.uniforms.violet.value.set(color("--site-violet"));
+            material.uniforms.copper.value.set(color("--site-copper"));
+            material.uniforms.cool.value.set(color("--site-cyan"));
+            backgroundDirty = true;
+            themePending = true;
+            invalidate();
+        };
         const observer = new ResizeObserver(resize);
         observer.observe(el);
-        const intersection = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; invalidate(); });
+        const intersection = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; if (visible) invalidate(); else cancel(); });
         intersection.observe(el);
         const mutation = new MutationObserver(theme);
         mutation.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
         const onProgress = progress.on("change", v => { material.uniforms.progress.value = v; invalidate(); });
         const pointer = (e: PointerEvent) => { if (e.pointerType !== "mouse")
-            return; material.uniforms.pointer.value.set(e.offsetX / el.clientWidth - .5, e.offsetY / el.clientHeight - .5); invalidate(); };
+            return; pointerPosition = { x: e.clientX, y: e.clientY }; invalidate(); };
         const lost = (event: Event) => { event.preventDefault(); fallBack(); };
+        // Presentation-only fallback snapshots need both shader palettes at once.
+        // Render/capture/restore synchronously, so the live canvas never flashes.
+        const snapshot = (event: Event) => {
+            const { colors, capture } = (event as CustomEvent<{ colors: Record<string, string>; capture: (value: string) => void }>).detail;
+            if (disposed || failed) return;
+            const uniforms = [bg.uniforms.base, bg.uniforms.cool, bg.uniforms.violet, material.uniforms.copper, material.uniforms.cool];
+            const previous = uniforms.map(uniform => uniform.value.clone());
+            const names = ["--site-bg", "--site-cyan", "--site-violet", "--site-copper", "--site-cyan"];
+            const targetBefore = renderer.getRenderTarget();
+            try {
+                uniforms.forEach((uniform, i) => uniform.value.set(colors[names[i]]));
+                renderer.setRenderTarget(target); renderer.render(scene, camera);
+                renderer.setRenderTarget(null); renderer.render(screen, camera);
+                capture(canvas.toDataURL("image/png"));
+            } finally {
+                uniforms.forEach((uniform, i) => uniform.value.copy(previous[i]));
+                renderer.setRenderTarget(target); renderer.render(scene, camera);
+                renderer.setRenderTarget(null); renderer.render(screen, camera);
+                renderer.setRenderTarget(targetBefore);
+            }
+        };
         el.parentElement?.addEventListener("pointermove", pointer);
         canvas.addEventListener("webglcontextlost", lost);
-        document.addEventListener("visibilitychange", invalidate);
+        canvas.addEventListener("celah:ink-snapshot", snapshot);
+        const visibility = () => { if (document.hidden) cancel(); else invalidate(); };
+        document.addEventListener("visibilitychange", visibility);
         theme();
         resize();
-        return () => { disposed = true; cancelAnimationFrame(raf); onProgress(); observer.disconnect(); intersection.disconnect(); mutation.disconnect(); el.parentElement?.removeEventListener("pointermove", pointer); canvas.removeEventListener("webglcontextlost", lost); document.removeEventListener("visibilitychange", invalidate); target.dispose(); geometry.dispose(); bg.dispose(); material.dispose(); renderer.dispose(); canvas.remove(); };
+        return () => { disposed = true; cancelAnimationFrame(raf); onProgress(); observer.disconnect(); intersection.disconnect(); mutation.disconnect(); el.parentElement?.removeEventListener("pointermove", pointer); canvas.removeEventListener("webglcontextlost", lost); canvas.removeEventListener("celah:ink-snapshot", snapshot); document.removeEventListener("visibilitychange", visibility); target.dispose(); geometry.dispose(); bg.dispose(); material.dispose(); renderer.dispose(); canvas.remove(); };
     }, [progress]);
     return <div className="optical-field" ref={host}/>;
 }

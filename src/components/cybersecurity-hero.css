@@ -101,3 +101,19 @@
 
 .public-design .cyber-body{left:auto;right:auto;width:86%;margin-inline:auto}.public-design .cyber-seam-copy{color:var(--site-cavity-ink)}
 @media(max-width:767px){.public-design .cyber-body{width:88%}}
+
+/* Two polished edges separate; the travelling light follows the same camera. */
+.celah-rails { position:absolute; left:-12%; width:124%; top:50%; height:1px; transform:rotate(-8deg); pointer-events:none; z-index:2; }
+.celah-rail { position:absolute; inset:0; background:linear-gradient(90deg,transparent,var(--cy-cool) 25%,var(--cy-ink) 60%,var(--cy-metal) 85%,transparent); }
+.celah-rail-lower { opacity:.45; }
+.celah-tracer { position:absolute; top:-36px; height:72px; width:30%; background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--cy-cool) 12%,transparent),transparent); border-inline:1px solid color-mix(in srgb,var(--cy-metal) 35%,transparent); transform:skewX(-18deg); }
+@media (prefers-reduced-motion:no-preference) {
+  .cyber-heading h1 > span { animation:celah-type-register 1.1s cubic-bezier(.16,1,.3,1) both; }
+  .cyber-heading h1 > em { animation:celah-italic-register 1.4s cubic-bezier(.16,1,.3,1) both; }
+  .cyber-project-arrow { overflow:hidden; }
+  .cyber-project a:hover .cyber-project-arrow svg, .cyber-project a:focus-visible .cyber-project-arrow svg { animation:celah-arrow-pass .45s cubic-bezier(.16,1,.3,1); }
+}
+@keyframes celah-type-register { from { transform:translateX(-22px); letter-spacing:-.025em; } to { transform:translateX(0); letter-spacing:-.04em; } }
+@keyframes celah-italic-register { from { translate:32px 10px; rotate:-3deg; } to { translate:0 0; rotate:0deg; } }
+@keyframes celah-arrow-pass { 0% { transform:translate(0,0); } 45% { transform:translate(24px,-24px); } 46% { transform:translate(-24px,24px); } 100% { transform:translate(0,0); } }
+@media(prefers-reduced-motion:reduce) { .celah-tracer { display:none; } }

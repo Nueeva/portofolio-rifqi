@@ -60,8 +60,13 @@ function ScrollManager() {
                 lenis.raf(timestamp); };
             const reset = () => lenis.scrollTo(window.scrollY, { immediate: true, force: true });
             window.addEventListener("celah:scroll-restored", reset);
-            frame.setup(tick, true);
-            cleanup = () => { window.removeEventListener("celah:scroll-restored", reset); cancelFrame(tick); lenis.destroy(); };
+            const visibility = () => {
+                cancelFrame(tick);
+                if (!document.hidden) { reset(); frame.setup(tick, true); }
+            };
+            document.addEventListener("visibilitychange", visibility);
+            visibility();
+            cleanup = () => { document.removeEventListener("visibilitychange", visibility); window.removeEventListener("celah:scroll-restored", reset); cancelFrame(tick); lenis.destroy(); };
         });
         return () => { cancelled = true; cleanup?.(); };
     }, [reduced]);

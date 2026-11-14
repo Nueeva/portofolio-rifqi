@@ -1,0 +1,89 @@
+[
+  {
+    "mode": "view",
+    "direction": "light",
+    "fullCoverageMismatch": 0.007720703125,
+    "preparationMs": 1381.8999999910593
+  },
+  {
+    "mode": "view",
+    "direction": "dark",
+    "fullCoverageMismatch": 0.0088935546875,
+    "preparationMs": 344.3999999910593
+  },
+  {
+    "mode": "view",
+    "rapidClicks": "passed",
+    "resize": "passed",
+    "reducedMotion": "passed"
+  },
+  {
+    "mode": "layers",
+    "direction": "light",
+    "fullCoverageMismatch": 0.006103515625,
+    "preparationMs": 1910.199999988079
+  },
+  {
+    "mode": "layers",
+    "direction": "dark",
+    "fullCoverageMismatch": 0.0066455078125,
+    "preparationMs": 515.7999999970198
+  },
+  {
+    "mode": "layers",
+    "rapidClicks": "passed",
+    "resize": "passed",
+    "reducedMotion": "passed"
+  },
+  {
+    "mode": "layers",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "stateAndAlignment": "passed"
+  },
+  {
+    "mode": "view",
+    "viewport": {
+      "width": 1600,
+      "height": 420
+    },
+    "stateAndAlignment": "passed"
+  },
+  {
+    "mode": "layers",
+    "viewport": {
+      "width": 420,
+      "height": 1200
+    },
+    "stateAndAlignment": "passed"
+  },
+  {
+    "fault": "mask",
+    "settled": "passed"
+  },
+  {
+    "fault": "transition",
+    "settled": "passed"
+  },
+  {
+    "fault": "unmount",
+    "settled": "passed"
+  },
+  {
+    "fault": "scroll",
+    "settled": "passed"
+  },
+  {
+    "mode": "view",
+    "workerUnavailable": "raster fallback passed"
+  },
+  {
+    "mode": "layers",
+    "workerUnavailable": "raster fallback passed"
+  },
+  {
+    "preparationCancellation": "worker terminated, destination settled"
+  }
+]

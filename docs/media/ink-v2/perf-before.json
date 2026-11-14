@@ -1,0 +1,132 @@
+[
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "run": 0,
+    "steps": 48,
+    "prepareMs": 1209.2000000029802,
+    "revealMs": 1454.2000000029802,
+    "frameP95": 36.70000000000073,
+    "prepLongTasks": [
+      {
+        "start": 3420.0999999940395,
+        "duration": 64
+      },
+      {
+        "start": 3620.699999988079,
+        "duration": 69
+      }
+    ],
+    "revealLongTasks": [
+      {
+        "start": 4567.5999999940395,
+        "duration": 64
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "run": 1,
+    "steps": 48,
+    "prepareMs": 1199.800000011921,
+    "revealMs": 1171,
+    "frameP95": 282.5,
+    "prepLongTasks": [
+      {
+        "start": 2003,
+        "duration": 104
+      },
+      {
+        "start": 2223.3999999910593,
+        "duration": 83
+      }
+    ],
+    "revealLongTasks": [
+      {
+        "start": 3048.7000000029802,
+        "duration": 266
+      }
+    ]
+  },
+  {
+    "viewport": {
+      "width": 1280,
+      "height": 800
+    },
+    "run": 2,
+    "steps": 48,
+    "prepareMs": 1245.4000000059605,
+    "revealMs": 908.5,
+    "frameP95": 18.700000000000273,
+    "prepLongTasks": [
+      {
+        "start": 2134.5,
+        "duration": 102
+      },
+      {
+        "start": 2356.1000000089407,
+        "duration": 80
+      }
+    ],
+    "revealLongTasks": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "run": 0,
+    "steps": 48,
+    "prepareMs": 857,
+    "revealMs": 1313.7000000029802,
+    "frameP95": 18.300000000000182,
+    "prepLongTasks": [
+      {
+        "start": 2149.5,
+        "duration": 61
+      }
+    ],
+    "revealLongTasks": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "run": 1,
+    "steps": 48,
+    "prepareMs": 855.7000000029802,
+    "revealMs": 912.2999999970198,
+    "frameP95": 18.200000000000273,
+    "prepLongTasks": [
+      {
+        "start": 2251,
+        "duration": 60
+      }
+    ],
+    "revealLongTasks": []
+  },
+  {
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "run": 2,
+    "steps": 48,
+    "prepareMs": 857.7000000029802,
+    "revealMs": 903.5999999940395,
+    "frameP95": 18.300000000000182,
+    "prepLongTasks": [
+      {
+        "start": 1951.7999999970198,
+        "duration": 53
+      }
+    ],
+    "revealLongTasks": []
+  }
+]

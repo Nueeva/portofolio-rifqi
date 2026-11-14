@@ -24,7 +24,7 @@ export function CybersecurityHero() {
     });
     const progress = useMotionValue(0);
     const entrance = useMotionValue(0);
-    const camera = useTransform([progress, entrance], (values: number[]) => Math.min(1,values[1]*.72+values[0]*.28));
+    const camera = useTransform([progress, entrance], (values: number[]) => Math.min(1,values[1]*.42+values[0]*.58));
     useMotionValueEvent(scrollYProgress, "change", value => { if (!reduced)
         progress.set(value); });
     useEffect(() => {
@@ -33,7 +33,7 @@ export function CybersecurityHero() {
             progress.set(0);
             return;
         }
-        const animation = animate(entrance, [0, 1], { duration: 1.1, ease: [.22, 1, .36, 1] });
+        const animation = animate(entrance, [0, 1], { duration: 1.65, ease: [.22, 1, .36, 1] });
         return () => animation.stop();
     }, [reduced, entrance, progress]);
     useEffect(() => {
@@ -48,8 +48,8 @@ export function CybersecurityHero() {
         return () => { observer.disconnect(); window.removeEventListener("resize", sync); };
     }, [reduced]);
     // Lenis already smooths document scroll. No second spring on the camera.
-    const titleY = useTransform(camera, [0, 0.2, 0.85, 1], [0, -2, -24, -30]);
-    const engineerX = useTransform(camera, [0, 0.2, 0.85, 1], [0, 0, 14, 16]);
+    const titleY = useTransform(camera, [0, 0.2, 0.85, 1], [0, -2, -32, -40]);
+    const engineerX = useTransform(camera, [0, 0.2, 0.85, 1], [0, 0, 26, 32]);
     const lowerY = useTransform(camera, [0, 0.35, 0.75, 1], [0, 2, 43, 48]);
     const upperLip = useTransform(camera, [0, 0.35, 0.75, 1], [-10, -12, -51, -54]);
     const lowerLip = useTransform(camera, [0, 0.35, 0.75, 1], [10, 12, 51, 54]);
@@ -59,21 +59,45 @@ export function CybersecurityHero() {
     ]);
     // The highlight starts after the opening: position and light aren't one tween.
     const sweepX = useTransform(camera, [0, 0.35, 0.75, 1], ["-125%", "-110%", "125%", "170%"]);
+    const railSpread = useTransform(camera, [0, .42, 1], [3, 22, 64]);
+    const railUpper = useTransform(railSpread, value => -value);
+    const railSweep = useTransform(camera, [0, .2, .65, 1], ["-110%", "-100%", "40%", "130%"]);
     const reflectionY = useTransform(camera, [0, 1], [-4, 12]);
     const pointerX = useSpring(0, { stiffness: 90, damping: 28 });
     const pointerY = useSpring(0, { stiffness: 90, damping: 28 });
+    const pointerFrame = useRef(0);
+    const pendingPointer = useRef<{ x: number; y: number; target: HTMLElement } | null>(null);
+    useEffect(() => () => cancelAnimationFrame(pointerFrame.current), []);
+    function resetPointer() {
+        cancelAnimationFrame(pointerFrame.current);
+        pointerFrame.current = 0;
+        pendingPointer.current = null;
+        pointerX.set(0);
+        pointerY.set(0);
+    }
     function onPointerMove(event: PointerEvent<HTMLElement>) {
         if (event.pointerType !== "mouse" || window.matchMedia("(prefers-reduced-motion: reduce)").matches)
             return;
-        const bounds = event.currentTarget.getBoundingClientRect();
-        pointerX.set(((event.clientX - bounds.left) / bounds.width - 0.5) * 12);
-        pointerY.set(((event.clientY - bounds.top) / bounds.height - 0.5) * 6);
+        pendingPointer.current = { x: event.clientX, y: event.clientY, target: event.currentTarget };
+        if (!pointerFrame.current) pointerFrame.current = requestAnimationFrame(() => {
+            pointerFrame.current = 0;
+            const point = pendingPointer.current;
+            if (!point) return;
+            const bounds = point.target.getBoundingClientRect();
+            pointerX.set(((point.x - bounds.left) / Math.max(1, bounds.width) - .5) * 12);
+            pointerY.set(((point.y - bounds.top) / Math.max(1, bounds.height) - .5) * 6);
+        });
     }
     return (<section ref={ref} className={`cyber-hero ${sticky ? "can-stick" : ""}`} aria-labelledby="cyber-title">
-      <div className="cyber-stage" onPointerMove={onPointerMove} onPointerLeave={() => { pointerX.set(0); pointerY.set(0); }}>
+      <div className="cyber-stage" onPointerMove={onPointerMove} onPointerLeave={resetPointer}>
         {allowWebGL && <OptionalFeatureBoundary><Suspense fallback={null}><OpticalField progress={camera}/></Suspense></OptionalFeatureBoundary>}
-        <m.div className="hero-intro-light" aria-hidden="true" initial={false} animate={reduced ? { x: "150%" } : { x: ["-150%", "150%"] }} transition={{ duration: 1.1, ease: [.22, 1, .36, 1] }}/>
-        <svg className="optical-poster" viewBox="0 0 1280 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="optical-spectrum"><stop stopColor="var(--site-cyan)"/><stop offset=".6" stopColor="var(--site-violet)"/><stop offset="1" stopColor="var(--site-copper)"/></linearGradient></defs><path d="M-60 570L1340 325L1340 470L-60 715Z" fill="var(--site-cavity)"/><path d="M-60 568L1340 323" stroke="url(#optical-spectrum)" strokeWidth="3"/><path d="M-60 717L1340 472" stroke="var(--site-metal)" strokeWidth="1"/></svg>
+        <m.div className="hero-intro-light" aria-hidden="true" initial={false} animate={reduced ? { x: "150%" } : { x: ["-150%", "150%"] }} transition={{ duration: 1.65, ease: [.22, 1, .36, 1] }}/>
+        <m.svg className="optical-poster" viewBox="0 0 1280 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="optical-spectrum"><stop stopColor="var(--site-cyan)"/><stop offset=".6" stopColor="var(--site-violet)"/><stop offset="1" stopColor="var(--site-copper)"/></linearGradient></defs><path d="M-60 570L1340 325L1340 470L-60 715Z" fill="var(--site-cavity)"/><path d="M-60 568L1340 323" stroke="url(#optical-spectrum)" strokeWidth="3"/><path d="M-60 717L1340 472" stroke="var(--site-metal)" strokeWidth="1"/></m.svg>
+        <div className="celah-rails" aria-hidden="true">
+          <m.div className="celah-rail celah-rail-upper" style={{ y: reduced ? -22 : railUpper }} />
+          <m.div className="celah-rail celah-rail-lower" style={{ y: reduced ? 22 : railSpread }} />
+          <m.div className="celah-tracer" style={{ x: railSweep }} />
+        </div>
         <div className="cyber-upper" aria-hidden="true"/>
         <m.div className="cyber-lower" aria-hidden="true" style={{ y: lowerY }}/>
         <m.div className="cyber-heading" style={{ y: reduced ? 0 : titleY }}>

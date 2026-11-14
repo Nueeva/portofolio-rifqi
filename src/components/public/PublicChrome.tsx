@@ -1,6 +1,5 @@
-import { changePublicTheme } from "@/lib/themeTransition";
 import * as m from "motion/react-m";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { useTheme } from "next-themes";
 import { ArrowUpRight, Github, Linkedin, Mail, Menu, Moon, Sun, Twitter } from "lucide-react";
@@ -12,9 +11,41 @@ const links = [{ to: "/", label: "Beranda" }, { to: "/projects", label: "Karya" 
 export function PublicThemeSwitch() {
     const { resolvedTheme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
-    useEffect(() => setMounted(true), []);
+    const [requestedTheme, setRequestedTheme] = useState<"dark" | "light" | undefined>();
+    const cancelTransition = useRef<(() => void) | undefined>();
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    useEffect(() => {
+      setMounted(true);
+      const timer = setTimeout(() => {
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        void import("@/lib/themeTransition").then(module => {
+          if (!buttonRef.current?.isConnected) return;
+          cancelTransition.current = module.cancelPublicThemeTransition;
+          return module.warmPublicTheme(buttonRef.current);
+        }).catch(() => undefined);
+      }, 2500);
+      return () => { clearTimeout(timer); cancelTransition.current?.(); };
+    }, []);
     const dark = mounted && resolvedTheme === "dark";
-    return <button className="public-theme-switch" type="button" disabled={!mounted} aria-label={mounted ? `Gunakan tema ${dark ? "terang" : "gelap"}` : "Ganti tema"} onClick={() => void changePublicTheme(dark ? "light" : "dark",setTheme)}>
+    const actionDark = requestedTheme ? requestedTheme === "dark" : dark;
+    return <button ref={buttonRef} className="public-theme-switch" type="button" disabled={!mounted} aria-label={mounted ? `Gunakan tema ${actionDark ? "terang" : "gelap"}` : "Ganti tema"} onClick={event => {
+      const button = event.currentTarget;
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches && !cancelTransition.current) {
+        const next = document.documentElement.classList.contains("dark") ? "light" : "dark";
+        setTheme(next);
+        document.documentElement.classList.toggle("dark", next === "dark");
+        document.documentElement.classList.toggle("light", next === "light");
+        document.documentElement.style.colorScheme = next;
+        return;
+      }
+      void import("@/lib/themeTransition").then(module => {
+        if (!button.isConnected) return;
+        cancelTransition.current = module.cancelPublicThemeTransition;
+        const task = module.togglePublicTheme(setTheme, button);
+        setRequestedTheme(module.requestedPublicTheme());
+        return task.finally(() => { if (button.isConnected) setRequestedTheme(undefined); });
+      }).catch(() => setTheme(dark ? "light" : "dark"));
+    }}>
     {dark ? <Sun aria-hidden="true"/> : <Moon aria-hidden="true"/>}
   </button>;
 }
