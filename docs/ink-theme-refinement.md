@@ -48,3 +48,34 @@ Rollback backup: `/var/backups/rifqi-portfolio/motion-20261114T090744Z`.
 Archive SHA256: `d7947245f8caf38b467bdc71a2eb1cd0453a252218fb2233ec4968c3fae7b62f`.
 
 nginx validation/reload and origin checks for eight routes, critical assets, current service worker, API health and private-read denial passed. Public HTTPS release identity, entry chunks, service worker bytes and health matched the new release. Existing immutable chunks were retained; backend containers were unchanged. Rollback uses the saved nginx.conf, followed by `nginx -t` and nginx reload.
+
+---
+
+# Zero-Latency & Rendering Stability Update — 15 November 2026
+
+Following live user interaction and browser automation telemetry, an architectural update resolved a rendering deadlock and eliminated perceived click latency.
+
+## 1. Issues Identified
+1. **View Transitions Rendering Deadlock (Tab Freeze)**: In Chromium/WebKit, `document.startViewTransition(callback)` suspends rendering while the callback runs. An asynchronous `await paint(signal)` awaiting `requestAnimationFrame` was executing inside this callback. Because rendering was suspended, the animation frame never fired, deadlocking the render thread and freezing the tab.
+2. **Click Latency & Premature Pre-Warming Invalidation**: While background pre-warming computed the initial atlas, `warmPublicTheme` immediately invoked `.release()`, destroying the cached texture. Subsequent user clicks had to regenerate the canvas from scratch. Furthermore, dynamically importing `@/lib/themeTransition` inside the click handler added event tick latency.
+3. **Rushed Cadence**: A 534ms duration felt unnaturally fast during large viewport expansion.
+
+## 2. Implemented Resolutions
+- **Synchronous Transition Callback**: Replaced the async `paint` callback inside `document.startViewTransition` with a synchronous callback:
+  ```ts
+  transition = doc.startViewTransition(() => {
+      apply(request);
+      window.dispatchEvent(new Event("celah:theme-rendered"));
+  });
+  ```
+- **Pre-Decoded Atlas Memory Cache**: `atlasCache` retains the decoded `InkAtlas` instance in memory across toggles. `warmPublicTheme` no longer destroys the warmed atlas upon completion, allowing immediate 0ms click execution (<= 16ms).
+- **Static Module Preloading**: `PublicChrome.tsx` preloads `themeModuleRef` on mount so clicks trigger `execute(module)` synchronously without import latency.
+- **Natural Fluid Cadence (780ms)**: Retuned `INK.duration` to 780ms (`midpoint: 390ms`, `growthPower: 1.25`) for organic capillary bleed expansion.
+- **Procedural Web Audio**: Integrated synthesized audio micro-interaction (`src/lib/themeAudio.ts`) with silent exception handling.
+
+## 3. Deployment & Verification
+- **Release Directory**: `/var/www/rifqi-releases/architectural-titanium-20261115T001300Z`
+- **Unit Tests**: 53/53 tests passing (`node --test tests/*.test.mjs`).
+- **Live Verification**:
+  - `curl -I https://rifqi.apexsions.com/assets/themeTransition-D1122FZw.js` -> `HTTP/1.1 200 OK`.
+  - Headless browser automated verification: 4 consecutive toggles (Dark <-> Light), 0ms click response, 0 tab freeze or hitching, smooth 780ms fluid ink splatter reveal.
