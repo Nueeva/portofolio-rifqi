@@ -36,23 +36,6 @@ function apply(request: Request) {
     root.style.colorScheme = request.theme;
 }
 
-async function paint(signal: AbortSignal) {
-    signal.throwIfAborted();
-    await new Promise<void>(resolve => {
-        let frame = 0;
-        const done = () => {
-            cancelAnimationFrame(frame);
-            window.removeEventListener("celah:theme-rendered", done);
-            signal.removeEventListener("abort", done);
-            resolve();
-        };
-        window.addEventListener("celah:theme-rendered", done, { once: true });
-        signal.addEventListener("abort", done, { once: true });
-        frame = requestAnimationFrame(done);
-    });
-    signal.throwIfAborted();
-}
-
 function animationFor(target: HTMLElement, atlas: InkAtlas, pseudoElement?: string) {
     const keyframes = atlas.keyframes.map(k => ({
         ...k,
@@ -73,6 +56,7 @@ async function reveal(request: Request, signal: AbortSignal) {
             root.style.opacity = "0.75";
             await new Promise(r => setTimeout(r, 75));
             apply(request);
+            window.dispatchEvent(new Event("celah:theme-rendered"));
             root.style.opacity = "1";
             await new Promise(r => setTimeout(r, 75));
             root.style.removeProperty("transition");
@@ -82,23 +66,28 @@ async function reveal(request: Request, signal: AbortSignal) {
 
         if (document.hidden || !supportsMask()) {
             apply(request);
+            window.dispatchEvent(new Event("celah:theme-rendered"));
             return;
         }
 
-        // Trigger procedural fluid audio micro-interaction
-        playThemeInkSound(request.theme === "dark");
+        // Trigger procedural fluid audio micro-interaction (silently handled if disabled)
+        try { playThemeInkSound(request.theme === "dark"); } catch {}
 
         await warming;
         signal.throwIfAborted();
         atlas = await createInkAtlas(innerWidth, innerHeight, request.origin.x, request.origin.y, signal);
         signal.throwIfAborted();
         if (!request.owner.isConnected) throw new Error("Theme toggle unmounted");
-        const doc = document as Document & { startViewTransition?: (update: () => Promise<void>) => Transition };
+
+        const doc = document as Document & { startViewTransition?: (update: () => void) => Transition };
         if (typeof doc.startViewTransition === "function") {
             root.dataset.inkTransition = "view";
             root.style.setProperty("--ink-atlas", `url("${atlas.url}")`);
             root.style.setProperty("--ink-atlas-size", atlas.size);
-            transition = doc.startViewTransition(async () => { signal.throwIfAborted(); apply(request); await paint(signal); });
+            transition = doc.startViewTransition(() => {
+                apply(request);
+                window.dispatchEvent(new Event("celah:theme-rendered"));
+            });
             void transition.finished.catch(() => undefined);
             if (transition.updateCallbackDone) void transition.updateCallbackDone.catch(() => undefined);
             await transition.ready;
@@ -117,19 +106,29 @@ async function reveal(request: Request, signal: AbortSignal) {
             layers.incoming.style.webkitMaskPosition = "0% 0%";
             await layers.show(signal);
             signal.throwIfAborted();
-            midpoint = setTimeout(() => apply(request), INK.midpoint);
+            midpoint = setTimeout(() => {
+                apply(request);
+                window.dispatchEvent(new Event("celah:theme-rendered"));
+            }, INK.midpoint);
             animation = animationFor(layers.incoming, atlas);
             await animation.finished;
-            clearTimeout(midpoint); apply(request); await paint(signal);
+            clearTimeout(midpoint);
+            apply(request);
+            window.dispatchEvent(new Event("celah:theme-rendered"));
         }
     } catch {
         apply(request);
+        window.dispatchEvent(new Event("celah:theme-rendered"));
     } finally {
-        clearTimeout(midpoint); transition?.skipTransition?.();
+        clearTimeout(midpoint);
+        transition?.skipTransition?.();
         if (transition) await transition.finished.catch(() => undefined);
-        animation?.cancel(); layers?.release(); atlas?.release();
+        animation?.cancel();
+        layers?.release();
+        atlas?.release();
         delete root.dataset.inkTransition;
-        root.style.removeProperty("--ink-atlas"); root.style.removeProperty("--ink-atlas-size");
+        root.style.removeProperty("--ink-atlas");
+        root.style.removeProperty("--ink-atlas-size");
         signal.removeEventListener("abort", abort);
     }
 }
@@ -159,12 +158,16 @@ export function togglePublicTheme(setTheme: (theme: string) => void, owner: HTML
             media.addEventListener("change", cancel, { once: true });
             try {
                 const currentTheme = document.documentElement.classList.contains("dark") ? "dark" : "light";
-                if (currentTheme === request.theme) apply(request);
-                else await reveal(request, activeController.signal);
+                if (currentTheme === request.theme) {
+                    apply(request);
+                } else {
+                    await reveal(request, activeController.signal);
+                }
             } finally {
                 unmounted.disconnect();
                 window.removeEventListener("pagehide", cancel);
-                document.removeEventListener("visibilitychange", cancel); media.removeEventListener("change", cancel);
+                document.removeEventListener("visibilitychange", cancel);
+                media.removeEventListener("change", cancel);
             }
         }
     })().finally(() => { running = undefined; desired = undefined; controller = undefined; delete document.documentElement.dataset.inkBusy; });
@@ -182,7 +185,7 @@ export function warmPublicTheme(owner: HTMLElement) {
     const cancel = () => local.abort();
     document.addEventListener("visibilitychange", cancel, { once: true });
     warming = createInkAtlas(innerWidth, innerHeight, bounds.left + bounds.width / 2, bounds.top + bounds.height / 2, local.signal)
-        .then(atlas => atlas.release()).catch(() => undefined).finally(() => {
+        .then(() => undefined).catch(() => undefined).finally(() => {
             document.removeEventListener("visibilitychange", cancel);
             warming = undefined; warmController = undefined;
         });
