@@ -41,16 +41,14 @@ async function paint(signal: AbortSignal) {
     await new Promise<void>(resolve => {
         let frame = 0;
         const done = () => {
-            clearTimeout(timer);
             cancelAnimationFrame(frame);
             window.removeEventListener("celah:theme-rendered", done);
             signal.removeEventListener("abort", done);
             resolve();
         };
-        const timer = setTimeout(done, 100);
         window.addEventListener("celah:theme-rendered", done, { once: true });
         signal.addEventListener("abort", done, { once: true });
-        frame = requestAnimationFrame(() => { frame = requestAnimationFrame(done); });
+        frame = requestAnimationFrame(done);
     });
     signal.throwIfAborted();
 }

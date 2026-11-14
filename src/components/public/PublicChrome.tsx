@@ -14,18 +14,20 @@ export function PublicThemeSwitch() {
     const [requestedTheme, setRequestedTheme] = useState<"dark" | "light" | undefined>();
     const cancelTransition = useRef<(() => void) | undefined>();
     const buttonRef = useRef<HTMLButtonElement>(null);
+    const themeModuleRef = useRef<typeof import("@/lib/themeTransition") | null>(null);
+
     useEffect(() => {
       setMounted(true);
-      const timer = setTimeout(() => {
-        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-        void import("@/lib/themeTransition").then(module => {
-          if (!buttonRef.current?.isConnected) return;
+      void import("@/lib/themeTransition").then(module => {
+        themeModuleRef.current = module;
+        if (buttonRef.current?.isConnected) {
           cancelTransition.current = module.cancelPublicThemeTransition;
           return module.warmPublicTheme(buttonRef.current);
-        }).catch(() => undefined);
-      }, 300);
-      return () => { clearTimeout(timer); cancelTransition.current?.(); };
+        }
+      }).catch(() => undefined);
+      return () => { cancelTransition.current?.(); };
     }, []);
+
     const dark = mounted && resolvedTheme === "dark";
     const actionDark = requestedTheme ? requestedTheme === "dark" : dark;
     return <button ref={buttonRef} className="public-theme-switch" type="button" disabled={!mounted} aria-label={mounted ? `Gunakan tema ${actionDark ? "terang" : "gelap"}` : "Ganti tema"} onPointerDown={() => {
@@ -40,13 +42,18 @@ export function PublicThemeSwitch() {
         document.documentElement.style.colorScheme = next;
         return;
       }
-      void import("@/lib/themeTransition").then(module => {
+      const execute = (module: typeof import("@/lib/themeTransition")) => {
         if (!button.isConnected) return;
         cancelTransition.current = module.cancelPublicThemeTransition;
         const task = module.togglePublicTheme(setTheme, button);
         setRequestedTheme(module.requestedPublicTheme());
         return task.finally(() => { if (button.isConnected) setRequestedTheme(undefined); });
-      }).catch(() => setTheme(dark ? "light" : "dark"));
+      };
+      if (themeModuleRef.current) {
+        void execute(themeModuleRef.current);
+      } else {
+        void import("@/lib/themeTransition").then(execute).catch(() => setTheme(dark ? "light" : "dark"));
+      }
     }}>
     {dark ? <Sun aria-hidden="true"/> : <Moon aria-hidden="true"/>}
   </button>;

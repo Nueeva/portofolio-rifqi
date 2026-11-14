@@ -1,7 +1,7 @@
 /** Color-independent pigment geometry shared by the worker and compatibility path. */
 export const INK = {
-    duration: 534,
-    midpoint: 267,
+    duration: 780,
+    midpoint: 390,
     frames: 64,
     columns: 8,
     resolution: 480,
@@ -13,7 +13,7 @@ export const INK = {
     droplets: 32,
     tendrils: 11,
     merge: .012,
-    growthPower: 1.32,
+    growthPower: 1.25,
     coverageAt: .94,
 };
 
