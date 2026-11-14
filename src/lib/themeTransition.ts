@@ -1,7 +1,10 @@
 import { flushSync } from "react-dom";
 import { clearInkCache, createInkAtlas, INK, type InkAtlas } from "./inkMask";
 import { createThemeLayers } from "./themeSnapshots";
+import { playThemeInkSound, primeThemeAudio } from "./themeAudio";
 import "./theme-transition.css";
+
+export { primeThemeAudio };
 
 type Theme = "dark" | "light";
 type Request = { theme: Theme; setTheme: (theme: string) => void; origin: { x: number; y: number }; owner: HTMLElement };
@@ -67,10 +70,26 @@ async function reveal(request: Request, signal: AbortSignal) {
     const abort = () => { animation?.cancel(); transition?.skipTransition?.(); };
     signal.addEventListener("abort", abort, { once: true });
     try {
-        if (reduced() || document.hidden || !supportsMask()) {
+        if (reduced()) {
+            root.style.transition = "opacity 150ms ease";
+            root.style.opacity = "0.75";
+            await new Promise(r => setTimeout(r, 75));
+            apply(request);
+            root.style.opacity = "1";
+            await new Promise(r => setTimeout(r, 75));
+            root.style.removeProperty("transition");
+            root.style.removeProperty("opacity");
+            return;
+        }
+
+        if (document.hidden || !supportsMask()) {
             apply(request);
             return;
         }
+
+        // Trigger procedural fluid audio micro-interaction
+        playThemeInkSound(request.theme === "dark");
+
         await warming;
         signal.throwIfAborted();
         atlas = await createInkAtlas(innerWidth, innerHeight, request.origin.x, request.origin.y, signal);

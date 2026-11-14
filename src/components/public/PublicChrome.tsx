@@ -28,7 +28,9 @@ export function PublicThemeSwitch() {
     }, []);
     const dark = mounted && resolvedTheme === "dark";
     const actionDark = requestedTheme ? requestedTheme === "dark" : dark;
-    return <button ref={buttonRef} className="public-theme-switch" type="button" disabled={!mounted} aria-label={mounted ? `Gunakan tema ${actionDark ? "terang" : "gelap"}` : "Ganti tema"} onClick={event => {
+    return <button ref={buttonRef} className="public-theme-switch" type="button" disabled={!mounted} aria-label={mounted ? `Gunakan tema ${actionDark ? "terang" : "gelap"}` : "Ganti tema"} onPointerDown={() => {
+      void import("@/lib/themeAudio").then(m => m.primeThemeAudio()).catch(() => undefined);
+    }} onClick={event => {
       const button = event.currentTarget;
       if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
         const next = document.documentElement.classList.contains("dark") ? "light" : "dark";
