@@ -16,21 +16,25 @@ export function PublicThemeSwitch() {
     const buttonRef = useRef<HTMLButtonElement>(null);
     useEffect(() => {
       setMounted(true);
-      const timer = setTimeout(() => {
-        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const preload = () => {
         void import("@/lib/themeTransition").then(module => {
           if (!buttonRef.current?.isConnected) return;
           cancelTransition.current = module.cancelPublicThemeTransition;
-          return module.warmPublicTheme(buttonRef.current);
         }).catch(() => undefined);
-      }, 2500);
-      return () => { clearTimeout(timer); cancelTransition.current?.(); };
+      };
+      if (typeof requestIdleCallback === "function") {
+        const id = requestIdleCallback(preload);
+        return () => { cancelIdleCallback(id); cancelTransition.current?.(); };
+      } else {
+        const timer = setTimeout(preload, 150);
+        return () => { clearTimeout(timer); cancelTransition.current?.(); };
+      }
     }, []);
     const dark = mounted && resolvedTheme === "dark";
     const actionDark = requestedTheme ? requestedTheme === "dark" : dark;
     return <button ref={buttonRef} className="public-theme-switch" type="button" disabled={!mounted} aria-label={mounted ? `Gunakan tema ${actionDark ? "terang" : "gelap"}` : "Ganti tema"} onClick={event => {
       const button = event.currentTarget;
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches && !cancelTransition.current) {
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
         const next = document.documentElement.classList.contains("dark") ? "light" : "dark";
         setTheme(next);
         document.documentElement.classList.toggle("dark", next === "dark");

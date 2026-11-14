@@ -17,11 +17,6 @@ html[data-ink-transition]::view-transition-group(root) { inset:0; width:100%; he
 html[data-ink-transition]::view-transition-old(root) { z-index:1; }
 html[data-ink-transition]::view-transition-new(root) {
     z-index:2;
-    mask-image:var(--ink-atlas);
-    mask-size:var(--ink-atlas-size);
-    mask-position:0% 0%;
-    mask-mode:alpha;
-    mask-repeat:no-repeat;
 }
 .ink-overlay, .ink-overlay-layer { position:fixed; inset:0; pointer-events:none; overflow:hidden; }
 .ink-overlay { z-index:2147483000; isolation:isolate; }
