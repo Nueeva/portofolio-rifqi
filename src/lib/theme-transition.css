@@ -17,10 +17,25 @@ html[data-ink-transition]::view-transition-group(root) { inset:0; width:100%; he
 html[data-ink-transition]::view-transition-old(root) { z-index:1; }
 html[data-ink-transition]::view-transition-new(root) {
     z-index:2;
+    -webkit-mask-image:var(--ink-atlas);
+    mask-image:var(--ink-atlas);
+    -webkit-mask-size:var(--ink-atlas-size);
+    mask-size:var(--ink-atlas-size);
+    -webkit-mask-position:0% 0%;
+    mask-position:0% 0%;
+    -webkit-mask-mode:alpha;
+    mask-mode:alpha;
+    -webkit-mask-repeat:no-repeat;
+    mask-repeat:no-repeat;
 }
 .ink-overlay, .ink-overlay-layer { position:fixed; inset:0; pointer-events:none; overflow:hidden; }
 .ink-overlay { z-index:2147483000; isolation:isolate; }
-.ink-overlay-layer { mask-repeat:no-repeat; mask-mode:alpha; }
+.ink-overlay-layer {
+    -webkit-mask-repeat:no-repeat;
+    mask-repeat:no-repeat;
+    -webkit-mask-mode:alpha;
+    mask-mode:alpha;
+}
 [data-ink-scope] { position:absolute; left:0; margin:0; pointer-events:none; }
 [data-ink-scope], [data-ink-scope] *, [data-ink-scope] *::before, [data-ink-scope] *::after {
     animation:none !important;

@@ -16,19 +16,15 @@ export function PublicThemeSwitch() {
     const buttonRef = useRef<HTMLButtonElement>(null);
     useEffect(() => {
       setMounted(true);
-      const preload = () => {
+      const timer = setTimeout(() => {
+        if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         void import("@/lib/themeTransition").then(module => {
           if (!buttonRef.current?.isConnected) return;
           cancelTransition.current = module.cancelPublicThemeTransition;
+          return module.warmPublicTheme(buttonRef.current);
         }).catch(() => undefined);
-      };
-      if (typeof requestIdleCallback === "function") {
-        const id = requestIdleCallback(preload);
-        return () => { cancelIdleCallback(id); cancelTransition.current?.(); };
-      } else {
-        const timer = setTimeout(preload, 150);
-        return () => { clearTimeout(timer); cancelTransition.current?.(); };
-      }
+      }, 300);
+      return () => { clearTimeout(timer); cancelTransition.current?.(); };
     }, []);
     const dark = mounted && resolvedTheme === "dark";
     const actionDark = requestedTheme ? requestedTheme === "dark" : dark;
