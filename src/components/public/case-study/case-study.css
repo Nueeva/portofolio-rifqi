@@ -1,0 +1,713 @@
+/* Case Study & Projects Enhanced Components Styles (Celah Theme Compliant) */
+
+/* Case Study Section Common */
+.case-section-header {
+  margin-bottom: 32px;
+}
+.case-section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--site-cyan);
+  margin-bottom: 10px;
+}
+.case-section-desc {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--site-muted);
+  max-width: 68ch;
+  margin-top: 8px;
+}
+
+/* 1. Telemetry Stats Grid */
+.case-telemetry-section {
+  padding-block: 40px;
+}
+.telemetry-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+.telemetry-card {
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.telemetry-card:hover {
+  border-color: var(--site-cyan);
+}
+.telemetry-card-top {
+  margin-bottom: 16px;
+}
+.telemetry-badge {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+.telemetry-badge-cyan {
+  background: color-mix(in srgb, var(--site-cyan) 12%, transparent);
+  color: var(--site-cyan);
+  border: 1px solid color-mix(in srgb, var(--site-cyan) 30%, transparent);
+}
+.telemetry-badge-accent {
+  background: color-mix(in srgb, var(--site-copper) 12%, transparent);
+  color: var(--site-copper);
+  border: 1px solid color-mix(in srgb, var(--site-copper) 30%, transparent);
+}
+.telemetry-badge-muted {
+  background: color-mix(in srgb, var(--site-muted) 10%, transparent);
+  color: var(--site-muted);
+  border: 1px solid color-mix(in srgb, var(--site-muted) 25%, transparent);
+}
+.telemetry-card-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.75rem, 2.5vw, 2.25rem);
+  font-weight: 700;
+  color: var(--site-ink);
+  line-height: 1.15;
+  margin-bottom: 6px;
+}
+.telemetry-card-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--site-metal);
+  margin-bottom: 10px;
+}
+.telemetry-card-detail {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--site-muted);
+  margin-top: auto;
+  padding-top: 10px;
+  border-top: 1px dashed var(--site-line);
+}
+
+/* 2. Audit Ledger */
+.audit-ledger-section {
+  padding-block: 44px;
+}
+.audit-summary-bar {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  padding: 16px 20px;
+  margin-bottom: 24px;
+}
+.summary-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stat-label {
+  font-size: 11px;
+  font-family: 'Space Grotesk', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--site-muted);
+}
+.stat-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--site-ink);
+}
+.stat-critical .stat-value {
+  color: #dc2626;
+}
+.stat-major .stat-value {
+  color: var(--site-copper);
+}
+.stat-badge-remediated {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--site-cyan);
+  margin-top: 4px;
+}
+.audit-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+.audit-severity-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.audit-tab {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 8px 14px;
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  color: var(--site-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.audit-tab:hover {
+  color: var(--site-ink);
+  border-color: var(--site-input);
+}
+.audit-tab.active {
+  background: var(--site-ink);
+  color: var(--site-bg);
+  border-color: var(--site-ink);
+}
+.audit-tab-critical.active {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+.audit-tab-major.active {
+  background: var(--site-copper);
+  color: #ffffff;
+  border-color: var(--site-copper);
+}
+.audit-search-wrapper {
+  position: relative;
+  min-width: 260px;
+  flex: 1;
+  max-width: 380px;
+}
+.audit-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--site-muted);
+  pointer-events: none;
+}
+.audit-search-input {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  font-size: 13px;
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  color: var(--site-ink);
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+.audit-search-input:focus {
+  border-color: var(--site-cyan);
+}
+.audit-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--site-line);
+  background: var(--site-surface);
+}
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 13px;
+}
+.audit-table th {
+  padding: 12px 16px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--site-muted);
+  border-bottom: 1px solid var(--site-line);
+  background: var(--site-low);
+}
+.audit-row {
+  border-bottom: 1px solid var(--site-line);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+.audit-row:hover, .audit-row:focus-visible {
+  background: color-mix(in srgb, var(--site-cyan) 5%, var(--site-surface));
+}
+.audit-row.row-expanded {
+  background: color-mix(in srgb, var(--site-cyan) 8%, var(--site-surface));
+}
+.audit-row td {
+  padding: 12px 16px;
+  vertical-align: middle;
+}
+.finding-id-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.finding-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--site-ink);
+}
+.cvss-badge {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 2px;
+}
+.cvss-critical {
+  background: color-mix(in srgb, #dc2626 15%, transparent);
+  color: #dc2626;
+  border: 1px solid color-mix(in srgb, #dc2626 40%, transparent);
+}
+.cvss-major {
+  background: color-mix(in srgb, var(--site-copper) 15%, transparent);
+  color: var(--site-copper);
+  border: 1px solid color-mix(in srgb, var(--site-copper) 40%, transparent);
+}
+.finding-class-text {
+  font-weight: 500;
+  color: var(--site-ink);
+}
+.finding-scope-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: var(--site-muted);
+  background: var(--site-low);
+  padding: 2px 8px;
+  border-radius: 2px;
+  border: 1px solid var(--site-line);
+}
+.commit-hash-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: var(--site-muted);
+  background: var(--site-low);
+  padding: 2px 6px;
+  border: 1px solid var(--site-line);
+}
+.expand-indicator {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--site-muted);
+}
+.audit-detail-row td {
+  padding: 0;
+  border-bottom: 1px solid var(--site-line);
+}
+.finding-expanded-card {
+  padding: 20px 24px;
+  background: var(--site-low);
+  border-top: 1px dashed var(--site-line);
+}
+.finding-expanded-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 768px) {
+  .finding-expanded-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.expanded-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.expanded-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--site-ink);
+}
+.expanded-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--site-muted);
+}
+.expanded-commit-info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--site-line);
+  font-size: 12px;
+  color: var(--site-muted);
+}
+.commit-tag {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  padding: 2px 8px;
+  color: var(--site-cyan);
+}
+.verified-stamp {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--site-cyan);
+  letter-spacing: 0.05em;
+}
+.audit-empty-state {
+  padding: 40px;
+  text-align: center;
+  color: var(--site-muted);
+  font-size: 14px;
+}
+
+/* 3. Remediation Diff Viewer */
+.remediation-diff-section {
+  padding-block: 44px;
+}
+.diff-tabs-bar {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--site-line);
+}
+.diff-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  color: var(--site-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 13px;
+  transition: all 0.15s ease;
+}
+.diff-tab-btn:hover {
+  border-color: var(--site-input);
+  color: var(--site-ink);
+}
+.diff-tab-btn.active {
+  background: var(--site-surface);
+  border-color: var(--site-cyan);
+  color: var(--site-ink);
+  border-bottom-width: 2px;
+}
+.diff-tab-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--site-cyan);
+}
+.diff-tab-name {
+  font-weight: 500;
+}
+.diff-card {
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+}
+.diff-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  background: var(--site-low);
+  border-bottom: 1px solid var(--site-line);
+}
+.diff-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  color: var(--site-ink);
+}
+.diff-badge-lang {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  color: var(--site-muted);
+}
+.diff-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 12px;
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  color: var(--site-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.diff-copy-btn:hover {
+  color: var(--site-ink);
+  border-color: var(--site-cyan);
+}
+.diff-code-viewport {
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.diff-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.diff-line-row td {
+  padding: 2px 8px;
+  vertical-align: top;
+}
+.diff-num {
+  width: 40px;
+  text-align: right;
+  color: var(--site-muted);
+  user-select: none;
+  opacity: 0.6;
+  font-size: 11px;
+}
+.diff-marker {
+  width: 20px;
+  text-align: center;
+  user-select: none;
+  font-weight: 700;
+}
+.diff-content {
+  white-space: pre;
+}
+.diff-content code {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+.diff-removed {
+  background: color-mix(in srgb, #dc2626 12%, transparent);
+  color: #ef4444;
+}
+.diff-removed .diff-marker {
+  color: #dc2626;
+}
+.diff-added {
+  background: color-mix(in srgb, #10b981 12%, transparent);
+  color: #10b981;
+}
+.diff-added .diff-marker {
+  color: #10b981;
+}
+.diff-context {
+  color: var(--site-ink);
+}
+.diff-card-footer {
+  padding: 16px 20px;
+  background: var(--site-low);
+  border-top: 1px solid var(--site-line);
+}
+.diff-annotation {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.diff-annotation-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--site-cyan);
+}
+.diff-annotation-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--site-muted);
+}
+
+/* 4. Architectural Trade-Off Cards (ADR) */
+.adr-section {
+  padding-block: 44px;
+}
+.adr-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 24px;
+}
+.adr-card {
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease;
+}
+.adr-card:hover {
+  border-color: var(--site-metal);
+}
+.adr-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.adr-id-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--site-copper);
+  background: color-mix(in srgb, var(--site-copper) 10%, transparent);
+  padding: 2px 8px;
+  border: 1px solid color-mix(in srgb, var(--site-copper) 30%, transparent);
+}
+.adr-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--site-cyan);
+  letter-spacing: 0.05em;
+}
+.adr-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--site-ink);
+  line-height: 1.35;
+  margin-bottom: 12px;
+}
+.adr-context {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--site-muted);
+  margin-bottom: 18px;
+}
+.adr-block {
+  padding: 12px 14px;
+  border-radius: 2px;
+  margin-bottom: 12px;
+}
+.adr-decision-block {
+  background: var(--site-low);
+  border-left: 3px solid var(--site-cyan);
+}
+.adr-alt-block {
+  background: var(--site-low);
+  border-left: 3px solid var(--site-line);
+}
+.adr-security-block {
+  background: color-mix(in srgb, var(--site-cyan) 6%, var(--site-low));
+  border-left: 3px solid var(--site-copper);
+  margin-bottom: 0;
+  margin-top: auto;
+}
+.adr-block-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--site-ink);
+  margin-bottom: 6px;
+}
+.adr-block-text {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--site-muted);
+}
+.adr-alt-list {
+  list-style: disc;
+  padding-left: 18px;
+  font-size: 12px;
+  color: var(--site-muted);
+  line-height: 1.6;
+}
+
+/* 5. Projects Page Search & Badges Styles */
+.project-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+.project-search-bar {
+  width: 100%;
+}
+.project-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 580px;
+}
+.project-search-icon {
+  position: absolute;
+  left: 14px;
+  color: var(--site-muted);
+  pointer-events: none;
+}
+.project-search-input {
+  width: 100%;
+  padding: 12px 38px 12px 42px;
+  font-size: 14px;
+  background: var(--site-surface);
+  border: 1px solid var(--site-line);
+  color: var(--site-ink);
+  border-radius: 2px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.project-search-input:focus {
+  border-color: var(--site-cyan);
+  box-shadow: 0 0 0 1px var(--site-cyan);
+  outline: none;
+}
+.project-search-clear {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--site-muted);
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+.project-search-clear:hover {
+  color: var(--site-ink);
+}
+.category-badge-count {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: var(--site-muted);
+  margin-left: 6px;
+}
+button[aria-pressed=true] .category-badge-count {
+  color: var(--site-metal);
+}

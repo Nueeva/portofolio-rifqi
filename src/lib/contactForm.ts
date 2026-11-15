@@ -19,7 +19,7 @@ export const topicPrefills: Record<string, string> = {
   "web-security": "Halo, saya ingin mendiskusikan keamanan aplikasi web.",
 };
 
-const emailDomains = ["@gmail.com", "@yahoo.com", "@hotmail.com", "@outlook.com", "@icloud.com", "@protonmail.com", "@mail.com", "@live.com", "@ymail.com", "@aol.com"];
+const emailDomains = ["@gmail.com", "@yahoo.com", "@hotmail.com", "@outlook.com", "@icloud.com", "@protonmail.com", "@proton.me", "@pm.me", "@mail.com", "@live.com", "@ymail.com", "@aol.com"];
 export function suggestEmails(value: string): string[] {
   const at = value.indexOf("@");
   if (at < 1 || value.includes(" ")) return [];

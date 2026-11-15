@@ -52,7 +52,8 @@
 .public-text-link { display: inline-flex; align-items: center; gap: 22px; min-height: 44px; border-bottom: 1px solid var(--site-metal); padding-block: 9px; font-size: 14px; width: fit-content; transition: color .18s, gap .18s; }
 .public-text-link:hover { color: var(--site-metal); gap: 29px; }
 .public-text-link svg { width: 19px; height: 19px; flex: none; }
-.public-navbar { position: fixed; inset: 0 0 auto; z-index: 50; background: var(--site-bg); border-bottom: 1px solid var(--site-line); }
+.public-navbar { position: fixed; inset: 0 0 auto; z-index: 50; background: color-mix(in srgb, var(--site-bg) 84%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border-bottom: 1px solid var(--site-line); transition: border-color .25s ease, box-shadow .25s ease; }
+.public-navbar.is-scrolled { border-bottom-color: color-mix(in srgb, var(--site-metal) 45%, var(--site-line)); box-shadow: 0 4px 20px -4px var(--site-shadow); }
 .public-navbar-inner { height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 24px; }
 .public-brand { display: inline-flex; align-items: center; gap: 11px; min-height: 44px; font-size: 13px; font-weight: 500; white-space: nowrap; }
 .public-brand svg { width: 28px; height: 28px; color: var(--site-metal); flex: none; }
@@ -318,3 +319,67 @@
 .dark .public-design .hero-intro-light{mix-blend-mode:normal;opacity:1}
 .dark .public-design .celah-rail{background:linear-gradient(90deg,transparent,var(--site-cool) 25%,var(--site-ink) 60%,var(--site-metal) 85%,transparent);opacity:1}
 .dark .public-design .celah-tracer{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--site-cool) 12%,transparent),transparent);border-inline:1px solid color-mix(in srgb,var(--site-metal) 35%,transparent)}
+
+/* --- Public Footer Availability Beacon --- */
+.public-availability-beacon { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--site-cyan); padding: 6px 14px; border: 1px solid color-mix(in srgb, var(--site-cyan) 30%, transparent); background: color-mix(in srgb, var(--site-cyan) 8%, transparent); border-radius: 9999px; margin-bottom: 24px; width: fit-content; }
+.public-availability-beacon .beacon-dot { color: var(--site-cyan); animation: beacon-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+@keyframes beacon-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+
+/* --- Contact Dynamic Seam Glow & Telemetry --- */
+.contact-field input, .contact-field textarea { transition: border-color .2s ease, box-shadow .2s ease; }
+.contact-field input:focus, .contact-field textarea:focus { border-color: var(--site-metal) !important; box-shadow: 0 0 0 1px var(--site-metal), 0 0 14px -2px color-mix(in srgb, var(--site-cyan) 45%, transparent) !important; outline: none; }
+.telemetry-gauge-wrap { display: flex; align-items: center; gap: 10px; }
+.telemetry-gauge-track { width: 50px; height: 3px; background: var(--site-line); border-radius: 2px; overflow: hidden; }
+.telemetry-gauge-bar { height: 100%; transition: width .2s ease, background-color .2s ease; border-radius: 2px; }
+
+/* --- Contact PGP Card --- */
+.contact-pgp-card { margin-top: 36px; padding: 22px; border: 1px solid var(--site-line); background: var(--site-surface); border-radius: 6px; }
+.contact-pgp-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.contact-pgp-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--site-metal); text-transform: uppercase; letter-spacing: 0.05em; }
+.contact-pgp-fingerprint { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--site-ink); background: var(--site-bg); padding: 10px 12px; border: 1px solid var(--site-line); border-radius: 4px; word-break: break-all; margin-bottom: 14px; line-height: 1.6; letter-spacing: 0.02em; }
+.contact-pgp-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.contact-pgp-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 12px; border: 1px solid var(--site-line); background: var(--site-bg); color: var(--site-muted); border-radius: 4px; transition: color .18s, border-color .18s; cursor: pointer; }
+.contact-pgp-btn:hover { color: var(--site-metal); border-color: var(--site-metal); }
+
+/* --- Public RIVA Enhancements --- */
+.riva-deliberating { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--site-surface); border-radius: 4px; border: 1px dashed var(--site-line); width: fit-content; margin-bottom: 4px; }
+.riva-dot-pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--site-cyan); animation: riva-delib 1s infinite alternate; }
+@keyframes riva-delib { from { opacity: 0.3; transform: scale(0.8); } to { opacity: 1; transform: scale(1.2); } }
+.riva-route-pill { display: inline-flex; align-items: center; gap: 4px; padding: 2px 7px; margin-inline: 2px; background: color-mix(in srgb, var(--site-cyan) 12%, transparent); border: 1px solid color-mix(in srgb, var(--site-cyan) 40%, transparent); color: var(--site-cyan) !important; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 11px; text-decoration: none !important; transition: all .18s; }
+.riva-route-pill:hover { background: color-mix(in srgb, var(--site-cyan) 25%, transparent); border-color: var(--site-cyan); color: var(--site-ink) !important; }
+
+/* --- Error Pages High-Security HUDs --- */
+.error-breach-hud { position: relative; margin-block: 28px; padding: 22px; border: 1px solid color-mix(in srgb, var(--site-metal) 45%, transparent); background: color-mix(in srgb, var(--site-surface) 75%, transparent); border-radius: 4px; }
+.hud-bracket { position: absolute; width: 10px; height: 10px; border-color: var(--site-metal); pointer-events: none; }
+.hud-bracket.top-left { top: -1px; left: -1px; border-top: 2px solid; border-left: 2px solid; }
+.hud-bracket.top-right { top: -1px; right: -1px; border-top: 2px solid; border-right: 2px solid; }
+.hud-bracket.bottom-left { bottom: -1px; left: -1px; border-bottom: 2px solid; border-left: 2px solid; }
+.hud-bracket.bottom-right { bottom: -1px; right: -1px; border-bottom: 2px solid; border-right: 2px solid; }
+.hud-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.hud-alert-tag { color: var(--site-metal); font-weight: 600; }
+.hud-code { color: var(--site-muted); }
+.hud-telemetry { display: grid; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--site-muted); border-top: 1px dashed var(--site-line); padding-top: 12px; }
+.hud-telemetry span { color: var(--site-cyan); }
+
+.error-memory-dump { margin-block: 28px; padding: 20px; border: 1px solid var(--site-line); background: var(--site-surface); border-radius: 4px; }
+.dump-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.dump-title { color: var(--site-metal); font-weight: 600; }
+.dump-flag { color: var(--site-cyan); }
+.dump-body { margin: 0; padding: 12px; background: var(--site-bg); border: 1px solid var(--site-line); border-radius: 3px; color: var(--site-muted); overflow-x: auto; line-height: 1.6; font-size: 11px; }
+
+.error-circuit-seam { margin-block: 28px; }
+.circuit-fracture-line { display: flex; align-items: center; gap: 8px; height: 16px; margin-bottom: 16px; }
+.fracture-seg { flex: 1; height: 1px; background: var(--site-line); }
+.fracture-point { width: 6px; height: 6px; border-radius: 50%; background: var(--site-metal); }
+.fracture-gap { width: 28px; height: 2px; background: repeating-linear-gradient(90deg, var(--site-metal), var(--site-metal) 3px, transparent 3px, transparent 6px); }
+.circuit-daemon-status { padding: 18px; border: 1px solid var(--site-line); background: var(--site-surface); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.daemon-badge { color: var(--site-copper); font-weight: 600; margin-bottom: 8px; }
+.daemon-meta { display: flex; flex-direction: column; gap: 6px; color: var(--site-muted); font-size: 11px; }
+
+.error-rate-limit-meter { margin-block: 28px; padding: 20px; border: 1px solid var(--site-line); background: var(--site-surface); border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+.meter-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 12px; }
+.meter-countdown { color: var(--site-cyan); font-weight: 600; }
+.meter-track { width: 100%; height: 6px; background: var(--site-bg); border: 1px solid var(--site-line); border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
+.meter-fill { height: 100%; background: linear-gradient(90deg, var(--site-cyan), var(--site-metal)); transition: width 1s linear; }
+.meter-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; color: var(--site-muted); font-size: 11px; }
+

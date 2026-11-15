@@ -7,7 +7,9 @@ import { TembusMark } from "@/components/TembusMark";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+
 const links = [{ to: "/", label: "Beranda" }, { to: "/projects", label: "Karya" }, { to: "/about", label: "Tentang" }, { to: "/contact", label: "Kontak" }];
+
 export function PublicThemeSwitch() {
     const { resolvedTheme, setTheme } = useTheme();
     const [mounted, setMounted] = useState(false);
@@ -58,11 +60,21 @@ export function PublicThemeSwitch() {
     {dark ? <Sun aria-hidden="true"/> : <Moon aria-hidden="true"/>}
   </button>;
 }
+
 export function PublicNavbar() {
     const { get } = usePublicSettings();
     const name = get("hero_name", "Rifqi Ariansyah");
     const [open, setOpen] = useState(false);
     const [loggedIn, setLoggedIn] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 15);
+        onScroll();
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+    }, []);
+
     useEffect(() => {
         let active = true;
         let unsubscribe: (() => void) | undefined;
@@ -77,6 +89,7 @@ export function PublicNavbar() {
         });
         return () => { active = false; unsubscribe?.(); };
     }, []);
+
     const account = loggedIn && <>
     <Link to="/admin" onClick={() => setOpen(false)}>Admin</Link>
     <AlertDialog>
@@ -86,7 +99,8 @@ export function PublicNavbar() {
       </AlertDialogContent>
     </AlertDialog>
   </>;
-    return <header className="public-navbar"><div className="public-container public-navbar-inner">
+
+    return <header className={scrolled ? "public-navbar is-scrolled" : "public-navbar"}><div className="public-container public-navbar-inner">
     <Link to="/" className="public-brand" aria-label={`${name} — Beranda`}><TembusMark /><span>{name}</span></Link>
     <nav className="public-desktop-nav" aria-label="Navigasi utama">{links.map(link => <NavLink key={link.to} to={link.to} end={link.to === "/"}>{({isActive})=><>{link.label}{isActive&&<m.span className="nav-active-line" layoutId="public-nav-line"/>}</>}</NavLink>)}{account}</nav>
     <div className="public-nav-actions"><PublicThemeSwitch /><Dialog open={open} onOpenChange={setOpen}>
@@ -97,6 +111,7 @@ export function PublicNavbar() {
     </Dialog></div>
   </div></header>;
 }
+
 export function PublicFooter() {
     const { get } = usePublicSettings();
     const socials = [
@@ -106,6 +121,9 @@ export function PublicFooter() {
         { label: "Email", url: `mailto:${get("contact_email", "contact@rifqi.tech")}`, Icon: Mail },
     ];
     return <footer className="public-footer"><div className="public-container">
+    <div className="public-availability-beacon" role="status" aria-label="Status ketersediaan">
+      <span className="beacon-dot" aria-hidden="true">●</span> Tersedia untuk Audit &amp; Rekayasa Keamanan
+    </div>
     <div className="public-footer-invitation"><h2>Mari bertukar<br /><em>perspektif.</em></h2><Link className="public-text-link" to="/contact">Mulai percakapan <ArrowUpRight /></Link></div>
     <div className="public-footer-base"><Link to="/" className="public-brand"><TembusMark /><span>{get("hero_name", "Rifqi Ariansyah")}</span></Link><p>Cybersecurity Engineer</p>
       <div className="public-socials">{socials.filter(item => item.url).map(({ label, url, Icon }) => <a key={label} href={url} aria-label={label} {...(!url.startsWith("mailto:") ? { target: "_blank", rel: "noopener noreferrer" } : {})}><Icon aria-hidden="true"/></a>)}</div>
