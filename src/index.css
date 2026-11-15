@@ -59,6 +59,9 @@
     --sidebar-accent-foreground: 220 20% 10%;
     --sidebar-border: 220 10% 88%;
     --sidebar-ring: 160 100% 35%;
+    --scrollbar-thumb: rgba(146, 64, 14, 0.38);
+    --scrollbar-thumb-hover: #92400e;
+    --scrollbar-track: transparent;
   }
 
   .dark {
@@ -89,6 +92,9 @@
     --sidebar-accent-foreground: 210 20% 95%;
     --sidebar-border: 220 15% 20%;
     --sidebar-ring: 160 100% 45%;
+    --scrollbar-thumb: rgba(199, 181, 148, 0.32);
+    --scrollbar-thumb-hover: #c7b594;
+    --scrollbar-track: transparent;
   }
 }
 
@@ -211,6 +217,47 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* WebKit / Chromium Custom Scrollbar (Desktop Chrome, Edge, Safari, Brave) */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 9999px;
+  border: 1px solid transparent;
+  background-clip: content-box;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Infinite skills marquee — two identical halves, translate -50% loops seamlessly */

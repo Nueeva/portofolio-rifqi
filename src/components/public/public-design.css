@@ -278,8 +278,8 @@
   .public-aperture { clip-path: none !important; }
 }
 
-.public-design{--site-cyan:#0F766E;--site-violet:#6366F1;--site-copper:#B45309;scrollbar-color:var(--site-metal) var(--site-bg)}
-.dark .public-design{--site-cyan:#8eddd5;--site-violet:#a9b7f6;--site-copper:#d39576}
+.public-design{--site-cyan:#0F766E;--site-violet:#6366F1;--site-copper:#B45309;scrollbar-color:var(--scrollbar-thumb) transparent}
+.dark .public-design{--site-cyan:#8eddd5;--site-violet:#a9b7f6;--site-copper:#d39576;scrollbar-color:var(--scrollbar-thumb) transparent}
 .public-main{padding-top:64px;min-height:70svh}.public-skip{position:fixed;left:20px;top:-100px;z-index:100;background:var(--site-bg);padding:12px}.public-skip:focus{top:8px}
 .public-back-top{position:fixed;right:24px;bottom:100px;z-index:60;width:44px;height:44px;border:1px solid var(--site-line);background:var(--site-bg);display:grid;place-items:center;border-radius:50%}
 .technical-figure{margin:0;min-width:0;background:var(--site-low);padding:28px;position:relative;overflow:hidden;color:var(--site-ink)}
