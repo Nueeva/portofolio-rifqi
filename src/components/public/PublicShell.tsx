@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocation, useNavigationType } from "react-router-dom";
 import { LazyMotion } from "motion/react";
-import { Bot, ArrowUp } from "lucide-react";
+import { Bot, ArrowUp, Loader2 } from "lucide-react";
 import { PublicSettingsProvider } from "@/hooks/usePublicSettings";
 import { OptionalFeatureBoundary } from "./OptionalFeatureBoundary";
 import { PublicNavbar, PublicFooter } from "./PublicChrome";
@@ -84,7 +84,7 @@ function Shell({ children }: {
  {allowWebGL && <OptionalFeatureBoundary><Suspense fallback={null}><Cursor /></Suspense></OptionalFeatureBoundary>}
  <main id="main-content" className="public-main">{children}</main><PublicFooter />
 
- {riva ? <OptionalFeatureBoundary fallback={<button className="public-riva-launcher" onClick={() => window.location.reload()} aria-label="RIVA gagal dimuat. Muat ulang halaman."><Bot /></button>}><Suspense fallback={<span role="status" className="public-riva-launcher">Memuat RIVA…</span>}><Riva initiallyOpen/></Suspense></OptionalFeatureBoundary> : <button type="button" className="public-riva-launcher" aria-label="Buka RIVA, asisten portofolio" onClick={() => setRiva(true)}><Bot /></button>}
+ {riva ? <OptionalFeatureBoundary fallback={<button className="public-riva-launcher" onClick={() => window.location.reload()} aria-label="RIVA gagal dimuat. Muat ulang halaman."><Bot /></button>}><Suspense fallback={<span role="status" className="public-riva-launcher is-loading" aria-label="Memuat RIVA…" title="Memuat RIVA…"><Loader2 className="animate-spin" /><span className="sr-only">Memuat RIVA…</span></span>}><Riva initiallyOpen/></Suspense></OptionalFeatureBoundary> : <button type="button" className="public-riva-launcher" aria-label="Buka RIVA, asisten portofolio" onClick={() => setRiva(true)}><Bot /></button>}
 
  {top && <button type="button" className="public-back-top" aria-label="Kembali ke atas" onClick={() => window.scrollTo({ top: 0, behavior: reduced ? "instant" : "smooth" })}><ArrowUp /></button>}
 
