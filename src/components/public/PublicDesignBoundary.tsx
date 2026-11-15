@@ -4,6 +4,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { PublicDesignContext } from "./PublicDesignContext";
 import { getPublicProject } from "@/data/projectCopy.id";
 import "./public-design.css";
+import "@/components/admin/admin-console.css";
 
 /** CSS variables stop at this boundary, including the dedicated portal host.
  * Admin/auth keep their original root tokens and component contracts. */

@@ -940,10 +940,10 @@ export default function Admin() {
 
         {/* Main Tabs */}
         <Tabs defaultValue="projects" className="w-full">
-          <TabsList className="mb-6 w-full flex overflow-x-auto no-scrollbar">
+          <TabsList className="mb-6 w-full flex overflow-x-auto no-scrollbar border-b border-border/80 bg-transparent rounded-none p-0 gap-4 sm:gap-6 h-auto">
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="projects" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                <TabsTrigger value="projects" className="relative pb-2.5 pt-1 px-1 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-none bg-transparent data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all flex items-center gap-1.5 shrink-0">
                   <LayoutGrid className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline">Projects</span>
                 </TabsTrigger>
@@ -952,7 +952,7 @@ export default function Admin() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="analytics" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                <TabsTrigger value="analytics" className="relative pb-2.5 pt-1 px-1 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-none bg-transparent data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all flex items-center gap-1.5 shrink-0">
                   <BarChart3 className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline">Analytics</span>
                 </TabsTrigger>
@@ -961,7 +961,7 @@ export default function Admin() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="security" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                <TabsTrigger value="security" className="relative pb-2.5 pt-1 px-1 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-none bg-transparent data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all flex items-center gap-1.5 shrink-0">
                   <ShieldAlert className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline">Security</span>
                 </TabsTrigger>
@@ -970,7 +970,7 @@ export default function Admin() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="content" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                <TabsTrigger value="content" className="relative pb-2.5 pt-1 px-1 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-none bg-transparent data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all flex items-center gap-1.5 shrink-0">
                   <FileText className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline">Content</span>
                 </TabsTrigger>
@@ -979,7 +979,7 @@ export default function Admin() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="settings" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                <TabsTrigger value="settings" className="relative pb-2.5 pt-1 px-1 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-none bg-transparent data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all flex items-center gap-1.5 shrink-0">
                   <Settings className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline">Settings</span>
                 </TabsTrigger>
@@ -988,7 +988,7 @@ export default function Admin() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="certifications" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                <TabsTrigger value="certifications" className="relative pb-2.5 pt-1 px-1 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-none bg-transparent data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all flex items-center gap-1.5 shrink-0">
                   <Award className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline">Sertifikasi</span>
                 </TabsTrigger>
@@ -997,7 +997,7 @@ export default function Admin() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="export" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                <TabsTrigger value="export" className="relative pb-2.5 pt-1 px-1 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-none bg-transparent data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all flex items-center gap-1.5 shrink-0">
                   <Download className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline">Backup</span>
                 </TabsTrigger>
@@ -1006,7 +1006,7 @@ export default function Admin() {
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <TabsTrigger value="theme" className="flex items-center gap-1.5 text-xs sm:text-sm px-2 sm:px-3">
+                <TabsTrigger value="theme" className="relative pb-2.5 pt-1 px-1 font-mono text-xs uppercase tracking-wider text-muted-foreground hover:text-foreground rounded-none bg-transparent data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary transition-all flex items-center gap-1.5 shrink-0">
                   <Palette className="h-4 w-4 shrink-0" />
                   <span className="hidden sm:inline">Tema</span>
                 </TabsTrigger>
@@ -1016,51 +1016,30 @@ export default function Admin() {
           </TabsList>
 
           <TabsContent value="projects">
-            {/* Statistics Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="p-4 rounded-lg border border-border bg-card">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <LayoutGrid className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Total Projects</p>
-                    <p className="text-2xl font-bold">{stats.total}</p>
-                  </div>
-                </div>
+            {/* Statistics Ribbon - Monolithic Hairline Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 border border-border bg-card divide-y md:divide-y-0 md:divide-x divide-border rounded-[2px] mb-6">
+              <div className="p-4">
+                <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">TOTAL_PROJECTS</p>
+                <p className="text-2xl font-bold font-mono text-foreground mt-1">{stats.total}</p>
               </div>
               
               {Object.entries(stats.byCategory).slice(0, 2).map(([category, count]) => (
-                <div key={category} className="p-4 rounded-lg border border-border bg-card">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-secondary">
-                      <FolderOpen className="h-5 w-5 text-secondary-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground truncate">{category}</p>
-                      <p className="text-2xl font-bold">{count}</p>
-                    </div>
-                  </div>
+                <div key={category} className="p-4">
+                  <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider truncate">{category.toUpperCase()}</p>
+                  <p className="text-2xl font-bold font-mono text-foreground mt-1">{count}</p>
                 </div>
               ))}
               
-              <div className="p-4 rounded-lg border border-border bg-card">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-accent">
-                    <Clock className="h-5 w-5 text-accent-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Last Updated</p>
-                    <p className="text-sm font-medium truncate">
-                      {stats.lastUpdated 
-                        ? new Date(stats.lastUpdated.updated_at).toLocaleDateString("id-ID", { 
-                            day: "numeric", 
-                            month: "short" 
-                          })
-                        : "-"}
-                    </p>
-                  </div>
-                </div>
+              <div className="p-4">
+                <p className="font-mono text-[10px] text-muted-foreground uppercase tracking-wider">LAST_SYNC</p>
+                <p className="text-sm font-mono font-medium text-foreground mt-2">
+                  {stats.lastUpdated 
+                    ? new Date(stats.lastUpdated.updated_at).toLocaleDateString("id-ID", { 
+                        day: "numeric", 
+                        month: "short" 
+                      })
+                    : "-"}
+                </p>
               </div>
             </div>
 
@@ -1191,7 +1170,8 @@ export default function Admin() {
                         </div>
                       </td>
                       <td className="p-4 hidden md:table-cell">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[2px] font-mono text-[11px] bg-secondary/80 text-foreground border border-border/60">
+                          <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                           {project.category}
                         </span>
                       </td>
@@ -1200,13 +1180,13 @@ export default function Admin() {
                           {project.tech_stack.slice(0, 3).map((tech) => (
                             <span
                               key={tech}
-                              className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-secondary text-secondary-foreground"
+                              className="inline-flex items-center px-1.5 py-0.5 rounded-[2px] text-[10px] font-mono bg-muted/60 text-muted-foreground border border-border/40"
                             >
                               {tech}
                             </span>
                           ))}
                           {project.tech_stack.length > 3 && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-[10px] font-mono text-muted-foreground">
                               +{project.tech_stack.length - 3}
                             </span>
                           )}
@@ -1379,7 +1359,7 @@ export default function Admin() {
                             setImagePreview(null);
                             if (fileInputRef.current) fileInputRef.current.value = "";
                           }}
-                          className="absolute -top-2 -right-2 p-1 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+                          className="absolute -top-2 -right-2 p-1 rounded-[2px] bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
                         >
                           <X className="h-3 w-3" />
                         </button>
@@ -1391,7 +1371,7 @@ export default function Admin() {
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center text-center">
-                      <div className={`p-3 rounded-full mb-3 transition-colors ${isDragging ? "bg-primary/10" : "bg-muted"}`}>
+                      <div className={`p-3 rounded-[2px] mb-3 border border-border transition-colors ${isDragging ? "bg-primary/10 border-primary" : "bg-muted/40"}`}>
                         <Upload className={`h-6 w-6 ${isDragging ? "text-primary" : "text-muted-foreground"}`} />
                       </div>
                       <p className="font-medium">
@@ -1430,7 +1410,19 @@ export default function Admin() {
 
               <div className="space-y-2">
                 <Label htmlFor="category">Kategori *</Label>
-                <select id="category" className="w-full border bg-background p-3" value={formData.category} onChange={e=>setFormData({...formData,category:e.target.value})}><option value="">Pilih kategori</option><option value="tools">Tools</option><option value="web-security">Web Security</option><option value="pentesting">Pentesting</option></select>
+                <Select
+                  value={formData.category}
+                  onValueChange={(val) => setFormData({ ...formData, category: val })}
+                >
+                  <SelectTrigger id="category" className={errors.category ? "border-destructive" : ""}>
+                    <SelectValue placeholder="Pilih kategori" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tools">Tools</SelectItem>
+                    <SelectItem value="web-security">Web Security</SelectItem>
+                    <SelectItem value="pentesting">Pentesting</SelectItem>
+                  </SelectContent>
+                </Select>
                 {errors.category && (
                   <p className="text-sm text-destructive">{errors.category}</p>
                 )}

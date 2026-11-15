@@ -455,26 +455,41 @@ export default function Auth() {
     return (
       <Layout>
         <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
-          <div className="w-full max-w-md text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-              <Mail className="h-8 w-8 text-primary" />
+          <div className="w-full max-w-md border border-border bg-card rounded-[2px] shadow-xl overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border/80 px-4 py-2.5 bg-muted/40">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 rounded-[2px] border border-primary/40 bg-background/80 flex items-center justify-center text-primary font-mono text-[10px] font-bold">
+                  H
+                </div>
+                <span className="font-mono text-[11px] tracking-wider text-muted-foreground uppercase">
+                  SECURITY_DISPATCH // TOKEN
+                </span>
+              </div>
+              <span className="font-mono text-[10px] text-primary tracking-wider uppercase font-semibold">DELIVERED</span>
             </div>
-            <h1 className="text-2xl font-bold mb-2">Cek Email Anda</h1>
-            <p className="text-muted-foreground mb-6">
-              Kami telah mengirim link reset password ke <strong>{email}</strong>. Silakan cek inbox Anda.
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setMode("login");
-                setResetEmailSent(false);
-                setEmail("");
-              }}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Kembali ke Login
-            </Button>
+            <div className="p-6 text-center">
+              <div className="inline-flex items-center justify-center w-12 h-12 rounded-[2px] border border-primary/30 bg-primary/10 mb-4">
+                <Mail className="h-6 w-6 text-primary" />
+              </div>
+              <h1 className="text-xl font-bold font-mono tracking-tight mb-2 text-foreground">DISPATCH_COMPLETE</h1>
+              <div className="text-sm text-muted-foreground mb-6 font-mono text-left bg-muted/30 p-3 rounded-[2px] border border-border/50">
+                <span className="text-xs text-muted-foreground block mb-1">DESTINATION:</span>
+                <strong className="text-foreground break-all">{email}</strong>
+                <span className="text-[11px] text-muted-foreground block mt-2">Instruksi reset token telah dikirim ke inbox. Silakan periksa email Anda.</span>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setMode("login");
+                  setResetEmailSent(false);
+                  setEmail("");
+                }}
+                className="w-full gap-2 font-mono text-xs uppercase tracking-wider rounded-[2px]"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Kembali ke Login
+              </Button>
+            </div>
           </div>
         </div>
       </Layout>
@@ -484,59 +499,66 @@ export default function Auth() {
   return (
     <Layout>
       <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
-        <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
-              {getIcon()}
+        <div className="w-full max-w-md border border-border bg-card rounded-[2px] shadow-2xl overflow-hidden">
+          {/* Terminal Console Window Bar */}
+          <div className="flex items-center justify-between border-b border-border/80 px-4 py-2.5 bg-muted/40">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded-[2px] border border-primary/40 bg-background/80 flex items-center justify-center text-primary font-mono text-[10px] font-bold">
+                H
+              </div>
+              <span className="font-mono text-[11px] tracking-wider text-muted-foreground uppercase">
+                AUTH_NODE // PRIVILEGED
+              </span>
             </div>
-            <h1 className="text-2xl font-bold">{getTitle()}</h1>
-            <p className="text-muted-foreground mt-2">{getDescription()}</p>
+            <div className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="font-mono text-[10px] text-muted-foreground tracking-widest">TLS_1.3</span>
+            </div>
           </div>
 
-          {/* Rate Limit Warning Banner */}
-          {rateLimitState.blocked && (mode === "login" || mode === "register") && (
-            <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/20 animate-in fade-in slide-in-from-top-2 duration-300">
-              <div className="flex items-start gap-3">
-                <div className="flex-shrink-0 mt-0.5">
-                  <AlertTriangle className="h-5 w-5 text-destructive" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-destructive text-sm">
-                    {rateLimitState.blockedType === "ip" 
-                      ? "IP Address Diblokir" 
-                      : "Akses Dibatasi"}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    {rateLimitState.message}
-                  </p>
-                  
-                  <div className="mt-3 space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-1.5 text-muted-foreground">
-                        <Clock className="h-4 w-4" />
-                        Waktu tunggu
-                      </span>
-                      <span className="font-mono font-semibold text-destructive">
+          <div className="p-6">
+            <div className="mb-6">
+              <h1 className="text-xl font-bold font-mono tracking-tight text-foreground uppercase">{getTitle()}</h1>
+              <p className="text-xs font-mono text-muted-foreground mt-1 uppercase tracking-wider">{getDescription()}</p>
+            </div>
+
+            {/* Rate Limit Warning Banner - Discreet Telemetry Throttle Rail */}
+            {rateLimitState.blocked && (mode === "login" || mode === "register") && (
+              <div className="mb-5 p-3.5 rounded-[2px] border border-border bg-card border-l-2 border-l-amber-500 animate-in fade-in duration-200">
+                <div className="flex items-start gap-2.5">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-mono font-semibold text-amber-500 text-xs uppercase tracking-wider">
+                        [TELEMETRY: RATE_LIMIT_ENGAGED]
+                      </h3>
+                      <span className="font-mono text-xs font-bold text-amber-400">
                         {formatTime(rateLimitState.remainingSeconds)}
                       </span>
                     </div>
-                    <Progress 
-                      value={progressValue} 
-                      className="h-2 bg-destructive/20"
-                    />
-                    <p className="text-xs text-muted-foreground text-center">
-                      {rateLimitState.blockedType === "ip"
-                        ? "IP Anda telah diblokir sementara karena terlalu banyak percobaan gagal"
-                        : "Silakan tunggu sebelum mencoba login kembali"}
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {rateLimitState.message}
                     </p>
+                    
+                    <div className="mt-2.5 space-y-1.5">
+                      <div className="h-1 bg-border/50 rounded-[1px] overflow-hidden">
+                        <div 
+                          className="h-full bg-amber-500 transition-all duration-300" 
+                          style={{ width: `${progressValue}%` }}
+                        />
+                      </div>
+                      <p className="text-[10px] font-mono text-muted-foreground">
+                        {rateLimitState.blockedType === "ip"
+                          ? "IP sementara dibatasi karena percobaan berulang."
+                          : "Cooldown keamanan aktif sebelum percobaan berikutnya."}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div className={`p-6 rounded-lg bg-card border border-border transition-opacity duration-300 ${rateLimitState.blocked ? 'opacity-60' : ''}`}>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <div className={`transition-opacity duration-300 ${rateLimitState.blocked ? 'opacity-50 pointer-events-none' : ''}`}>
+              <form onSubmit={handleSubmit} className="space-y-4">
               {/* Email field - shown for login, register, forgot */}
               {(mode === "login" || mode === "register" || mode === "forgot") && (
                 <div className="space-y-2">
@@ -611,20 +633,26 @@ export default function Auth() {
                 </div>
               )}
 
-              {/* Turnstile CAPTCHA - only for login and register */}
+              {/* Turnstile CAPTCHA - Hardened Integrity Bay */}
               {!rateLimitState.blocked && (mode === "login" || mode === "register") && (
-                <TurnstileCaptcha
-                  ref={turnstileRef}
-                  onVerify={setTurnstileToken}
-                  onExpire={() => setTurnstileToken(null)}
-                  onError={() => setTurnstileToken(null)}
-                  theme="auto"
-                />
+                <div className="p-3 border border-border/70 bg-background/50 rounded-[2px] space-y-2">
+                  <div className="flex items-center justify-between font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
+                    <span>INTEGRITY_CHECK // TURNSTILE</span>
+                    <span className="text-primary font-bold">SHA-256</span>
+                  </div>
+                  <TurnstileCaptcha
+                    ref={turnstileRef}
+                    onVerify={setTurnstileToken}
+                    onExpire={() => setTurnstileToken(null)}
+                    onError={() => setTurnstileToken(null)}
+                    theme="auto"
+                  />
+                </div>
               )}
 
               <Button 
                 type="submit" 
-                className="w-full"
+                className="w-full font-mono text-xs uppercase tracking-wider font-bold rounded-[2px] bg-primary text-primary-foreground hover:bg-primary/90 active:translate-y-[0.5px] transition-all py-2.5 h-auto shadow-sm"
                 disabled={
                   isSubmitting || 
                   ((mode === "login" || mode === "register") && (!turnstileToken || rateLimitState.blocked))
@@ -709,6 +737,7 @@ export default function Auth() {
           </div>
         </div>
       </div>
-    </Layout>
-  );
+    </div>
+  </Layout>
+);
 }
