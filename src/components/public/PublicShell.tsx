@@ -77,11 +77,17 @@ function Shell({ children }: {
 }) {
     const [riva, setRiva] = useState(false);
     const [top, setTop] = useState(false);
-    const { reduced, allowWebGL } = useMotionPolicy();
-    useEffect(() => { const scroll = () => setTop(scrollY > 600); window.addEventListener("scroll", scroll, { passive: true }); return () => window.removeEventListener("scroll", scroll); }, []);
+    const [mounted, setMounted] = useState(false);
+    const { reduced } = useMotionPolicy();
+    useEffect(() => {
+        setMounted(true);
+        const scroll = () => setTop(scrollY > 600);
+        window.addEventListener("scroll", scroll, { passive: true });
+        return () => window.removeEventListener("scroll", scroll);
+    }, []);
     return <LazyMotion features={loadFeatures}><ScrollManager /><a className="public-skip" href="#main-content">Lewati ke konten utama</a><PublicNavbar />
 
- {allowWebGL && <OptionalFeatureBoundary><Suspense fallback={null}><Cursor /></Suspense></OptionalFeatureBoundary>}
+ {mounted && !reduced && <OptionalFeatureBoundary><Suspense fallback={null}><Cursor /></Suspense></OptionalFeatureBoundary>}
  <main id="main-content" className="public-main">{children}</main><PublicFooter />
 
  {riva ? <OptionalFeatureBoundary fallback={<button className="public-riva-launcher" onClick={() => window.location.reload()} aria-label="RIVA gagal dimuat. Muat ulang halaman."><Bot /></button>}><Suspense fallback={<span role="status" className="public-riva-launcher is-loading" aria-label="Memuat RIVA…" title="Memuat RIVA…"><Loader2 className="animate-spin" /><span className="sr-only">Memuat RIVA…</span></span>}><Riva initiallyOpen/></Suspense></OptionalFeatureBoundary> : <button type="button" className="public-riva-launcher" aria-label="Buka RIVA, asisten portofolio" onClick={() => setRiva(true)}><Bot /></button>}

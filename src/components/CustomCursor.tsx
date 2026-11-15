@@ -44,7 +44,7 @@ export function CustomCursor() {
     const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
 
     const checkSupport = () => {
-      const isFine = pointerFineQuery.matches;
+      const isFine = pointerFineQuery.matches || window.matchMedia("(any-pointer: fine)").matches || !("ontouchstart" in window);
       const isReduced = reducedMotionQuery.matches;
       const shouldEnable = isFine && !isReduced;
       setEnabled(shouldEnable);

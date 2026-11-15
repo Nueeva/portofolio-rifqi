@@ -180,7 +180,7 @@ export function HomeWork({ project, index }: { project: Project; index: number }
             <div className="home-work-copy">
                 <h2 id={`work-${project.id}`}>{project.title.split(" — ")[0]}</h2>
                 <p>{project.solution.split(/\s+/).length > 25 ? project.solution.split(/\s+/).slice(0, 25).join(" ") + "…" : project.solution}</p>
-                <Link className="public-text-link home-work-link" to={`/projects/${project.id}`}>Telusuri karya <span className="home-link-orbit"><ArrowUpRight /></span></Link>
+                <Link className="public-text-link home-work-link" to={`/projects/${project.id}`} data-cursor="TELUSURI">Telusuri karya <span className="home-link-orbit"><ArrowUpRight /></span></Link>
             </div>
             <div className="home-visual">
                 {!spec || project.image_url ? <ProjectArtwork project={project} /> : <figure ref={figure} className={`home-mechanism mechanism-${project.id}`}>
@@ -213,7 +213,7 @@ export function HomeStory() {
             </svg>
         </div>
         <div><p>Saya mulai menghasilkan uang sejak SMP, termasuk dari server Minecraft yang saya jalankan. Penghasilan itu dipakai orang tua untuk cicilan keluarga. Dari sana, saya terus belajar merancang, membangun, mengaudit, dan mengoperasikan sistem sendiri.</p>
-            <Link className="public-text-link home-work-link" to="/about">Kenali perjalanan saya <span className="home-link-orbit"><ArrowUpRight /></span></Link>
+            <Link className="public-text-link home-work-link" to="/about" data-cursor="TENTANG">Kenali perjalanan saya <span className="home-link-orbit"><ArrowUpRight /></span></Link>
         </div>
     </div></section>;
 }

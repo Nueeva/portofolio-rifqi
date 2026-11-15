@@ -136,13 +136,13 @@ export function CybersecurityHero() {
             <p>{presentText(get("hero_description", "Membangun tooling dan memperbaiki celah pada sistem produksi."))}</p>
           </div>
           <div className="cyber-project">
-            <Link to="/projects"><span>Jelajahi karya</span><span className="cyber-project-arrow"><ArrowUpRight /></span></Link>
-            <a href={get("portfolio_cv_url", "/cv-rifqi-ariansyah.pdf")} download><span>Unduh CV</span><span className="cyber-project-arrow"><ArrowUpRight /></span></a>
+            <Link to="/projects" data-cursor="JELAJAHI"><span>Jelajahi karya</span><span className="cyber-project-arrow"><ArrowUpRight /></span></Link>
+            <a href={get("portfolio_cv_url", "/cv-rifqi-ariansyah.pdf")} download data-cursor="UNDUH CV"><span>Unduh CV</span><span className="cyber-project-arrow"><ArrowUpRight /></span></a>
           </div>
         </div>
         <div className="cyber-bottom">
-          <Link to="/contact">Diskusikan keamanan sistemmu <ArrowUpRight /></Link>
-          <Link to="/projects/curated-apexsions">Apexsions — 32 temuan diperbaiki <ArrowUpRight /></Link>
+          <Link to="/contact" data-cursor="KONTAK">Diskusikan keamanan sistemmu <ArrowUpRight /></Link>
+          <Link to="/projects/curated-apexsions" data-cursor="AUDIT">Apexsions — 32 temuan diperbaiki <ArrowUpRight /></Link>
         </div>
       </div>
     </section>);
