@@ -137,7 +137,7 @@ export function CybersecurityHero() {
           </div>
           <div className="cyber-project">
             <Link to="/projects"><span>Jelajahi karya</span><span className="cyber-project-arrow"><ArrowUpRight /></span></Link>
-            <a href={get("portfolio_cv_url", "/cv-rifqi-ariansyah.pdf")} download>Unduh CV <ArrowUpRight /></a>
+            <a href={get("portfolio_cv_url", "/cv-rifqi-ariansyah.pdf")} download><span>Unduh CV</span><span className="cyber-project-arrow"><ArrowUpRight /></span></a>
           </div>
         </div>
         <div className="cyber-bottom">
