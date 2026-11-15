@@ -38,33 +38,30 @@ export function CybersecurityHero() {
     }, [reduced, entrance, progress]);
     useEffect(() => {
         const media = matchMedia("(min-width:1024px) and (min-height:780px)");
-        const body = ref.current?.querySelector<HTMLElement>(".cyber-body");
-        const sync = () => setSticky(!reduced && media.matches && !!body && body.offsetTop + body.offsetHeight + 80 <= innerHeight - 64);
-        const observer = new ResizeObserver(sync);
-        if (body)
-            observer.observe(body);
+        const sync = () => setSticky(!reduced && media.matches && window.innerHeight >= 780);
+        media.addEventListener("change", sync);
         window.addEventListener("resize", sync);
         sync();
-        return () => { observer.disconnect(); window.removeEventListener("resize", sync); };
+        return () => { media.removeEventListener("change", sync); window.removeEventListener("resize", sync); };
     }, [reduced]);
-    // Lenis already smooths document scroll. No second spring on the camera.
-    const titleY = useTransform(camera, [0, 0.2, 0.85, 1], [0, -2, -32, -40]);
-    const engineerX = useTransform(camera, [0, 0.2, 0.85, 1], [0, 0, 26, 32]);
-    const lowerY = useTransform(camera, [0, 0.35, 0.75, 1], [0, 2, 43, 48]);
-    const upperLip = useTransform(camera, [0, 0.35, 0.75, 1], [-10, -12, -51, -54]);
-    const lowerLip = useTransform(camera, [0, 0.35, 0.75, 1], [10, 12, 51, 54]);
-    const aperture = useTransform(camera, [0, 0.35, 0.75, 1], [
-        "inset(42% 0% 42% 0%)", "inset(40% 0% 40% 0%)",
-        "inset(8% 0% 8% 0%)", "inset(5% 0% 5% 0%)",
+    // Lenis already smooths document scroll. Non-linear viscoelastic fracture curves.
+    const titleY = useTransform(camera, [0, 0.22, 0.72, 1], [0, -3, -34, -42]);
+    const engineerX = useTransform(camera, [0, 0.22, 0.72, 1], [0, 0, 28, 34]);
+    const lowerY = useTransform(camera, [0, 0.22, 0.72, 1], [0, 2, 44, 50]);
+    const upperLip = useTransform(camera, [0, 0.22, 0.72, 1], [-10, -14, -52, -56]);
+    const lowerLip = useTransform(camera, [0, 0.22, 0.72, 1], [10, 14, 52, 56]);
+    const aperture = useTransform(camera, [0, 0.22, 0.72, 1], [
+        "inset(42% 0% 42% 0%)", "inset(38% 0% 38% 0%)",
+        "inset(7% 0% 7% 0%)", "inset(4% 0% 4% 0%)",
     ]);
     // The highlight starts after the opening: position and light aren't one tween.
-    const sweepX = useTransform(camera, [0, 0.35, 0.75, 1], ["-125%", "-110%", "125%", "170%"]);
-    const railSpread = useTransform(camera, [0, .42, 1], [3, 22, 64]);
+    const sweepX = useTransform(camera, [0, 0.22, 0.72, 1], ["-125%", "-105%", "135%", "175%"]);
+    const railSpread = useTransform(camera, [0, .35, 1], [3, 24, 66]);
     const railUpper = useTransform(railSpread, value => -value);
-    const railSweep = useTransform(camera, [0, .2, .65, 1], ["-110%", "-100%", "40%", "130%"]);
-    const reflectionY = useTransform(camera, [0, 1], [-4, 12]);
-    const pointerX = useSpring(0, { stiffness: 90, damping: 28 });
-    const pointerY = useSpring(0, { stiffness: 90, damping: 28 });
+    const railSweep = useTransform(camera, [0, .2, .65, 1], ["-110%", "-100%", "45%", "135%"]);
+    const reflectionY = useTransform(camera, [0, 1], [-4, 14]);
+    const pointerX = useSpring(0, { stiffness: 110, damping: 26 });
+    const pointerY = useSpring(0, { stiffness: 110, damping: 26 });
     const pointerFrame = useRef(0);
     const pendingPointer = useRef<{ x: number; y: number; target: HTMLElement } | null>(null);
     useEffect(() => () => cancelAnimationFrame(pointerFrame.current), []);
@@ -92,7 +89,24 @@ export function CybersecurityHero() {
       <div className="cyber-stage" onPointerMove={onPointerMove} onPointerLeave={resetPointer}>
         {allowWebGL && <OptionalFeatureBoundary><Suspense fallback={null}><OpticalField progress={camera}/></Suspense></OptionalFeatureBoundary>}
         <m.div className="hero-intro-light" aria-hidden="true" initial={false} animate={reduced ? { x: "150%" } : { x: ["-150%", "150%"] }} transition={{ duration: 1.65, ease: [.22, 1, .36, 1] }}/>
-        <m.svg className="optical-poster" viewBox="0 0 1280 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="optical-spectrum"><stop stopColor="var(--site-cyan)"/><stop offset=".6" stopColor="var(--site-violet)"/><stop offset="1" stopColor="var(--site-copper)"/></linearGradient></defs><path d="M-60 570L1340 325L1340 470L-60 715Z" fill="var(--site-cavity)"/><path d="M-60 568L1340 323" stroke="url(#optical-spectrum)" strokeWidth="3"/><path d="M-60 717L1340 472" stroke="var(--site-metal)" strokeWidth="1"/></m.svg>
+        <m.svg className="optical-poster" viewBox="0 0 1280 760" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <defs>
+            <linearGradient id="optical-spectrum" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="var(--site-cyan)" stopOpacity="0.95"/>
+              <stop offset="48%" stopColor="var(--site-cyan)" stopOpacity="0.8"/>
+              <stop offset="62%" stopColor="var(--site-violet)" stopOpacity="0.85"/>
+              <stop offset="85%" stopColor="var(--site-copper)" stopOpacity="0.9"/>
+              <stop offset="100%" stopColor="var(--site-copper)" stopOpacity="0.95"/>
+            </linearGradient>
+            <filter id="seam-glow" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="3" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+          <path d="M-60 570L1340 325L1340 470L-60 715Z" fill="var(--site-cavity)"/>
+          <path d="M-60 568L1340 323" stroke="url(#optical-spectrum)" strokeWidth="2.5" filter="url(#seam-glow)"/>
+          <path d="M-60 717L1340 472" stroke="var(--site-metal)" strokeWidth="1" strokeOpacity="0.6"/>
+        </m.svg>
         <div className="celah-rails" aria-hidden="true">
           <m.div className="celah-rail celah-rail-upper" style={{ y: reduced ? -22 : railUpper }} />
           <m.div className="celah-rail celah-rail-lower" style={{ y: reduced ? 22 : railSpread }} />

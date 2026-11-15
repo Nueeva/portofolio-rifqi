@@ -5,7 +5,51 @@ const vertex = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.x
 const background = `varying vec2 vUv; uniform vec3 base;uniform vec3 cool;uniform vec3 violet;
 void main(){vec2 p=vUv;float field=exp(-length((p-vec2(.74,.48))*vec2(1.5,2.8))*3.);float band=.5+.5*sin(p.x*15.+p.y*9.);gl_FragColor=vec4(mix(base,mix(cool,violet,band),field*.24),1.);}`.replace(';#include', ';\n#include');
 const optical = `varying vec2 vUv;uniform sampler2D source;uniform float progress;uniform vec2 pointer;uniform vec2 resolution;uniform vec3 copper;uniform vec3 cool;uniform vec3 base;
-void main(){vec2 p=vUv;float gap=.025+smoothstep(0.,.35,progress)*.07;float seam=p.y-.35-p.x*.19;float edge=abs(seam)-gap;float bevel=exp(-abs(edge)*180.);vec2 offset=vec2(bevel*.012+pointer.x*.028,bevel*.018+pointer.y*.012);vec3 col;col.r=texture2D(source,p+offset*1.7).r;col.g=texture2D(source,p+offset).g;col.b=texture2D(source,p+offset*.3).b;float cavity=1.-smoothstep(-.003,.003,edge);float isDark=base.r<.2?1.:0.;col*=1.-cavity*(isDark*.72+.08);float sweep=smoothstep(.35,.75,progress);float shine=exp(-pow((p.x-(sweep*1.5-.25))*.9,2.)*22.);col+=bevel*mix(cool,copper,p.x)*(.26+shine*.8);col+=exp(-abs(edge)*35.)*copper*.035;gl_FragColor=vec4(col,1.);\n#include <colorspace_fragment>\n}`;
+vec2 hash(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return -1.+2.*fract(sin(p)*43758.5453123);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);return mix(mix(dot(hash(i+vec2(0.,0.)),f-vec2(0.,0.)),dot(hash(i+vec2(1.,0.)),f-vec2(1.,0.)),u.x),mix(dot(hash(i+vec2(0.,1.)),f-vec2(0.,1.)),dot(hash(i+vec2(1.,1.)),f-vec2(1.,1.)),u.x),u.y);}
+vec2 curlNoise(vec2 p){float eps=.01;float n1=noise(p+vec2(0.,eps));float n2=noise(p-vec2(0.,eps));float n3=noise(p+vec2(eps,0.));float n4=noise(p-vec2(eps,0.));return vec2((n1-n2)/(2.*eps),-(n3-n4)/(2.*eps));}
+void main(){
+vec2 p=vUv;
+float gap=.025+smoothstep(0.,.35,progress)*.07;
+float seam=p.y-.35-p.x*.19;
+float edge=abs(seam)-gap;
+float boundaryEnvelope=exp(-pow(edge*40.,2.));
+vec2 kineticPhase=vec2(progress*3.6+pointer.x*1.8,pointer.y*1.4-progress*1.9);
+vec2 fluidDrift=curlNoise(p*8.+kineticPhase)*boundaryEnvelope*.0035;
+vec2 pDistorted=p+fluidDrift;
+seam=pDistorted.y-.35-pDistorted.x*.19;
+edge=abs(seam)-gap;
+float bevelSlope=exp(-abs(edge)*160.)*sign(seam);
+vec2 n2D=normalize(vec2(-.19,1.));
+vec3 N=normalize(vec3(-n2D*bevelSlope*1.5,1.));
+vec3 I=vec3(0.,0.,-1.);
+vec3 refR=refract(I,N,.6605);
+vec3 refG=refract(I,N,.6570);
+vec3 refB=refract(I,N,.6502);
+float slabThickness=.016;
+vec2 offsetR=(refR.xy/abs(refR.z))*slabThickness+pointer*.015;
+vec2 offsetG=(refG.xy/abs(refG.z))*slabThickness+pointer*.015;
+vec2 offsetB=(refB.xy/abs(refB.z))*slabThickness+pointer*.015;
+vec3 col;
+col.r=texture2D(source,pDistorted+offsetR).r;
+col.g=texture2D(source,pDistorted+offsetG).g;
+col.b=texture2D(source,pDistorted+offsetB).b;
+float cosTheta=clamp(dot(-I,N),0.,1.);
+float R0=.0426;
+float fresnel=R0+(1.-R0)*pow(1.-cosTheta,5.);
+float sweep=smoothstep(.35,.75,progress);
+float causticPhase=progress*8.+(pointer.x+pointer.y)*4.;
+float caustic=(exp(-abs(edge)*220.)/sqrt(abs(edge)+.005))*(1.+.35*sin(p.x*45.+causticPhase));
+float shine=exp(-pow((p.x-(sweep*1.5-.25))*.9,2.)*25.);
+float cavity=1.-smoothstep(-.004,.004,edge);
+float isDark=base.r<.2?1.:0.;
+col*=1.-cavity*(isDark*.72+.08);
+vec3 accentColor=mix(cool,copper,p.x);
+col+=fresnel*accentColor*(.35+shine*.95);
+col+=caustic*copper*.045*(1.+shine*.5);
+gl_FragColor=vec4(col,1.);
+#include <colorspace_fragment>
+}`;
 /** Decorative, render-on-demand optical layer. Poster and DOM remain complete on failure. */
 export default function OpticalField({ progress }: {
     progress: MotionValue<number>;
