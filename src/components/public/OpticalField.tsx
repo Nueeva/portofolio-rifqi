@@ -43,10 +43,22 @@ float caustic=(exp(-abs(edge)*220.)/sqrt(abs(edge)+.005))*(1.+.35*sin(p.x*45.+ca
 float shine=exp(-pow((p.x-(sweep*1.5-.25))*.9,2.)*25.);
 float cavity=1.-smoothstep(-.004,.004,edge);
 float isDark=base.r<.2?1.:0.;
-col*=1.-cavity*(isDark*.72+.08);
+float cavityDarkening=isDark*.72+(1.-isDark)*.46;
+col*=1.-cavity*cavityDarkening;
 vec3 accentColor=mix(cool,copper,p.x);
-col+=fresnel*accentColor*(.35+shine*.95);
-col+=caustic*copper*.045*(1.+shine*.5);
+vec3 darkLighting=fresnel*accentColor*(.35+shine*.95)+caustic*copper*.045*(1.+shine*.5);
+
+// Light-mode mineral refraction, ambient occlusion bevel & specular glint
+vec3 mineralPigment=mix(copper*.78,cool*.70,p.x);
+float edgeGrip=exp(-abs(edge)*60.);
+float razorShadow=smoothstep(0.,.012,edge)*exp(-max(0.,edge)*110.)*max(0.,seam);
+float causticGlint=clamp(caustic*(shine*1.15+.35)*.065,0.,.85);
+vec3 lightShaded=col*(1.-razorShadow*.36);
+lightShaded=mix(lightShaded,mineralPigment,edgeGrip*.42);
+lightShaded=mix(lightShaded,copper*1.32,causticGlint);
+lightShaded+=fresnel*copper*(shine*.75+.15)*.38;
+
+col=mix(lightShaded,col+darkLighting,isDark);
 gl_FragColor=vec4(col,1.);
 #include <colorspace_fragment>
 }`;

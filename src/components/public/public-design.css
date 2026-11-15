@@ -13,8 +13,8 @@
   --site-ink: #14171A; --site-muted: #69707A; --site-metal: #92400E;
   --site-cool: #0F766E; --site-line: #E3DED4; --site-input: #D4CDC0;
   --site-cyan: #0F766E; --site-copper: #B45309; --site-violet: #6366F1;
-  --site-cavity: #ECE7DC; --site-cavity-shadow: inset 0 3px 10px rgba(44, 38, 30, 0.08), inset 0 1px 2px rgba(44, 38, 30, 0.10);
-  --site-reflection: #92400E; --site-shadow: rgba(20, 23, 26, 0.04);
+  --site-cavity: #DCD5C5; --site-cavity-shadow: inset 0 14px 24px rgba(44, 38, 30, 0.18), inset 0 2px 4px rgba(44, 38, 30, 0.22);
+  --site-reflection: #92400E; --site-shadow: rgba(20, 23, 26, 0.12);
   --public-gutter: clamp(20px, 4vw, 64px);
   min-height: 100svh; background: var(--site-bg); color: var(--site-ink);
   font-family: Inter, sans-serif; line-height: 1.65;
@@ -302,7 +302,7 @@
 
 .public-desktop-nav a{position:relative}.nav-active-line{position:absolute;bottom:7px;inset-inline:0;height:1px;background:var(--site-metal)}.public-desktop-nav a[aria-current]{text-decoration:none}
 
-.public-design{--site-cavity-ink:#f1ece1;--site-cavity-muted:#c1c7c2}.public-design .cyber-seam-copy svg{color:var(--site-reflection)}
+.public-design{--site-cavity-ink:#242018;--site-cavity-muted:#635c4f}.dark .public-design{--site-cavity-ink:#f1ece1;--site-cavity-muted:#c1c7c2}.public-design .cyber-seam-copy svg{color:var(--site-reflection)}
 .public-theme-switch svg{transition:transform .2s}.public-theme-switch:active svg{transform:rotate(45deg)}
 .theme-color-transition .public-design,.theme-color-transition .public-design :is(header,footer,main,section,figure,button,input,textarea,p,a,h1,h2,h3){transition:background-color .2s,color .2s,border-color .2s}
 @media(prefers-reduced-motion:reduce){.theme-color-transition .public-design *{transition:none!important}}
@@ -312,3 +312,9 @@
 @media(max-width:767px){.work-reverse .home-visual,.work-reverse>div:first-child{grid-column:auto;grid-row:auto}}
 
 .hero-intro-light{position:absolute;inset:-20%;z-index:2;pointer-events:none;background:linear-gradient(110deg,transparent 40%,color-mix(in srgb,var(--site-cyan) 25%,transparent) 47%,color-mix(in srgb,var(--site-metal) 40%,transparent) 50%,transparent 57%);transform:rotate(-8deg)}
+.public-design .hero-intro-light{mix-blend-mode:multiply;opacity:0.65}
+.public-design .celah-rail{background:linear-gradient(90deg,transparent,var(--site-cool) 25%,var(--site-metal) 60%,var(--site-copper) 85%,transparent);opacity:0.85}
+.public-design .celah-tracer{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--site-metal) 28%,transparent),transparent);border-inline:1px solid color-mix(in srgb,var(--site-copper) 65%,transparent)}
+.dark .public-design .hero-intro-light{mix-blend-mode:normal;opacity:1}
+.dark .public-design .celah-rail{background:linear-gradient(90deg,transparent,var(--site-cool) 25%,var(--site-ink) 60%,var(--site-metal) 85%,transparent);opacity:1}
+.dark .public-design .celah-tracer{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--site-cool) 12%,transparent),transparent);border-inline:1px solid color-mix(in srgb,var(--site-metal) 35%,transparent)}
