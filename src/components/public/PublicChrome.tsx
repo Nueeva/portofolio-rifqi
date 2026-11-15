@@ -121,9 +121,6 @@ export function PublicFooter() {
         { label: "Email", url: `mailto:${get("contact_email", "contact@rifqi.tech")}`, Icon: Mail },
     ];
     return <footer className="public-footer"><div className="public-container">
-    <div className="public-availability-beacon" role="status" aria-label="Status ketersediaan">
-      <span className="beacon-dot" aria-hidden="true">●</span> Tersedia untuk Audit &amp; Rekayasa Keamanan
-    </div>
     <div className="public-footer-invitation"><h2>Mari bertukar<br /><em>perspektif.</em></h2><Link className="public-text-link" to="/contact">Mulai percakapan <ArrowUpRight /></Link></div>
     <div className="public-footer-base"><Link to="/" className="public-brand"><TembusMark /><span>{get("hero_name", "Rifqi Ariansyah")}</span></Link><p>Cybersecurity Engineer</p>
       <div className="public-socials">{socials.filter(item => item.url).map(({ label, url, Icon }) => <a key={label} href={url} aria-label={label} {...(!url.startsWith("mailto:") ? { target: "_blank", rel: "noopener noreferrer" } : {})}><Icon aria-hidden="true"/></a>)}</div>

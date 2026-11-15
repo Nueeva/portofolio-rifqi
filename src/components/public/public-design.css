@@ -334,10 +334,6 @@
 .dark .public-design .celah-rail{background:linear-gradient(90deg,transparent,var(--site-cool) 25%,var(--site-ink) 60%,var(--site-metal) 85%,transparent);opacity:1}
 .dark .public-design .celah-tracer{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--site-cool) 12%,transparent),transparent);border-inline:1px solid color-mix(in srgb,var(--site-metal) 35%,transparent)}
 
-/* --- Public Footer Availability Beacon --- */
-.public-availability-beacon { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--site-cyan); padding: 6px 14px; border: 1px solid color-mix(in srgb, var(--site-cyan) 30%, transparent); background: color-mix(in srgb, var(--site-cyan) 8%, transparent); border-radius: 9999px; margin-bottom: 24px; width: fit-content; }
-.public-availability-beacon .beacon-dot { color: var(--site-cyan); animation: beacon-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
-@keyframes beacon-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
 
 /* --- Contact Dynamic Seam Glow & Telemetry --- */
 .contact-field input, .contact-field textarea { transition: border-color .2s ease, box-shadow .2s ease; }
