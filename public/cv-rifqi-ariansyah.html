@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Curriculum Vitae — Rifqi Ariansyah | Cybersecurity Engineer & Systems Architect</title>
+  <meta name="description" content="Curriculum Vitae resmi Rifqi Ariansyah (Nueeva) — Cybersecurity Engineer & Systems Architect. Spesialisasi audit keamanan, arsitektur monorepo Java 21, dan sistem berdaya tahan tinggi.">
+  <meta name="author" content="Rifqi Ariansyah">
+  <meta name="robots" content="index, follow">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+
+  <style>
+    /* ==========================================================================
+       FONTS & DESIGN TOKENS (Swiss Architectural Hierarchy)
+       ========================================================================== */
+    @font-face {
+      font-family: 'Inter';
+      font-style: normal;
+      font-weight: 400 700;
+      font-display: swap;
+      src: url('/fonts/inter.woff2') format('woff2');
+    }
+    @font-face {
+      font-family: 'JetBrains Mono';
+      font-style: normal;
+      font-weight: 400 600;
+      font-display: swap;
+      src: url('/fonts/jetbrains-mono.woff2') format('woff2');
+    }
+
+    :root {
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      
+      --color-slate-950: #020617;
+      --color-slate-900: #0f172a;
+      --color-slate-800: #1e293b;
+      --color-slate-700: #334155;
+      --color-slate-600: #475569;
+      --color-slate-500: #64748b;
+      --color-slate-400: #94a3b8;
+      --color-slate-300: #cbd5e1;
+      --color-slate-200: #e2e8f0;
+      --color-slate-100: #f1f5f9;
+      --color-slate-50:  #f8fafc;
+      
+      --color-accent: #0284c7;
+      --color-accent-dark: #0369a1;
+      --divider-color: #cbd5e1;
+    }
+
+    /* CSS Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 13px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      color: #0f172a;
+      background-color: #e2e8f0;
+      line-height: 1.45;
+      letter-spacing: -0.01em;
+    }
+
+    a {
+      color: var(--color-accent-dark);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    a:hover {
+      text-decoration: underline;
+      color: var(--color-accent);
+    }
+
+    /* ==========================================================================
+       SCREEN ACTION TOOLBAR (Hidden in Print)
+       ========================================================================== */
+    .screen-toolbar {
+      width: 100%;
+      background: #0f172a;
+      color: #f8fafc;
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.18);
+      font-size: 13px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .screen-toolbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .screen-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #0284c7;
+      color: #ffffff !important;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 4px;
+      font-size: 12px;
+      cursor: pointer;
+      border: none;
+      text-decoration: none !important;
+      transition: background 0.15s ease;
+    }
+    .btn-action:hover {
+      background: #0369a1;
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.1);
+      color: #f8fafc !important;
+      font-weight: 500;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      text-decoration: none !important;
+      transition: background 0.15s ease;
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* ==========================================================================
+       PAGE CONTAINER (A4 Exact Dimensions: 210mm x 297mm)
+       ========================================================================== */
+    .screen-wrapper {
+      display: flex;
+      justify-content: center;
+      padding: 24px 16px 40px;
+    }
+
+    .cv-page {
+      width: 210mm;
+      min-height: 297mm;
+      max-height: 297mm;
+      background: #ffffff;
+      padding: 12mm 14mm;
+      box-shadow: 0 10px 30px -5px rgba(0,0,0,0.12), 0 4px 6px -2px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    /* ==========================================================================
+       HEADER (Swiss Identity Block)
+       ========================================================================== */
+    .cv-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1.5px solid var(--color-slate-900);
+      padding-bottom: 7px;
+      margin-bottom: 7px;
+    }
+
+    .header-identity h1 {
+      font-size: 20pt;
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -0.035em;
+      color: var(--color-slate-950);
+      text-transform: uppercase;
+    }
+
+    .header-identity .subtitle {
+      font-size: 9.8pt;
+      font-weight: 600;
+      color: var(--color-accent-dark);
+      letter-spacing: -0.015em;
+      margin-top: 2.5px;
+    }
+
+    .header-contact {
+      text-align: right;
+      font-size: 8.5pt;
+      line-height: 1.45;
+      color: var(--color-slate-600);
+      font-family: var(--font-sans);
+    }
+
+    .header-contact .contact-item {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 5px;
+    }
+
+    .header-contact a {
+      color: var(--color-slate-800);
+      font-weight: 500;
+    }
+    .header-contact a:hover {
+      color: var(--color-accent-dark);
+    }
+
+    .header-contact .highlight-link {
+      font-family: var(--font-mono);
+      font-size: 8pt;
+      color: var(--color-accent-dark);
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       SECTIONS & TYPOGRAPHY
+       ========================================================================== */
+    .cv-section {
+      margin-bottom: 6.5px;
+    }
+
+    .section-title {
+      font-size: 7.6pt;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--color-slate-900);
+      border-bottom: 1px solid var(--divider-color);
+      padding-bottom: 2px;
+      margin-bottom: 4.5px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .section-title::after {
+      content: "";
+      flex-grow: 1;
+      height: 1px;
+      background: var(--divider-color);
+      margin-left: 10px;
+    }
+
+    /* Executive Summary */
+    .summary-text {
+      font-size: 8.5pt;
+      line-height: 1.38;
+      color: var(--color-slate-800);
+      text-align: justify;
+    }
+    .summary-text strong {
+      color: var(--color-slate-950);
+      font-weight: 600;
+    }
+
+    /* Micro-Badges / Pills (Swiss Architectural Precision) */
+    .badge-cloud {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 3.5px;
+      align-items: center;
+    }
+
+    .pill {
+      font-family: var(--font-mono);
+      font-size: 7.2pt;
+      font-weight: 500;
+      padding: 1px 5px;
+      border-radius: 3px;
+      background: var(--color-slate-100);
+      border: 1px solid var(--color-slate-300);
+      color: var(--color-slate-800);
+      white-space: nowrap;
+      line-height: 1.25;
+      display: inline-block;
+    }
+
+    .pill.pill-accent {
+      background: #f0f9ff;
+      border-color: #bae6fd;
+      color: #0369a1;
+      font-weight: 600;
+    }
+
+    /* Competencies Grid */
+    .competency-table {
+      display: grid;
+      grid-template-columns: 125px 1fr;
+      row-gap: 3.2px;
+      font-size: 8.2pt;
+      align-items: center;
+    }
+
+    .competency-label {
+      font-weight: 700;
+      color: var(--color-slate-900);
+      font-size: 7.8pt;
+      letter-spacing: -0.01em;
+    }
+
+    /* Experience & Projects */
+    .exp-item {
+      margin-bottom: 5.5px;
+    }
+    .exp-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .exp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1.5px;
+    }
+
+    .exp-title-group {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+    }
+
+    .exp-title {
+      font-size: 9pt;
+      font-weight: 700;
+      color: var(--color-slate-950);
+      letter-spacing: -0.02em;
+    }
+
+    .exp-role {
+      font-size: 8.2pt;
+      font-weight: 600;
+      color: var(--color-slate-700);
+    }
+
+    .exp-meta {
+      font-size: 7.8pt;
+      color: var(--color-slate-500);
+      font-family: var(--font-mono);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .exp-subrow {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7.6pt;
+      color: var(--color-slate-600);
+      margin-bottom: 2px;
+    }
+
+    .exp-links {
+      font-family: var(--font-mono);
+      font-size: 7.5pt;
+    }
+    .exp-links a {
+      color: var(--color-accent-dark);
+      font-weight: 500;
+    }
+
+    .bullet-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 2.5px 0;
+    }
+
+    .bullet-list li {
+      position: relative;
+      padding-left: 11px;
+      font-size: 8.1pt;
+      line-height: 1.34;
+      color: var(--color-slate-800);
+      margin-bottom: 1.5px;
+    }
+
+    .bullet-list li::before {
+      content: "▪";
+      position: absolute;
+      left: 0;
+      top: -0.5px;
+      color: var(--color-slate-400);
+      font-size: 6.5pt;
+    }
+
+    .bullet-list li strong {
+      color: var(--color-slate-950);
+      font-weight: 600;
+    }
+
+    .exp-stack-row {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 1.5px;
+    }
+    .stack-tag-label {
+      font-size: 7pt;
+      font-weight: 700;
+      color: var(--color-slate-500);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* 2-Column Subgrid */
+    .grid-2col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      column-gap: 14px;
+      row-gap: 5px;
+    }
+
+    .research-card {
+      background: var(--color-slate-50);
+      border: 1px solid var(--color-slate-200);
+      border-radius: 3px;
+      padding: 4px 7px;
+    }
+
+    .research-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 1.5px;
+    }
+
+    .research-name {
+      font-size: 8.5pt;
+      font-weight: 700;
+      color: var(--color-slate-950);
+    }
+
+    .research-role {
+      font-size: 7.4pt;
+      color: var(--color-slate-600);
+    }
+
+    .research-desc {
+      font-size: 7.8pt;
+      line-height: 1.32;
+      color: var(--color-slate-800);
+      margin-bottom: 3px;
+    }
+
+    /* Certifications & Education */
+    .cert-item, .edu-item {
+      margin-bottom: 2.5px;
+    }
+    .cert-item:last-child, .edu-item:last-child {
+      margin-bottom: 0;
+    }
+
+    .item-title-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+
+    .item-title {
+      font-size: 8.2pt;
+      font-weight: 700;
+      color: var(--color-slate-900);
+    }
+
+    .item-year {
+      font-family: var(--font-mono);
+      font-size: 7.4pt;
+      color: var(--color-slate-500);
+      font-weight: 500;
+    }
+
+    .item-issuer {
+      font-size: 7.6pt;
+      color: var(--color-slate-600);
+      line-height: 1.25;
+    }
+
+    /* Footer / ATS Sign-off */
+    .cv-footer {
+      border-top: 1px solid var(--divider-color);
+      padding-top: 3.5px;
+      margin-top: 3px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 7.2pt;
+      color: var(--color-slate-500);
+      font-family: var(--font-mono);
+    }
+
+    .cv-footer a {
+      color: var(--color-slate-600);
+    }
+
+    /* ==========================================================================
+       PRINT SPECIFICATIONS (Strict Single Page A4 Fit)
+       ========================================================================== */
+    @page {
+      size: A4 portrait;
+      margin: 12mm 14mm;
+    }
+
+    @media print {
+      html, body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        font-family: 'Inter', -apple-system, sans-serif !important;
+        font-size: 9.2pt;
+        line-height: 1.45;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+
+      .screen-wrapper {
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+      }
+
+      .cv-page {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+        max-height: none !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        page-break-after: avoid !important;
+        page-break-inside: avoid !important;
+      }
+
+      .research-card {
+        background: transparent !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+
+      .pill {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Screen Top Bar (Hidden in Print) -->
+  <aside class="screen-toolbar no-print" aria-label="Aksi Dokumen CV">
+    <div class="screen-toolbar-left">
+      <a href="/" class="btn-secondary" title="Kembali ke Portofolio Utama">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+        <span>rifqi.apexsions.com</span>
+      </a>
+      <span style="color: #94a3b8; font-size: 11px;">Format: A4 Portofolio Master CV · Higienis & ATS Compliant</span>
+    </div>
+    <div class="screen-toolbar-right">
+      <a href="/cv-rifqi-ariansyah.pdf" download class="btn-secondary" title="Unduh Berkas PDF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        <span>Unduh File PDF</span>
+      </a>
+      <button onclick="window.print()" class="btn-action" title="Cetak atau Simpan ke PDF 1 Halaman">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+        <span>Cetak / Ekspor PDF</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main CV Page Wrapper -->
+  <div class="screen-wrapper">
+    <main class="cv-page" id="cv-content">
+
+      <!-- Header Identitas -->
+      <header class="cv-header">
+        <div class="header-identity">
+          <h1>Rifqi Ariansyah</h1>
+          <div class="subtitle">Cybersecurity Engineer &amp; Systems Architect</div>
+        </div>
+        <div class="header-contact">
+          <div class="contact-item">
+            <span>Jakarta, Indonesia</span>
+          </div>
+          <div class="contact-item">
+            <a href="mailto:contact@rifqi.tech">contact@rifqi.tech</a>
+          </div>
+          <div class="contact-item">
+            <a href="https://github.com/Nueeva" target="_blank" rel="noopener noreferrer" class="highlight-link">github.com/Nueeva</a>
+          </div>
+          <div class="contact-item">
+            <a href="https://rifqi.apexsions.com" target="_blank" rel="noopener noreferrer" class="highlight-link">rifqi.apexsions.com</a>
+          </div>
+        </div>
+      </header>
+
+      <!-- Ringkasan Eksekutif -->
+      <section class="cv-section" aria-labelledby="section-summary">
+        <h2 class="section-title" id="section-summary">Ringkasan Eksekutif</h2>
+        <p class="summary-text">
+          <strong>Cybersecurity engineer dan systems architect</strong> dengan spesialisasi audit kerentanan kode, pengujian celah web &amp; jaringan, dan rekayasa backend berdaya tahan tinggi. Terbukti memimpin arsitektur monorepo 9-plugin produksi dengan mitigasi tuntas <strong>32 temuan celah keamanan (13 critical, 19 major)</strong>, arsitektur failover database nirhenti (zero-downtime), dan integrasi platform terverifikasi skala institusional.
+        </p>
+      </section>
+
+      <!-- Core Competencies -->
+      <section class="cv-section" aria-labelledby="section-competencies">
+        <h2 class="section-title" id="section-competencies">Core Competencies</h2>
+        <div class="competency-table">
+          <div class="competency-label">Security Engineering</div>
+          <div class="badge-cloud">
+            <span class="pill pill-accent">Vulnerability Assessment</span>
+            <span class="pill pill-accent">Penetration Testing</span>
+            <span class="pill">Secure Code Review</span>
+            <span class="pill">Threat Modeling</span>
+            <span class="pill">Web App Security</span>
+            <span class="pill">Context Delimiter Analysis</span>
+          </div>
+
+          <div class="competency-label">Systems &amp; Backend</div>
+          <div class="badge-cloud">
+            <span class="pill pill-accent">Java 21 (Paper API)</span>
+            <span class="pill">Node.js</span>
+            <span class="pill">Python</span>
+            <span class="pill">TypeScript</span>
+            <span class="pill">REST API Architecture</span>
+            <span class="pill">Concurrency &amp; Thread-Safety</span>
+          </div>
+
+          <div class="competency-label">Infrastructure &amp; DB</div>
+          <div class="badge-cloud">
+            <span class="pill pill-accent">PostgreSQL</span>
+            <span class="pill pill-accent">SQLite (Live Failover)</span>
+            <span class="pill">Linux VPS</span>
+            <span class="pill">Cloudflare Tunnel</span>
+            <span class="pill">Cloudflare R2</span>
+            <span class="pill">Pterodactyl</span>
+          </div>
+
+          <div class="competency-label">Toolchains &amp; Research</div>
+          <div class="badge-cloud">
+            <span class="pill">Burp Suite</span>
+            <span class="pill">Wireshark</span>
+            <span class="pill">Ghidra</span>
+            <span class="pill">OWASP ZAP</span>
+            <span class="pill">Nmap</span>
+            <span class="pill">Git CI/CD</span>
+            <span class="pill">Zero-Dependency Tooling</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Flagship Systems Experience -->
+      <section class="cv-section" aria-labelledby="section-experience">
+        <h2 class="section-title" id="section-experience">Flagship Systems Experience</h2>
+
+        <!-- Project 1: Apexsions -->
+        <article class="exp-item">
+          <div class="exp-header">
+            <div class="exp-title-group">
+              <h3 class="exp-title">Apexsions</h3>
+              <span class="exp-role">— Founder &amp; Lead Systems Architect</span>
+            </div>
+            <div class="exp-meta">2026 – Sekarang | Produksi</div>
+          </div>
+          <div class="exp-subrow">
+            <span>Ekosistem Server Game Minecraft Monorepo &amp; Web Platform Azuriom</span>
+            <span class="exp-links">
+              <a href="https://web.apexsions.com" target="_blank" rel="noopener noreferrer">web.apexsions.com</a> · 
+              <a href="https://github.com/Nueeva/Apexsions" target="_blank" rel="noopener noreferrer">github.com/Nueeva/Apexsions</a>
+            </span>
+          </div>
+          <ul class="bullet-list">
+            <li>Mengarsitektur monorepo <strong>9-plugin in-house Java 21 Paper</strong> (Core, Economy, Shop, Chat, Crates, Battlepass, CustomEnchants, Fishing, Media) dengan shared library ApexsionsCore dan 14 skenario E2E passing.</li>
+            <li>Memimpin audit keamanan menyeluruh: <strong>memitigasi 32 celah keamanan (13 critical, 19 major)</strong> termasuk eksploitasi money-duplication dan credential exposure tanpa downtime operasional.</li>
+            <li>Merancang <strong>zero-downtime database failover otomatis ke SQLite</strong> dengan migrasi skema langsung V1–V7 saat PostgreSQL primer mengalami gangguan konektivitas di lingkungan produksi.</li>
+            <li>Membangun <strong>WebBridge REST API dua arah</strong> dengan otentikasi kriptografis untuk sinkronisasi state transaksi game, player linking (/link), dan administrasi finansial terpusat.</li>
+          </ul>
+          <div class="exp-stack-row">
+            <span class="stack-tag-label">Stack:</span>
+            <div class="badge-cloud">
+              <span class="pill">Java 21</span>
+              <span class="pill">Paper API</span>
+              <span class="pill">PostgreSQL</span>
+              <span class="pill">SQLite Failover</span>
+              <span class="pill">REST API</span>
+              <span class="pill">Azuriom</span>
+              <span class="pill">Linux VPS</span>
+              <span class="pill">Cloudflare R2</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Project 2: Portfolio 71 -->
+        <article class="exp-item">
+          <div class="exp-header">
+            <div class="exp-title-group">
+              <h3 class="exp-title">Portfolio 71</h3>
+              <span class="exp-role">— Full-Stack &amp; Security Engineer</span>
+            </div>
+            <div class="exp-meta">Okt 2026 | SMKN 71 Jakarta</div>
+          </div>
+          <div class="exp-subrow">
+            <span>Platform Verifikasi Portofolio Digital Institusional (Produksi Aktif)</span>
+            <span class="exp-links">
+              <a href="https://portofolio.apexsions.com" target="_blank" rel="noopener noreferrer">portofolio.apexsions.com</a>
+            </span>
+          </div>
+          <ul class="bullet-list">
+            <li>Mengembangkan platform portofolio sekolah melayani <strong>51 proyek terverifikasi, 28 siswa, dan 4 guru pembimbing</strong> dengan dukungan proyek kolaboratif lintas jurusan.</li>
+            <li>Merancang <strong>pipeline verifikasi multi-tahap</strong> berbasis kontrol akses ketat (RBAC) memisahkan hak akses siswa, guru penilai, dan admin sekolah dengan token otentikasi Sanctum.</li>
+            <li>Mengamankan infrastruktur produksi melalui zero-trust <strong>Cloudflare Tunnel</strong>, patch kerentanan CVE PHP/Laravel, dan generator ekspor PDF ATS 1-klik terintegrasi.</li>
+          </ul>
+          <div class="exp-stack-row">
+            <span class="stack-tag-label">Stack:</span>
+            <div class="badge-cloud">
+              <span class="pill">Laravel</span>
+              <span class="pill">Nuxt</span>
+              <span class="pill">Tailwind CSS</span>
+              <span class="pill">Sanctum RBAC</span>
+              <span class="pill">Cloudflare Tunnel</span>
+              <span class="pill">ATS PDF Generator</span>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Security Research & Tooling -->
+      <section class="cv-section" aria-labelledby="section-tooling">
+        <h2 class="section-title" id="section-tooling">Security Research &amp; Open-Source Tooling</h2>
+        <div class="grid-2col">
+          <div class="research-card">
+            <div class="research-head">
+              <span class="research-name">xssscope</span>
+              <a href="https://github.com/Nueeva/xssscope" target="_blank" rel="noopener noreferrer" class="exp-links">github.com/Nueeva/xssscope</a>
+            </div>
+            <div class="research-role" style="margin-bottom: 2px;">Designer &amp; Solo Developer · Sep 2026</div>
+            <p class="research-desc">
+              Scanner reflected-XSS <strong>zero-dependency Node.js</strong> dengan parser context-aware syntax delimiter (&lt;, &gt;, &quot;, &apos;) untuk klasifikasi konteks refleksi payload otomatis dan eliminasi false positive.
+            </p>
+            <div class="badge-cloud">
+              <span class="pill">Node.js</span>
+              <span class="pill">HTTP Probing</span>
+              <span class="pill">Context Analysis</span>
+              <span class="pill">0-Dependency</span>
+            </div>
+          </div>
+
+          <div class="research-card">
+            <div class="research-head">
+              <span class="research-name">CTF-Toolkit</span>
+              <a href="https://github.com/Nueeva/CTF-Toolkit" target="_blank" rel="noopener noreferrer" class="exp-links">github.com/Nueeva/CTF-Toolkit</a>
+            </div>
+            <div class="research-role" style="margin-bottom: 2px;">Creator &amp; Maintainer · 2024 – 2026</div>
+            <p class="research-desc">
+              Suite ofensif Python modular <strong>4 cabang kompetisi</strong> (Web Exploitation, Cryptography, Forensics, Reverse Engineering) untuk akselerasi triage forensik dan automatisasi delivery payload.
+            </p>
+            <div class="badge-cloud">
+              <span class="pill">Python</span>
+              <span class="pill">Burp Suite</span>
+              <span class="pill">Wireshark</span>
+              <span class="pill">Ghidra</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Sertifikasi & Pendidikan (2 Columns) -->
+      <section class="cv-section" aria-labelledby="section-certs-edu" style="margin-bottom: 0;">
+        <div class="grid-2col">
+          <!-- Kolom Sertifikasi -->
+          <div>
+            <h2 class="section-title" id="section-certs-edu">Sertifikasi Profesi</h2>
+            <div class="cert-item">
+              <div class="item-title-row">
+                <span class="item-title">LSP / BNSP — Rekayasa Perangkat Lunak</span>
+                <span class="item-year">2024 · Aktif</span>
+              </div>
+              <div class="item-issuer">Badan Nasional Sertifikasi Profesi (BNSP)</div>
+            </div>
+            <div class="cert-item">
+              <div class="item-title-row">
+                <span class="item-title">PortSwigger Web Security Academy Practitioner</span>
+                <span class="item-year">2024 – 2025 · Aktif</span>
+              </div>
+              <div class="item-issuer">PortSwigger Web Security</div>
+            </div>
+          </div>
+
+          <!-- Kolom Pendidikan -->
+          <div>
+            <h2 class="section-title" id="section-education">Pendidikan</h2>
+            <div class="edu-item">
+              <div class="item-title-row">
+                <span class="item-title">SMKN 71 Jakarta</span>
+                <span class="item-year">2023 – 2026</span>
+              </div>
+              <div class="item-issuer">Kompetensi Keahlian: Rekayasa Perangkat Lunak (RPL)</div>
+              <div class="item-issuer" style="color: var(--color-slate-500); font-size: 7.2pt;">Fokus: Keamanan Aplikasi Web, Rekayasa Sistem, &amp; Arsitektur Jaringan</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ATS Metadata Footer -->
+      <footer class="cv-footer">
+        <span>Rifqi Ariansyah · Master CV 2026</span>
+        <span>Terverifikasi Empiris · <a href="https://rifqi.apexsions.com">rifqi.apexsions.com</a></span>
+      </footer>
+
+    </main>
+  </div>
+
+</body>
+</html>
