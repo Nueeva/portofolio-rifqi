@@ -293,10 +293,10 @@ const companionTools = ["Burp Suite", "CyberChef", "Wireshark", "Ghidra"];
 
 function ToolStation({ assembly, index, selected }: { assembly: MotionValue<number>; index: number; selected: number }) {
     const angle = index * Math.PI / 2 - Math.PI / 2;
-    const x = 320 + Math.cos(angle) * 146, y = 214 + Math.sin(angle) * 146;
+    const x = 320 + Math.cos(angle) * 138, y = 214 + Math.sin(angle) * 138;
     const rotate = useTransform(assembly, [0, 1], [40, 0]);
     return <m.g style={{ rotate, transformBox: "view-box", transformOrigin: "320px 214px" }}>
-        <m.circle cx={x} cy={y} r="31" className="tool-socket" animate={{ stroke: selected === index ? "var(--site-cyan)" : "var(--site-line)", fill: selected === index ? "var(--site-surface)" : "var(--site-bg)" }} transition={settle} />
+        <m.circle cx={x} cy={y} r="28" className="tool-socket" animate={{ stroke: selected === index ? "var(--site-cyan)" : "var(--site-line)", fill: selected === index ? "var(--site-surface)" : "var(--site-bg)" }} transition={settle} />
         {index === 0 ? <path d={`M${x - 8} ${y - 9}l-9 9 9 9m16 -18 9 9 -9 9`} className="tool-symbol" /> : index === 1 ? <g className="tool-symbol"><rect x={x - 11} y={y - 1} width="22" height="15" rx="2" /><path d={`M${x - 6} ${y - 1}v-8a6 6 0 0 1 12 0v8`} /></g> : index === 2 ? <g className="tool-symbol"><circle cx={x - 3} cy={y - 3} r="9" /><path d={`M${x + 4} ${y + 4}l10 10`} /></g> : <path d={`M${x - 12} ${y}h24m-17 -8 -8 8 8 8m10 -16 8 8 -8 8`} className="tool-symbol" />}
     </m.g>;
 }
@@ -305,28 +305,28 @@ function ToolkitDial({ assembly, selected, pulse }: MechanismProps) {
     const rotate = useTransform(assembly, [0, 1], [-110, 0]);
     const trace = useTransform(pulse, [0, .7, 1], [0, 1, 1]);
 
-    // Radial companion tool positions placed cleanly outside sockets with 15px clearance
+    // Radial companion tool positions placed cleanly outside sockets with generous clearance
     // Top (Burp Suite), Right (CyberChef), Bottom (Wireshark), Left (Ghidra)
     const companionCoords = [
-        { x: 320, y: 22, anchor: "middle" as const },
-        { x: 512, y: 218, anchor: "start" as const },
-        { x: 320, y: 403, anchor: "middle" as const },
-        { x: 128, y: 218, anchor: "end" as const }
+        { x: 320, y: 24, anchor: "middle" as const },
+        { x: 502, y: 218, anchor: "start" as const },
+        { x: 320, y: 402, anchor: "middle" as const },
+        { x: 138, y: 218, anchor: "end" as const }
     ];
 
     return <>
         <m.g style={{ rotate, transformBox: "view-box", transformOrigin: "320px 214px" }}>
-            <circle cx="320" cy="214" r="109" className="dial-ring" />
-            <path d="M320 93A121 121 0 0 1 441 214M320 335A121 121 0 0 1 199 214" className="dial-caliper" />
-            {Array.from({ length: 24 }, (_, i) => <path key={i} d="M320 110V116" transform={`rotate(${i * 15} 320 214)`} className="dial-tick" />)}
+            <circle cx="320" cy="214" r="105" className="dial-ring" />
+            <path d="M320 97A117 117 0 0 1 437 214M320 331A117 117 0 0 1 203 214" className="dial-caliper" />
+            {Array.from({ length: 24 }, (_, i) => <path key={i} d="M320 112V118" transform={`rotate(${i * 15} 320 214)`} className="dial-tick" />)}
         </m.g>
 
-        {/* Dial needle with tactile snap transition: starts at radius 39px from center to keep center title unobstructed */}
+        {/* Dial needle with tactile snap transition: starts at radius 36px from center to keep center title unobstructed */}
         <m.g animate={{ rotate: selected * 90 }} style={{ transformBox: "view-box", transformOrigin: "320px 214px" }} transition={snapTransition}>
-            <m.path d="M320 175V102" className="mechanism-trace" style={{ pathLength: trace }} />
-            <path d="M311 119L320 107 329 119" className="tool-symbol" />
-            <circle cx="320" cy="107" r="3" className="dial-needle-tip" />
-            <circle cx="320" cy="175" r="3" className="dial-needle-hub" />
+            <m.path d="M320 178V108" className="mechanism-trace" style={{ pathLength: trace }} />
+            <path d="M312 122L320 111 328 122" className="tool-symbol" />
+            <circle cx="320" cy="111" r="3" className="dial-needle-tip" />
+            <circle cx="320" cy="178" r="3" className="dial-needle-hub" />
         </m.g>
 
         {[0, 1, 2, 3].map(i => <ToolStation key={i} assembly={assembly} index={i} selected={selected} />)}
@@ -348,10 +348,10 @@ function ToolkitDial({ assembly, selected, pulse }: MechanismProps) {
         })}
 
         {/* Clean category title ONLY in center of dial - no colliding subtitle or toolchain lines */}
-        <text x="320" y="221" textAnchor="middle" dominantBaseline="central" className="dial-title">{toolNames[selected]}</text>
+        <text x="320" y="214" textAnchor="middle" dominantBaseline="central" className="dial-title">{toolNames[selected]}</text>
         
-        {/* Bottom note comfortably separated from Wireshark (Wireshark at y=403, note at y=426) */}
-        <text x="320" y="426" textAnchor="middle" className="mechanism-note">Instrumen siap sebelum pengujian</text>
+        {/* Bottom note comfortably separated from Wireshark (Wireshark at y=402, note at y=428) */}
+        <text x="320" y="428" textAnchor="middle" className="mechanism-note">Instrumen siap sebelum pengujian</text>
     </>;
 }
 

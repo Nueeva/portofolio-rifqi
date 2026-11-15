@@ -7,9 +7,8 @@ import {
   useScroll,
 } from "motion/react";
 import { ArrowUp } from "lucide-react";
-import { Navbar } from "./Navbar";
-import { Footer } from "./Footer";
-import { RivaAgent } from "@/components/RivaAgent";
+import { AdminConsoleNavbar } from "@/components/admin/AdminConsoleNavbar";
+import "@/components/admin/admin-console.css";
 import { CustomCursor } from "@/components/CustomCursor";
 
 
@@ -54,9 +53,9 @@ export function Layout({ children }: LayoutProps) {
       >
         {isPublic ? "Lewati ke konten utama" : "Skip to main content"}
       </a>
-      {isPublic ? <PublicNavbar /> : <Navbar />}
+      {isPublic ? <PublicNavbar /> : <AdminConsoleNavbar />}
       <main id="main-content" className="flex-1 pt-16">{children}</main>
-      {isPublic ? <PublicFooter /> : <Footer />}
+      {isPublic && <PublicFooter />}
 
       {/* Back to top — appears after scrolling past ~600px */}
       <AnimatePresence>
@@ -77,7 +76,7 @@ export function Layout({ children }: LayoutProps) {
           </motion.button>
         )}
       </AnimatePresence>
-      {isPublic ? <PublicRiva /> : <RivaAgent />}
+      {isPublic && <PublicRiva />}
       <CustomCursor />
 
     </div>

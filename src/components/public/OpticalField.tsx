@@ -2,8 +2,17 @@ import { useEffect, useRef } from "react";
 import type { MotionValue } from "motion/react";
 import { Color, Mesh, OrthographicCamera, PlaneGeometry, Scene, ShaderMaterial, Vector2, WebGLRenderer, WebGLRenderTarget } from "three";
 const vertex = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`;
-const background = `varying vec2 vUv; uniform vec3 base;uniform vec3 cool;uniform vec3 violet;
-void main(){vec2 p=vUv;float field=exp(-length((p-vec2(.74,.48))*vec2(1.5,2.8))*3.);float band=.5+.5*sin(p.x*15.+p.y*9.);gl_FragColor=vec4(mix(base,mix(cool,violet,band),field*.24),1.);}`.replace(';#include', ';\n#include');
+const background = `varying vec2 vUv; uniform vec3 base;uniform vec3 cool;uniform vec3 violet;uniform vec2 resolution;
+void main(){
+vec2 p=vUv;
+float tanAngle=resolution.x<768.?0.0874887:0.1405408;
+float slope=tanAngle*(resolution.x/resolution.y);
+float normFactor=1./sqrt(1.+slope*slope);
+float seamCoord=((p.y-.53)-slope*(p.x-.5))*normFactor;
+float field=exp(-length((p-vec2(.74,.48))*vec2(1.5,2.8))*3.);
+float band=.5+.5*sin(seamCoord*18.);
+gl_FragColor=vec4(mix(base,mix(cool,violet,band),field*.24),1.);
+}`.replace(';#include', ';\n#include');
 const optical = `varying vec2 vUv;uniform sampler2D source;uniform float progress;uniform vec2 pointer;uniform vec2 resolution;uniform vec3 copper;uniform vec3 cool;uniform vec3 base;
 vec2 hash(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return -1.+2.*fract(sin(p)*43758.5453123);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);return mix(mix(dot(hash(i+vec2(0.,0.)),f-vec2(0.,0.)),dot(hash(i+vec2(1.,0.)),f-vec2(1.,0.)),u.x),mix(dot(hash(i+vec2(0.,1.)),f-vec2(0.,1.)),dot(hash(i+vec2(1.,1.)),f-vec2(1.,1.)),u.x),u.y);}
@@ -89,7 +98,7 @@ export default function OpticalField({ progress }: {
         const scene = new Scene();
         const screen = new Scene();
         const target = new WebGLRenderTarget(1, 1, { depthBuffer: false, stencilBuffer: false });
-        const bg = new ShaderMaterial({ vertexShader: vertex, fragmentShader: background, uniforms: { base: { value: new Color() }, cool: { value: new Color() }, violet: { value: new Color() } } });
+        const bg = new ShaderMaterial({ vertexShader: vertex, fragmentShader: background, uniforms: { base: { value: new Color() }, cool: { value: new Color() }, violet: { value: new Color() }, resolution: { value: new Vector2() } } });
         const material = new ShaderMaterial({ vertexShader: vertex, fragmentShader: optical, uniforms: { source: { value: target.texture }, progress: { value: progress.get() }, pointer: { value: new Vector2() }, resolution: { value: new Vector2() }, copper: { value: new Color() }, cool: { value: new Color() }, base: { value: new Color() } } });
         scene.add(new Mesh(geometry, bg));
         screen.add(new Mesh(geometry, material));
@@ -145,6 +154,7 @@ export default function OpticalField({ progress }: {
             renderer.setSize(width, height);
             target.setSize(Math.max(1, Math.floor(width * dpr * .5)), Math.max(1, Math.floor(height * dpr * .5)));
             material.uniforms.resolution.value.set(width, height);
+            bg.uniforms.resolution.value.set(width, height);
             backgroundDirty = true;
             invalidate();
         };

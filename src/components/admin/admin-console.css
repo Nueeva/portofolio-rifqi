@@ -1,0 +1,111 @@
+/* Celah Console Shell - Architectural Design Token Mapping for [data-design="legacy"] (/admin and /auth) */
+
+[data-design="legacy"] {
+  /* Default / Dark Mode */
+  --background: 194 44% 8%;
+  --foreground: 170 25% 91%;
+  --card: 195 40% 12%;
+  --card-foreground: 170 25% 91%;
+  --popover: 195 40% 12%;
+  --popover-foreground: 170 25% 91%;
+  --primary: 39 33% 68%;
+  --primary-foreground: 194 44% 8%;
+  --secondary: 195 39% 17%;
+  --secondary-foreground: 170 25% 91%;
+  --muted: 195 39% 17%;
+  --muted-foreground: 173 15% 65%;
+  --accent: 195 39% 17%;
+  --accent-foreground: 170 25% 91%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 194 33% 21%;
+  --input: 194 33% 21%;
+  --ring: 39 33% 68%;
+  --radius: 0.375rem;
+
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  letter-spacing: -0.01em;
+}
+
+/* Light Mode Overrides for Console */
+.light [data-design="legacy"],
+:root:not(.dark) [data-design="legacy"] {
+  --background: 43 25% 94%;
+  --foreground: 195 44% 12%;
+  --card: 42 24% 89%;
+  --card-foreground: 195 44% 12%;
+  --popover: 42 24% 89%;
+  --popover-foreground: 195 44% 12%;
+  --primary: 34 39% 43%;
+  --primary-foreground: 43 25% 94%;
+  --secondary: 40 20% 84%;
+  --secondary-foreground: 195 44% 12%;
+  --muted: 40 20% 84%;
+  --muted-foreground: 195 20% 40%;
+  --accent: 40 20% 84%;
+  --accent-foreground: 195 44% 12%;
+  --border: 40 18% 79%;
+  --input: 40 18% 79%;
+  --ring: 34 39% 43%;
+}
+
+/* Console Typography & Surfaces */
+[data-design="legacy"] h1,
+[data-design="legacy"] h2,
+[data-design="legacy"] h3,
+[data-design="legacy"] .font-display {
+  font-family: 'Space Grotesk', sans-serif;
+  letter-spacing: -0.025em;
+}
+
+[data-design="legacy"] pre,
+[data-design="legacy"] code,
+[data-design="legacy"] .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+  font-feature-settings: "zero" 1, "ss01" 1;
+}
+
+[data-design="legacy"] .bg-card {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border) / 0.8);
+}
+
+[data-design="legacy"] input,
+[data-design="legacy"] textarea,
+[data-design="legacy"] select {
+  background-color: hsl(var(--background) / 0.6);
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+[data-design="legacy"] input:focus,
+[data-design="legacy"] textarea:focus,
+[data-design="legacy"] select:focus {
+  border-color: hsl(var(--primary));
+  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.4);
+}
+
+[data-design="legacy"] table th {
+  font-family: 'Space Grotesk', sans-serif;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  color: hsl(var(--muted-foreground));
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+[data-design="legacy"] table td {
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+  font-size: 0.85rem;
+}
+
+/* Subtle background illumination matching Celah aesthetic */
+[data-design="legacy"] {
+  background-image: 
+    radial-gradient(ellipse 60% 40% at 85% -5%, rgba(199, 181, 148, 0.05), transparent 70%),
+    radial-gradient(ellipse 50% 30% at 15% 105%, rgba(126, 199, 191, 0.04), transparent 60%);
+}
