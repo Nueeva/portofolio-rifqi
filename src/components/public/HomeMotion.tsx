@@ -36,11 +36,12 @@ function ContextLens({ assembly, selected, pulse }: MechanismProps) {
     const beam = useTransform(pulse, [0, .65, 1], [0, 1, 1]);
     const lensY = 120 + selected * 80;
     const lensX = 225 + selected * 32;
+    const activeSample = contextSamples[selected];
 
     return <>
         <defs>
             <clipPath id={`${id}-lens`}>
-                <m.circle animate={{ cx: lensX, cy: lensY }} r="65" transition={settle} />
+                <circle cx="0" cy="0" r="65" />
             </clipPath>
             <linearGradient id={`${id}-cauchy`} x1="0%" y1="0%" x2="100%" y2="100%">
                 <stop offset="0%" stopColor="var(--site-cyan)" stopOpacity="0.95" />
@@ -53,34 +54,38 @@ function ContextLens({ assembly, selected, pulse }: MechanismProps) {
         {contextSamples.map((sample, i) => (
             <SyntaxSheet key={sample.raw} assembly={assembly} index={i} selected={selected === i} sample={sample} />
         ))}
-        <g clipPath={`url(#${id}-lens)`} className="lens-enlargement" aria-hidden="true">
-            <rect x="100" y="40" width="400" height="330" className="lens-glass" />
-            {contextSamples.map((sample, i) => (
+        {/* Magnifying lens with 100% opaque glass base so background text never bleeds through */}
+        <m.g animate={{ x: lensX, y: lensY }} transition={settle}>
+            {/* Opaque glass circle occluding the background completely */}
+            <circle cx="0" cy="0" r="65" className="lens-glass" />
+            
+            {/* Magnified code display clipped to the lens circle */}
+            <g clipPath={`url(#${id}-lens)`} className="lens-enlargement" aria-hidden="true">
+                <circle cx="0" cy="0" r="65" className="lens-glass" />
                 <text
-                    key={sample.raw}
-                    x={lensX - sample.offset * 12.6}
-                    y={127 + i * 80}
+                    x={-activeSample.offset * 12.6}
+                    y={7}
                     className="lens-code"
                 >
-                    <tspan className="lens-delim">{sample.prefix}</tspan>
-                    <tspan className="lens-payload">{sample.payload}</tspan>
-                    <tspan className="lens-delim">{sample.suffix}</tspan>
+                    <tspan className="lens-delim">{activeSample.prefix}</tspan>
+                    <tspan className="lens-payload">{activeSample.payload}</tspan>
+                    <tspan className="lens-delim">{activeSample.suffix}</tspan>
                 </text>
-            ))}
-        </g>
-        <m.g animate={{ x: lensX - 398, y: lensY }} transition={settle}>
-            <circle cx="398" r="65" className="lens-edge" />
-            <circle cx="398" r="66.5" className="lens-cauchy-ring" stroke={`url(#${id}-cauchy)`} />
-            <circle cx="398" r="63.5" className="lens-cauchy-inner" stroke={`url(#${id}-cauchy)`} />
-            <m.g style={{ rotate: rotation, scale: ringScale, transformBox: "view-box", transformOrigin: "398px 0px" }}>
-                <path d="M398-82A82 82 0 0 1 480 0M398 82A82 82 0 0 1 316 0" className="lens-caliper" />
-                <path d="M398-92V-75M398 75V92M306 0H323M473 0H490" className="lens-ticks" />
+            </g>
+
+            {/* Lens bezel, Cauchy dispersion rings, calipers, and handle */}
+            <circle cx="0" cy="0" r="65" className="lens-edge" />
+            <circle cx="0" cy="0" r="66.5" className="lens-cauchy-ring" stroke={`url(#${id}-cauchy)`} />
+            <circle cx="0" cy="0" r="63.5" className="lens-cauchy-inner" stroke={`url(#${id}-cauchy)`} />
+            <m.g style={{ rotate: rotation, scale: ringScale, transformBox: "view-box", transformOrigin: "0px 0px" }}>
+                <path d="M0 -82A82 82 0 0 1 82 0M0 82A82 82 0 0 1 -82 0" className="lens-caliper" />
+                <path d="M0 -92V-75M0 75V92M-92 0H-75M75 0H92" className="lens-ticks" />
             </m.g>
-            <path d="M444 46L481 83" className="lens-handle" />
-            <path d="M385 0H411M398-13V13" className="lens-cross" />
+            <path d="M46 46L83 83" className="lens-handle" />
+            <path d="M-13 0H13M0 -13V13" className="lens-cross" />
         </m.g>
         <m.path d={`M${lensX + 85} ${lensY}H560V360`} className="mechanism-trace" style={{ pathLength: beam }} />
-        <text x="65" y="400" className="mechanism-note">Parameter → parsing delimitasi context ({contextSamples[selected].delim}) → verifikasi</text>
+        <text x="320" y="405" textAnchor="middle" className="mechanism-note">Konteks: {contextSamples[selected].delim} · Verifikasi delimitasi sintaks</text>
     </>;
 }
 
@@ -130,7 +135,6 @@ function HostBridge({ assembly, selected, pulse, playing }: MechanismProps) {
     const corePos = getTilePos(4);
 
     // Failover animations when Operasi (selected === 2) is active:
-    // Packet starts at source (280, 250), hits junction (345, 275), switch diverts down to SQLite (345, 335) -> (450, 335)
     const failoverPacketX = useTransform(pulse, p => {
         if (p < 0.3) return 280 + (345 - 280) * (p / 0.3);
         if (p < 0.5) return 345;
@@ -157,11 +161,12 @@ function HostBridge({ assembly, selected, pulse, playing }: MechanismProps) {
 
         {Array.from({ length: 9 }, (_, i) => <PluginTile key={i} assembly={assembly} index={i} />)}
         
-        {/* ApexsionsCore callout highlight */}
-        <circle cx={corePos.cx} cy={corePos.cy} r="3.5" className="core-hub-dot" />
-        <path d={`M${corePos.cx} ${corePos.cy - 12}V125M${corePos.cx} 125H125`} className="core-callout-line" />
-        <text x="120" y="121" textAnchor="end" className="core-callout-title">ApexsionsCore</text>
-        <text x="120" y="135" textAnchor="end" className="core-callout-sub">monorepo 9-plugin engine</text>
+        {/* ApexsionsCore callout highlight: leader line terminates before text, zero intersection */}
+        <circle cx={corePos.cx} cy={corePos.cy} r="3" className="core-hub-dot" />
+        <path d={`M${corePos.cx} ${corePos.cy - 14}V96H152`} className="core-callout-line" />
+        <circle cx="152" cy="96" r="1.5" className="core-hub-dot" />
+        <text x="142" y="92" textAnchor="end" className="core-callout-title">ApexsionsCore</text>
+        <text x="142" y="106" textAnchor="end" className="core-callout-sub">monorepo 9-plugin engine</text>
 
         <g className="bridge-host">
             <path d="M438 141L501 116 564 153 501 178Z" />
@@ -205,19 +210,24 @@ function HostBridge({ assembly, selected, pulse, playing }: MechanismProps) {
 
         <text x="75" y="350" className="mechanism-label">9 plugin Paper</text>
         <text x="438" y="290" className="mechanism-label">Azuriom</text>
-        <text x="300" y="380" textAnchor="middle" className="mechanism-note">
-            {selected === 2 ? "Resiliensi: Auto-failover SQLite saat PostgreSQL terputus" : "Bridge dua arah"}
-        </text>
         <path d="M62 365H225M438 305H568" className="mechanism-wire" />
+
+        {/* Clean bottom note with opaque backdrop card: curved bridge lines never cut across text */}
+        <g className="bridge-note-group">
+            <rect x="120" y="393" width="400" height="26" rx="3" className="bridge-note-bg" />
+            <text x="320" y="410" textAnchor="middle" className="mechanism-note">
+                {selected === 2 ? "Resiliensi: Auto-failover SQLite saat PostgreSQL terputus" : selected === 1 ? "Bridge dua arah: Sinkronisasi game & web real-time" : "ApexsionsCore: 9 plugin Paper terintegrasi"}
+            </text>
+        </g>
     </>;
 }
 
 const workflowStages = [
     "Draf",
-    "Pengajuan",
-    "Review Guru",
-    "Verifikasi AI",
-    "Publikasi QR"
+    "Ajukan",
+    "Review",
+    "Verifikasi",
+    "Publikasi"
 ];
 
 function RoleSheet({ assembly, index, selected }: { assembly: MotionValue<number>; index: number; selected: number }) {
@@ -229,18 +239,23 @@ function RoleSheet({ assembly, index, selected }: { assembly: MotionValue<number
         <m.path d="M178 76H426L462 112V320H178Z" className="role-paper" animate={{ stroke: active ? "var(--site-violet)" : "var(--site-line)" }} />
         <path d="M426 76V112H462" className="paper-fold" />
         <text x="204" y="127" className="paper-title">{["Siswa", "Guru", "Admin"][index]}</text>
+
+        {/* Refined verification seal badge in the top-right card corner (never collides with content lines) */}
+        {index === 0 && (
+            <g transform="translate(378 116)" className="card-seal">
+                <rect x="-30" y="-11" width="60" height="20" rx="3" className="card-seal-bg" />
+                <text y="3" textAnchor="middle" className="card-seal-text">✓ VERIFIED</text>
+            </g>
+        )}
+
         <path d="M204 151H375M204 164H320" className="paper-lines" />
         <rect x="204" y="187" width="72" height="70" className="paper-preview" />
         
-        {/* Verified inspection stamp on the student work canvas */}
+        {/* Discreet checkmark seal badge in the preview corner */}
         {index === 0 && (
-            <g transform="translate(240 222) rotate(-12)" className="canvas-stamp">
-                <circle r="25" className="stamp-ring-outer" />
-                <circle r="21" className="stamp-ring-inner" />
-                <path d="M-15 -6H15M-15 6H15" className="stamp-wire" />
-                <text y="-9" textAnchor="middle" className="stamp-sub">SMKN 71</text>
-                <text y="4" textAnchor="middle" className="stamp-main">VERIFIED</text>
-                <text y="14" textAnchor="middle" className="stamp-sub">INSPECTED</text>
+            <g className="preview-seal">
+                <circle cx="262" cy="201" r="7" className="preview-seal-bg" />
+                <path d="M259 201l2 2 4 -4" className="preview-seal-check" />
             </g>
         )}
 
@@ -258,10 +273,10 @@ function RoleWorkflow({ assembly, selected, pulse }: MechanismProps) {
             <m.circle cx="395" cy="265" r="24" className="workflow-seal-ring" style={{ pathLength: seal, opacity: seal }} />
             <m.path d="M381 267l10 10 22 -24" className="workflow-seal" style={{ pathLength: seal, opacity: seal }} />
         </g>
-        <path d="M135 389H505" className="mechanism-wire" />
-        <m.path d="M135 389H505" className="mechanism-trace" style={{ pathLength: stage }} />
+        <path d="M120 389H520" className="mechanism-wire" />
+        <m.path d="M120 389H520" className="mechanism-trace" style={{ pathLength: stage }} />
         {workflowStages.map((name, i) => {
-            const cx = 135 + i * 92.5;
+            const cx = 120 + i * 100;
             return (
                 <g key={name} className="workflow-stage-group">
                     <circle cx={cx} cy="389" r="4.5" className="workflow-stop" />
@@ -289,6 +304,16 @@ function ToolStation({ assembly, index, selected }: { assembly: MotionValue<numb
 function ToolkitDial({ assembly, selected, pulse }: MechanismProps) {
     const rotate = useTransform(assembly, [0, 1], [-110, 0]);
     const trace = useTransform(pulse, [0, .7, 1], [0, 1, 1]);
+
+    // Radial companion tool positions placed cleanly outside sockets with 15px clearance
+    // Top (Burp Suite), Right (CyberChef), Bottom (Wireshark), Left (Ghidra)
+    const companionCoords = [
+        { x: 320, y: 22, anchor: "middle" as const },
+        { x: 512, y: 218, anchor: "start" as const },
+        { x: 320, y: 403, anchor: "middle" as const },
+        { x: 128, y: 218, anchor: "end" as const }
+    ];
+
     return <>
         <m.g style={{ rotate, transformBox: "view-box", transformOrigin: "320px 214px" }}>
             <circle cx="320" cy="214" r="109" className="dial-ring" />
@@ -296,28 +321,25 @@ function ToolkitDial({ assembly, selected, pulse }: MechanismProps) {
             {Array.from({ length: 24 }, (_, i) => <path key={i} d="M320 110V116" transform={`rotate(${i * 15} 320 214)`} className="dial-tick" />)}
         </m.g>
 
-        {/* Dial needle with tactile snap transition */}
+        {/* Dial needle with tactile snap transition: starts at radius 39px from center to keep center title unobstructed */}
         <m.g animate={{ rotate: selected * 90 }} style={{ transformBox: "view-box", transformOrigin: "320px 214px" }} transition={snapTransition}>
-            <m.path d="M320 177V100" className="mechanism-trace" style={{ pathLength: trace }} />
+            <m.path d="M320 175V102" className="mechanism-trace" style={{ pathLength: trace }} />
             <path d="M311 119L320 107 329 119" className="tool-symbol" />
             <circle cx="320" cy="107" r="3" className="dial-needle-tip" />
-            <circle cx="320" cy="214" r="5" className="dial-needle-hub" />
+            <circle cx="320" cy="175" r="3" className="dial-needle-hub" />
         </m.g>
 
         {[0, 1, 2, 3].map(i => <ToolStation key={i} assembly={assembly} index={i} selected={selected} />)}
 
-        {/* Companion toolchain names positioned beneath each quadrant socket */}
+        {/* Companion toolchain names cleanly positioned OUTSIDE sockets with comfortable radial padding */}
         {companionTools.map((tool, i) => {
-            const angle = i * Math.PI / 2 - Math.PI / 2;
-            const sx = 320 + Math.cos(angle) * 146;
-            const sy = 214 + Math.sin(angle) * 146;
-            const labelY = i === 0 ? sy + 44 : sy + 42;
+            const coord = companionCoords[i];
             return (
                 <text
                     key={tool}
-                    x={sx}
-                    y={labelY}
-                    textAnchor="middle"
+                    x={coord.x}
+                    y={coord.y}
+                    textAnchor={coord.anchor}
                     className={selected === i ? "tool-companion-active" : "tool-companion"}
                 >
                     {tool}
@@ -325,10 +347,11 @@ function ToolkitDial({ assembly, selected, pulse }: MechanismProps) {
             );
         })}
 
-        <text x="320" y="206" textAnchor="middle" className="dial-title">{toolNames[selected]}</text>
-        <text x="320" y="226" textAnchor="middle" className="mechanism-note">CTF-Toolkit</text>
-        <text x="320" y="244" textAnchor="middle" className="dial-companion-badge">Toolchain: {companionTools[selected]}</text>
-        <text x="320" y="419" textAnchor="middle" className="mechanism-note">Instrumen siap sebelum pengujian</text>
+        {/* Clean category title ONLY in center of dial - no colliding subtitle or toolchain lines */}
+        <text x="320" y="221" textAnchor="middle" dominantBaseline="central" className="dial-title">{toolNames[selected]}</text>
+        
+        {/* Bottom note comfortably separated from Wireshark (Wireshark at y=403, note at y=426) */}
+        <text x="320" y="426" textAnchor="middle" className="mechanism-note">Instrumen siap sebelum pengujian</text>
     </>;
 }
 

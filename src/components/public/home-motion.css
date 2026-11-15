@@ -19,7 +19,7 @@
 .syntax-payload { fill:var(--site-copper); font-weight:600; }
 .syntax-delim-tag-bg { fill:var(--site-surface); stroke:var(--site-line); stroke-width:1; }
 .syntax-delim-tag-text { font:600 11px 'JetBrains Mono',monospace; fill:var(--site-cyan); letter-spacing:.05em; }
-.lens-glass { fill:var(--site-surface); }
+.lens-glass { fill:var(--site-surface); fill-opacity:1; opacity:1; }
 .mechanism-scene .lens-code { font:20px 'JetBrains Mono',monospace; fill:var(--site-ink); letter-spacing:.01em; }
 .lens-delim { fill:var(--site-cyan); }
 .lens-payload { fill:var(--site-copper); font-weight:700; }
@@ -56,6 +56,7 @@
 .failover-sqlite-badge { fill:var(--site-surface); stroke:var(--site-cyan); stroke-width:1; }
 .failover-sqlite-text { font:600 11px 'JetBrains Mono',monospace; fill:var(--site-cyan); }
 .failover-packet { fill:var(--site-cyan); }
+.bridge-note-bg { fill:var(--site-surface); stroke:var(--site-line); stroke-width:1; }
 .mechanism-scene .mechanism-label { font-size:17px; }
 
 /* 3. RoleWorkflow */
@@ -64,18 +65,16 @@
 .mechanism-scene .paper-title { font-family:'Space Grotesk',sans-serif; font-size:24px; }
 .paper-lines { fill:none; stroke:var(--site-line); stroke-width:2; }
 .paper-preview { fill:var(--site-surface); stroke:var(--site-line); }
+.card-seal-bg { fill:var(--site-surface); stroke:var(--site-cyan); stroke-width:1; }
+.card-seal-text { font:600 9px 'JetBrains Mono',monospace; fill:var(--site-cyan); letter-spacing:.06em; }
+.preview-seal-bg { fill:var(--site-surface); stroke:var(--site-cyan); stroke-width:1; }
+.preview-seal-check { fill:none; stroke:var(--site-cyan); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
 .workflow-seal { fill:none; stroke:var(--site-cyan); stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
 .workflow-seal-ring { fill:none; stroke:var(--site-cyan); stroke-width:1.5; stroke-dasharray:3 2; }
 .workflow-stop { fill:var(--site-bg); stroke:var(--site-cyan); }
 .workflow-stage-num { font:600 10px 'JetBrains Mono',monospace; fill:var(--site-cyan); }
 .workflow-stage-name { font:500 11px 'Space Grotesk',Inter,sans-serif; fill:var(--site-muted); letter-spacing:-.01em; }
 .workflow-stage-arrow { fill:none; stroke:var(--site-line); stroke-width:1; stroke-dasharray:2 2; }
-.canvas-stamp { pointer-events:none; }
-.stamp-ring-outer { fill:none; stroke:var(--site-cyan); stroke-width:1.5; stroke-dasharray:4 2; }
-.stamp-ring-inner { fill:none; stroke:var(--site-cyan); stroke-width:1; }
-.stamp-wire { fill:none; stroke:var(--site-cyan); stroke-width:.75; opacity:.6; }
-.stamp-main { font:700 7px 'Space Grotesk',sans-serif; fill:var(--site-cyan); letter-spacing:.12em; }
-.stamp-sub { font:500 5px 'JetBrains Mono',monospace; fill:var(--site-cyan); letter-spacing:.08em; opacity:.85; }
 
 /* 4. ToolkitDial */
 .dial-ring { fill:none; stroke:var(--site-line); }
@@ -83,7 +82,7 @@
 .dial-tick { fill:none; stroke:var(--site-cool); }
 .tool-socket { stroke-width:1.5; }
 .tool-symbol { fill:none; stroke:var(--site-cyan); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
-.mechanism-scene .dial-title { font-family:'Space Grotesk',sans-serif; font-size:27px; }
+.mechanism-scene .dial-title { font-family:'Space Grotesk',sans-serif; font-size:24px; font-weight:600; fill:var(--site-ink); }
 .dial-companion-badge { font:500 12px 'JetBrains Mono',monospace; fill:var(--site-cyan); letter-spacing:.02em; }
 .tool-companion { font:11px 'JetBrains Mono',monospace; fill:var(--site-muted); transition:fill .3s,font-weight .3s; }
 .tool-companion-active { font:600 12px 'JetBrains Mono',monospace; fill:var(--site-cyan); }

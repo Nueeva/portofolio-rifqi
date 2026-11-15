@@ -3,25 +3,26 @@ import type { MotionValue } from "motion/react";
 import { Color, Mesh, OrthographicCamera, PlaneGeometry, Scene, ShaderMaterial, Vector2, WebGLRenderer, WebGLRenderTarget } from "three";
 const vertex = `varying vec2 vUv; void main(){vUv=uv;gl_Position=vec4(position.xy,0.,1.);}`;
 const background = `varying vec2 vUv; uniform vec3 base;uniform vec3 cool;uniform vec3 violet;
-void main(){vec2 p=vUv;float field=exp(-length((p-vec2(.74,.48))*vec2(1.5,2.8))*3.);float band=.5+.5*sin(p.x*15.+p.y*9.);gl_FragColor=vec4(mix(base,mix(cool,violet,band),field*.24),1.);}`.replace(';#include', ';\n#include');
+void main(){vec2 p=vUv;float dist=p.y-.38-p.x*.18;float field=exp(-abs(dist)*4.2);float band=.5+.5*sin(dist*35.);gl_FragColor=vec4(mix(base,mix(cool,violet,band),field*.24),1.);}`.replace(';#include', ';\n#include');
 const optical = `varying vec2 vUv;uniform sampler2D source;uniform float progress;uniform vec2 pointer;uniform vec2 resolution;uniform vec3 copper;uniform vec3 cool;uniform vec3 base;
 vec2 hash(vec2 p){p=vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3)));return -1.+2.*fract(sin(p)*43758.5453123);}
 float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);return mix(mix(dot(hash(i+vec2(0.,0.)),f-vec2(0.,0.)),dot(hash(i+vec2(1.,0.)),f-vec2(1.,0.)),u.x),mix(dot(hash(i+vec2(0.,1.)),f-vec2(0.,1.)),dot(hash(i+vec2(1.,1.)),f-vec2(1.,1.)),u.x),u.y);}
 vec2 curlNoise(vec2 p){float eps=.01;float n1=noise(p+vec2(0.,eps));float n2=noise(p-vec2(0.,eps));float n3=noise(p+vec2(eps,0.));float n4=noise(p-vec2(eps,0.));return vec2((n1-n2)/(2.*eps),-(n3-n4)/(2.*eps));}
 void main(){
 vec2 p=vUv;
+vec2 seamDir=normalize(vec2(1.,.18));
+vec2 seamNorm=normalize(vec2(-.18,1.));
 float gap=.025+smoothstep(0.,.35,progress)*.07;
-float seam=p.y-.35-p.x*.19;
+float seam=p.y-.38-p.x*.18;
 float edge=abs(seam)-gap;
 float boundaryEnvelope=exp(-pow(edge*40.,2.));
-vec2 kineticPhase=vec2(progress*3.6+pointer.x*1.8,pointer.y*1.4-progress*1.9);
-vec2 fluidDrift=curlNoise(p*8.+kineticPhase)*boundaryEnvelope*.0035;
+vec2 kineticPhase=seamDir*(progress*3.6+dot(pointer,seamDir)*1.8);
+vec2 fluidDrift=seamDir*dot(curlNoise(p*8.+kineticPhase),seamDir)*boundaryEnvelope*.0035;
 vec2 pDistorted=p+fluidDrift;
-seam=pDistorted.y-.35-pDistorted.x*.19;
+seam=pDistorted.y-.38-pDistorted.x*.18;
 edge=abs(seam)-gap;
 float bevelSlope=exp(-abs(edge)*160.)*sign(seam);
-vec2 n2D=normalize(vec2(-.19,1.));
-vec3 N=normalize(vec3(-n2D*bevelSlope*1.5,1.));
+vec3 N=normalize(vec3(-seamNorm*bevelSlope*1.5,1.));
 vec3 I=vec3(0.,0.,-1.);
 vec3 refR=refract(I,N,.6605);
 vec3 refG=refract(I,N,.6570);
@@ -38,18 +39,19 @@ float cosTheta=clamp(dot(-I,N),0.,1.);
 float R0=.0426;
 float fresnel=R0+(1.-R0)*pow(1.-cosTheta,5.);
 float sweep=smoothstep(.35,.75,progress);
-float causticPhase=progress*8.+(pointer.x+pointer.y)*4.;
-float caustic=(exp(-abs(edge)*220.)/sqrt(abs(edge)+.005))*(1.+.35*sin(p.x*45.+causticPhase));
-float shine=exp(-pow((p.x-(sweep*1.5-.25))*.9,2.)*25.);
+float seamCoord=dot(p-vec2(0.,.38),seamDir);
+float causticPhase=progress*8.+dot(pointer,seamDir)*4.;
+float caustic=(exp(-abs(edge)*220.)/sqrt(abs(edge)+.005))*(1.+.35*sin(seamCoord*45.+causticPhase));
+float shine=exp(-pow((seamCoord-(sweep*1.5-.25))*.9,2.)*25.);
 float cavity=1.-smoothstep(-.004,.004,edge);
 float isDark=base.r<.2?1.:0.;
 float cavityDarkening=isDark*.72+(1.-isDark)*.46;
 col*=1.-cavity*cavityDarkening;
-vec3 accentColor=mix(cool,copper,p.x);
+vec3 accentColor=mix(cool,copper,clamp(seamCoord,0.,1.));
 vec3 darkLighting=fresnel*accentColor*(.35+shine*.95)+caustic*copper*.045*(1.+shine*.5);
 
 // Light-mode mineral refraction, ambient occlusion bevel & specular glint
-vec3 mineralPigment=mix(copper*.78,cool*.70,p.x);
+vec3 mineralPigment=mix(copper*.78,cool*.70,clamp(seamCoord,0.,1.));
 float edgeGrip=exp(-abs(edge)*60.);
 float razorShadow=smoothstep(0.,.012,edge)*exp(-max(0.,edge)*110.)*max(0.,seam);
 float causticGlint=clamp(caustic*(shine*1.15+.35)*.065,0.,.85);
