@@ -103,9 +103,9 @@ export function CybersecurityHero() {
               <feComposite in="SourceGraphic" in2="blur" operator="over"/>
             </filter>
           </defs>
-          <path d="M-60 570L1340 325L1340 470L-60 715Z" fill="var(--site-cavity)"/>
-          <path d="M-60 568L1340 323" stroke="url(#optical-spectrum)" strokeWidth="2.5" filter="url(#seam-glow)"/>
-          <path d="M-60 717L1340 472" stroke="var(--site-metal)" strokeWidth="1" strokeOpacity="0.6"/>
+          <path d="M-60 480L1340 285L1340 380L-60 575Z" fill="var(--site-cavity)"/>
+          <path d="M-60 478L1340 283" stroke="url(#optical-spectrum)" strokeWidth="2.5" filter="url(#seam-glow)"/>
+          <path d="M-60 577L1340 382" stroke="var(--site-metal)" strokeWidth="1" strokeOpacity="0.6"/>
         </m.svg>
         <div className="celah-rails" aria-hidden="true">
           <m.div className="celah-rail celah-rail-upper" style={{ y: reduced ? -22 : railUpper }} />
