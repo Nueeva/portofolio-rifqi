@@ -7,7 +7,7 @@ import "./theme-transition.css";
 export { primeThemeAudio };
 
 type Theme = "dark" | "light";
-type Request = { theme: Theme; setTheme: (theme: string) => void; origin: { x: number; y: number }; owner: HTMLElement };
+type Request = { theme: Theme; preference: Theme | "system"; setTheme: (theme: string) => void; origin: { x: number; y: number }; owner: HTMLElement };
 type Transition = { ready: Promise<void>; finished: Promise<void>; updateCallbackDone?: Promise<void>; skipTransition?: () => void };
 
 let pending: Request | undefined;
@@ -29,7 +29,7 @@ const supportsMask = () => {
 };
 
 function apply(request: Request) {
-    flushSync(() => request.setTheme(request.theme));
+    flushSync(() => request.setTheme(request.preference));
     const root = document.documentElement;
     root.classList.toggle("dark", request.theme === "dark");
     root.classList.toggle("light", request.theme === "light");
@@ -135,25 +135,32 @@ async function reveal(request: Request, signal: AbortSignal) {
 
 export function togglePublicTheme(setTheme: (theme: string) => void, owner: HTMLElement) {
     const current = desired ?? (document.documentElement.classList.contains("dark") ? "dark" : "light");
+    return changeThemeWithInk(current === "dark" ? "light" : "dark", setTheme, owner);
+}
+
+export function changeThemeWithInk(preference: Theme | "system", setTheme: (theme: string) => void, owner: HTMLElement) {
     const bounds = owner.getBoundingClientRect();
-    desired = current === "dark" ? "light" : "dark";
-    pending = { theme: desired, setTheme, owner, origin: { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 } };
+    desired = preference === "system" ? (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light") : preference;
+    pending = { theme: desired, preference, setTheme, owner, origin: { x: bounds.left + bounds.width / 2, y: bounds.top + bounds.height / 2 } };
     document.documentElement.dataset.inkBusy = "true";
     if (!running) running = (async () => {
         while (pending) {
             const request = pending; pending = undefined;
+            let resized = false;
             controller = new AbortController();
             const activeController = controller;
             const cancel = () => {
-                if (pending) { request.theme = pending.theme; pending = undefined; }
+                if (pending) { request.theme = pending.theme; request.preference = pending.preference; pending = undefined; }
                 warmController?.abort();
                 activeController.abort();
             };
             const media = matchMedia("(prefers-reduced-motion: reduce)");
+            const resize = () => { resized = true; cancel(); };
             const unmounted = new MutationObserver(() => { if (!request.owner.isConnected) cancel(); });
             unmounted.observe(document.body, { childList: true, subtree: true });
             // Note: Never cancel on scroll! Lenis smooth-scrolling or user scrolling must not kill ink transitions.
             window.addEventListener("pagehide", cancel, { once: true });
+            window.addEventListener("resize", resize, { once: true });
             document.addEventListener("visibilitychange", cancel, { once: true });
             media.addEventListener("change", cancel, { once: true });
             try {
@@ -166,8 +173,10 @@ export function togglePublicTheme(setTheme: (theme: string) => void, owner: HTML
             } finally {
                 unmounted.disconnect();
                 window.removeEventListener("pagehide", cancel);
+                window.removeEventListener("resize", resize);
                 document.removeEventListener("visibilitychange", cancel);
                 media.removeEventListener("change", cancel);
+                if (resized || !request.owner.isConnected) clearInkCache();
             }
         }
     })().finally(() => { running = undefined; desired = undefined; controller = undefined; delete document.documentElement.dataset.inkBusy; });

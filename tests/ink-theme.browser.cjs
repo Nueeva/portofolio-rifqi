@@ -29,7 +29,7 @@ async function setup(browser, mode, viewport = {width:1280,height:800}, route='/
  return {context,page};
 }
 async function start(page,mode){await page.evaluate(()=>{window.inkAnimation=null;window.inkClicked=performance.now();});await page.locator('#root .public-theme-switch').click();await page.waitForFunction(()=>window.inkAnimation,{timeout:20000});assert.equal(await page.evaluate(()=>document.documentElement.dataset.inkTransition),mode);}
-async function clean(page){await page.waitForFunction(()=>!document.documentElement.dataset.inkTransition&&!document.documentElement.dataset.inkBusy,{timeout:15000});assert.equal(await page.locator('.ink-overlay,[data-ink-style]').count(),0);assert.equal(await page.evaluate(()=>window.inkAssets.size),0);assert.equal(await page.evaluate(()=>window.inkWorkers.size),0);}
+async function clean(page){await page.waitForFunction(()=>!document.documentElement.dataset.inkTransition&&!document.documentElement.dataset.inkBusy,{timeout:15000});assert.equal(await page.locator('.ink-overlay,[data-ink-style]').count(),0);assert.ok(await page.evaluate(()=>window.inkAssets.size<=1),'at most one resident atlas is retained for repeated clicks');assert.equal(await page.evaluate(()=>window.inkWorkers.size),0);}
 async function difference(a,b){const aa=await sharp(a).raw().toBuffer(),bb=await sharp(b).raw().toBuffer();assert.equal(aa.length,bb.length);let different=0;for(let i=0;i<aa.length;i+=3)if(Math.abs(aa[i]-bb[i])+Math.abs(aa[i+1]-bb[i+1])+Math.abs(aa[i+2]-bb[i+2])>24)different++;return different/(aa.length/3);}
 (async()=>{fs.mkdirSync(output,{recursive:true});const browser=await chromium.launch({executablePath:process.env.CHROME_PATH||'C:/Program Files/Google/Chrome/Application/chrome.exe',headless:true});try{
  for(const mode of ['view','layers']){
@@ -48,7 +48,7 @@ async function difference(a,b){const aa=await sharp(a).raw().toBuffer(),bb=await
    if(mode==='layers'){
     await sleep(500);
     const colors=await page.locator('[data-ink-scope] .public-design').evaluateAll(nodes=>nodes.map(e=>getComputedStyle(e).getPropertyValue('--site-bg').trim()));
-    assert.deepEqual(colors,direction==='light'?['#0b181c','#f1ece1']:['#f1ece1','#0b181c']);
+    assert.deepEqual(colors,direction==='light'?['#0b181c','#F8F6F1']:['#F8F6F1','#0b181c']);
     assert.equal(await page.locator('.ink-overlay').getAttribute('aria-hidden'),'true');
     assert.equal(await page.locator('.ink-overlay').evaluate(e=>e.inert),true);
    }
@@ -85,17 +85,21 @@ async function difference(a,b){const aa=await sharp(a).raw().toBuffer(),bb=await
  // Rejected captures, failed assets and owner removal settle without residue.
  for(const fault of ['mask','transition','unmount','scroll']){
   const {context,page}=await setup(browser,'view');
+  // Invalidate the warmed geometry so fault injection exercises preparation.
+  if(fault==='mask')await page.setViewportSize({width:1250,height:800});
   if(fault==='mask')await page.evaluate(()=>{window.Worker=undefined;HTMLCanvasElement.prototype.toBlob=function(callback){callback(null);};});
   if(fault==='transition')await page.evaluate(()=>{document.startViewTransition=()=>{throw Error('forced capture failure');};});
   const before=await page.evaluate(()=>document.documentElement.classList.contains('dark'));
   if(fault==='mask'||fault==='transition'){await page.locator('#root .public-theme-switch').click();await page.waitForTimeout(1800);}
   else {await start(page,'view');if(fault==='unmount')await page.locator('#root .public-theme-switch').evaluate(e=>e.remove());else await page.evaluate(()=>scrollTo(0,200));}
   await clean(page);assert.equal(await page.evaluate(()=>document.documentElement.classList.contains('dark')),!before);
+  if(fault==='unmount')assert.equal(await page.evaluate(()=>window.inkAssets.size),0,'disconnected owners release the resident atlas');
   results.push({fault,settled:'passed'});await context.close();
  }
  // Compatibility: worker construction failure uses the same rasterizer on the page.
  for(const mode of ['view','layers']){
   const {context,page}=await setup(browser,mode);
+  await page.setViewportSize({width:1250,height:800});
   await page.evaluate(()=>{window.Worker=class {constructor(){throw Error('forced worker failure');}};});
   await start(page,mode);await clean(page);
   results.push({mode,workerUnavailable:'raster fallback passed'});await context.close();
@@ -103,6 +107,7 @@ async function difference(a,b){const aa=await sharp(a).raw().toBuffer(),bb=await
  // Cancellation during preparation actually terminates the active worker.
  {
   const {context,page}=await setup(browser,'view');
+  await page.setViewportSize({width:1250,height:800});
   const before=await page.evaluate(()=>document.documentElement.classList.contains('dark'));
   await page.locator('#root .public-theme-switch').click();
   await page.waitForFunction(()=>window.inkWorkers.size>0);

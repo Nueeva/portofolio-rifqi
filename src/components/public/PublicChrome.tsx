@@ -1,65 +1,14 @@
 import * as m from "motion/react-m";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { useTheme } from "next-themes";
-import { ArrowUpRight, Github, Linkedin, Mail, Menu, Moon, Sun, Twitter } from "lucide-react";
+import { ArrowUpRight, Github, Linkedin, Mail, Menu, Twitter } from "lucide-react";
+import { InkThemeSwitch as PublicThemeSwitch } from "@/components/InkThemeSwitch";
 import { TembusMark } from "@/components/TembusMark";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 const links = [{ to: "/", label: "Beranda" }, { to: "/projects", label: "Karya" }, { to: "/about", label: "Tentang" }, { to: "/contact", label: "Kontak" }];
-
-export function PublicThemeSwitch() {
-    const { resolvedTheme, setTheme } = useTheme();
-    const [mounted, setMounted] = useState(false);
-    const [requestedTheme, setRequestedTheme] = useState<"dark" | "light" | undefined>();
-    const cancelTransition = useRef<(() => void) | undefined>();
-    const buttonRef = useRef<HTMLButtonElement>(null);
-    const themeModuleRef = useRef<typeof import("@/lib/themeTransition") | null>(null);
-
-    useEffect(() => {
-      setMounted(true);
-      void import("@/lib/themeTransition").then(module => {
-        themeModuleRef.current = module;
-        if (buttonRef.current?.isConnected) {
-          cancelTransition.current = module.cancelPublicThemeTransition;
-          return module.warmPublicTheme(buttonRef.current);
-        }
-      }).catch(() => undefined);
-      return () => { cancelTransition.current?.(); };
-    }, []);
-
-    const dark = mounted && resolvedTheme === "dark";
-    const actionDark = requestedTheme ? requestedTheme === "dark" : dark;
-    return <button ref={buttonRef} className="public-theme-switch" type="button" disabled={!mounted} aria-label={mounted ? `Gunakan tema ${actionDark ? "terang" : "gelap"}` : "Ganti tema"} onPointerDown={() => {
-      void import("@/lib/themeAudio").then(m => m.primeThemeAudio()).catch(() => undefined);
-    }} onClick={event => {
-      const button = event.currentTarget;
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        const next = document.documentElement.classList.contains("dark") ? "light" : "dark";
-        setTheme(next);
-        document.documentElement.classList.toggle("dark", next === "dark");
-        document.documentElement.classList.toggle("light", next === "light");
-        document.documentElement.style.colorScheme = next;
-        return;
-      }
-      const execute = (module: typeof import("@/lib/themeTransition")) => {
-        if (!button.isConnected) return;
-        cancelTransition.current = module.cancelPublicThemeTransition;
-        const task = module.togglePublicTheme(setTheme, button);
-        setRequestedTheme(module.requestedPublicTheme());
-        return task.finally(() => { if (button.isConnected) setRequestedTheme(undefined); });
-      };
-      if (themeModuleRef.current) {
-        void execute(themeModuleRef.current);
-      } else {
-        void import("@/lib/themeTransition").then(execute).catch(() => setTheme(dark ? "light" : "dark"));
-      }
-    }}>
-    {dark ? <Sun aria-hidden="true"/> : <Moon aria-hidden="true"/>}
-  </button>;
-}
 
 export function PublicNavbar() {
     const { get } = usePublicSettings();

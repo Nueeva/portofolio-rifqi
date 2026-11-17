@@ -48,14 +48,29 @@ const pageErrors = [];
       calls: [],
     };
     const context = await browser.newContext({
+      serviceWorkers: "block",
       viewport: options.viewport || { width: 1440, height: 1000 },
       colorScheme: options.theme || "dark",
-      reducedMotion: "reduce",
+      reducedMotion: options.motion || "reduce",
     });
-    await context.addInitScript(
-      (theme) => localStorage.setItem("theme", theme),
-      options.theme || "dark",
-    );
+    await context.addInitScript((theme) => {
+      if (!localStorage.getItem("theme")) localStorage.setItem("theme", theme);
+    }, options.theme || "dark");
+    if (options.inkMode)
+      await context.addInitScript((mode) => {
+        if (mode === "layers")
+          Object.defineProperty(document, "startViewTransition", {
+            value: undefined,
+            configurable: true,
+          });
+        const animate = Element.prototype.animate;
+        Element.prototype.animate = function (frames, options) {
+          const animation = animate.call(this, frames, options);
+          if (Array.isArray(frames) && frames[0]?.maskPosition)
+            window.consoleInkAnimation = animation;
+          return animation;
+        };
+      }, options.inkMode);
     await context.route("**/*", async (route) => {
       const req = route.request(),
         url = new URL(req.url());
@@ -127,6 +142,11 @@ const pageErrors = [];
           }
           value = { data: rows, error: null };
         }
+      } else if (name === "/api/data/site_settings" && options.heroName) {
+        value = {
+          data: [{ setting_key: "hero_name", setting_value: options.heroName }],
+          error: null,
+        };
       } else if (name === "/api/projects/save") {
         if (state.saveFail) {
           status = 500;
@@ -190,6 +210,11 @@ const pageErrors = [];
     return { page, context, state };
   }
   async function check(name, action) {
+    if (
+      process.env.CONSOLE_CASE_FILTER &&
+      !name.includes(process.env.CONSOLE_CASE_FILTER)
+    )
+      return;
     await action();
     passed.push(name);
     console.log("PASS " + name);
@@ -595,6 +620,225 @@ const pageErrors = [];
       });
       await context.close();
     });
+    for (const admin of [false, true])
+      for (const mode of ["view", "layers"]) {
+        await check(
+          `${admin ? "admin" : "auth"} shares the public ink animation (${mode}) and preserves edits`,
+          async () => {
+            const { page, context } = await setup({
+              admin,
+              inkMode: mode,
+              motion: "no-preference",
+              url: admin ? "/admin?edit=project-1" : "/auth",
+              viewport:
+                mode === "layers"
+                  ? { width: 390, height: 844 }
+                  : { width: 1440, height: 1000 },
+            });
+            await page
+              .locator("#root .console-brand")
+              .filter({ hasText: "Rifqi Ariansyah" })
+              .waitFor();
+            assert.equal(
+              await page.locator("#root").getByText(/Celah/).count(),
+              0,
+            );
+            const field = page.locator(admin ? "#project-title" : "#email");
+            const input = admin
+              ? "Draft yang belum disimpan"
+              : "owner@example.invalid";
+            await field.fill(input);
+            if (!admin)
+              await page.locator("#password").fill("private-form-state");
+            const scroll = await page.evaluate(() => scrollY);
+            for (const theme of ["light", "dark"]) {
+              await page.evaluate(() => {
+                window.consoleInkAnimation = null;
+              });
+              await page
+                .locator('#root [data-ink-theme-switch="toggle"]')
+                .click();
+              await page.waitForFunction(() => window.consoleInkAnimation, {
+                timeout: 20000,
+              });
+              assert.equal(
+                await page.evaluate(
+                  () => document.documentElement.dataset.inkTransition,
+                ),
+                mode,
+              );
+              await page.evaluate(() => {
+                window.consoleInkAnimation.pause();
+                window.consoleInkAnimation.currentTime = 320;
+              });
+              if (mode === "layers") {
+                const colors = await page
+                  .locator('[data-ink-scope] [data-design="legacy"]')
+                  .evaluateAll((nodes) =>
+                    nodes.map((node) => getComputedStyle(node).backgroundColor),
+                  );
+                assert.equal(
+                  new Set(colors).size,
+                  2,
+                  "fallback snapshots have distinct dark/light console palettes",
+                );
+                assert.equal(
+                  await page
+                    .locator(".ink-overlay")
+                    .getAttribute("aria-hidden"),
+                  "true",
+                );
+                assert.equal(
+                  await page
+                    .locator(".ink-overlay")
+                    .evaluate((node) => node.inert),
+                  true,
+                );
+              }
+              if (theme === "light")
+                await page.screenshot({
+                  path: path.join(
+                    out,
+                    `${admin ? "admin" : "auth"}-ink-${mode}.png`,
+                  ),
+                });
+              await page.evaluate(() => window.consoleInkAnimation.play());
+              await page.waitForFunction(
+                () =>
+                  !document.documentElement.dataset.inkBusy &&
+                  !document.documentElement.dataset.inkTransition,
+                { timeout: 20000 },
+              );
+              assert.equal(
+                await page.locator(".ink-overlay,[data-ink-style]").count(),
+                0,
+              );
+              assert.equal(
+                await page.evaluate(() => localStorage.getItem("theme")),
+                theme,
+              );
+              assert.equal(await field.inputValue(), input);
+              assert.equal(await page.evaluate(() => scrollY), scroll);
+              if (!admin)
+                assert.equal(
+                  await page.locator("#password").inputValue(),
+                  "private-form-state",
+                );
+            }
+            assert.ok(
+              await page.evaluate(
+                () => document.documentElement.scrollWidth <= innerWidth,
+              ),
+            );
+            await context.close();
+          },
+        );
+      }
+    await check(
+      "theme preferences animate and System stays synchronized with OS changes",
+      async () => {
+        const { page, context } = await setup({
+          admin: true,
+          url: "/admin?section=theme",
+          motion: "no-preference",
+          inkMode: "view",
+        });
+        await page.getByRole("button", { name: "Terang", exact: true }).click();
+        await page.waitForFunction(() => window.consoleInkAnimation, {
+          timeout: 20000,
+        });
+        await page.waitForFunction(
+          () => !document.documentElement.dataset.inkBusy,
+        );
+        assert.equal(
+          await page.evaluate(() => localStorage.getItem("theme")),
+          "light",
+        );
+        await page.evaluate(() => {
+          window.consoleInkAnimation = null;
+        });
+        await page.getByRole("button", { name: "Sistem", exact: true }).click();
+        await page.waitForFunction(() => window.consoleInkAnimation, {
+          timeout: 20000,
+        });
+        await page.waitForFunction(
+          () => !document.documentElement.dataset.inkBusy,
+        );
+        assert.equal(
+          await page.evaluate(() => localStorage.getItem("theme")),
+          "system",
+        );
+        assert.ok(
+          await page.evaluate(() =>
+            document.documentElement.classList.contains("dark"),
+          ),
+        );
+        await page.emulateMedia({ colorScheme: "light" });
+        await page.waitForFunction(() =>
+          document.documentElement.classList.contains("light"),
+        );
+        assert.equal(
+          await page
+            .getByRole("button", { name: "Sistem", exact: true })
+            .getAttribute("aria-pressed"),
+          "true",
+        );
+        await context.close();
+      },
+    );
+    await check(
+      "public and console branding/theme follow the same CMS identity and preference",
+      async () => {
+        const { page, context } = await setup({ heroName: "RifqiA" });
+        await page
+          .getByRole("link", { name: "RifqiA — Beranda", exact: true })
+          .waitFor();
+        await page.getByRole("button", { name: "Gunakan tema terang" }).click();
+        await page
+          .getByRole("link", { name: "RifqiA — Beranda", exact: true })
+          .click();
+        await page.locator(".public-navbar").waitFor();
+        await page
+          .getByRole("button", { name: "Gunakan tema gelap" })
+          .waitFor();
+        await page.goto(base + "/auth");
+        await page
+          .getByRole("link", { name: "RifqiA — Beranda", exact: true })
+          .waitFor();
+        assert.equal(
+          await page.evaluate(() => localStorage.getItem("theme")),
+          "light",
+        );
+        await context.close();
+      },
+    );
+    for (const admin of [false, true])
+      await check(
+        `${admin ? "admin" : "auth"} respects reduced motion during theme switching`,
+        async () => {
+          const { page, context } = await setup({
+            admin,
+            viewport: { width: 320, height: 844 },
+          });
+          await page
+            .getByRole("button", { name: "Gunakan tema terang" })
+            .click();
+          assert.ok(
+            await page.evaluate(() =>
+              document.documentElement.classList.contains("light"),
+            ),
+          );
+          assert.equal(
+            await page.locator(".ink-overlay,[data-ink-style]").count(),
+            0,
+          );
+          assert.equal(
+            await page.evaluate(() => document.documentElement.dataset.inkBusy),
+            undefined,
+          );
+          await context.close();
+        },
+      );
     assert.deepEqual(pageErrors, []);
     fs.writeFileSync(
       path.join(out, "results.json"),

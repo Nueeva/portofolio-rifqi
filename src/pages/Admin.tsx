@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { InkThemeSwitch } from "@/components/InkThemeSwitch";
 import { useTheme } from "next-themes";
 import {
   ArrowLeft,
@@ -71,29 +72,31 @@ const Notifications = lazy(() =>
 );
 
 function Preferences() {
-  const { theme, setTheme } = useTheme();
+  const { theme } = useTheme();
   return (
     <section className="console-editor-section">
       <h2>Tampilan ruang kerja</h2>
       <p>
-        Pilihan disimpan di browser ini dan mengikuti halaman portofolio.
-        Identitas warna Celah tetap konsisten.
+        Pilihan disimpan di browser ini dan mengikuti halaman portofolio. Palet
+        portofolio tetap konsisten.
       </p>
       <div className="console-preferences">
-        {[
-          { id: "light", label: "Terang", icon: Sun },
-          { id: "dark", label: "Gelap", icon: Moon },
-          { id: "system", label: "Sistem", icon: Monitor },
-        ].map((item) => (
-          <button
+        {(
+          [
+            { id: "light", label: "Terang", icon: Sun },
+            { id: "dark", label: "Gelap", icon: Moon },
+            { id: "system", label: "Sistem", icon: Monitor },
+          ] as const
+        ).map((item) => (
+          <InkThemeSwitch
             key={item.id}
-            type="button"
+            className=""
+            preference={item.id}
             aria-pressed={theme === item.id}
-            onClick={() => setTheme(item.id)}
           >
             <item.icon size={18} />
             {item.label}
-          </button>
+          </InkThemeSwitch>
         ))}
       </div>
     </section>
@@ -203,15 +206,13 @@ export default function Admin() {
         if (!refs.error && refs.data?.length === 0)
           await api.storage.from("project-images").remove([path]);
       }
-      await api
-        .from("activity_logs")
-        .insert({
-          user_id: auth.user!.id,
-          action: "DELETE",
-          entity_type: "projects",
-          entity_title: toRemove.map((row) => row.title).join(", "),
-          details: { count: deleteIds.length },
-        });
+      await api.from("activity_logs").insert({
+        user_id: auth.user!.id,
+        action: "DELETE",
+        entity_type: "projects",
+        entity_title: toRemove.map((row) => row.title).join(", "),
+        details: { count: deleteIds.length },
+      });
       setSelected(
         (previous) =>
           new Set([...previous].filter((id) => !deleteIds.includes(id))),
@@ -289,7 +290,9 @@ export default function Admin() {
       <>
         <div className="console-page-heading">
           <div>
-            <span className="console-eyebrow">{section.group} / Celah</span>
+            <span className="console-eyebrow">
+              {section.group} / Portofolio
+            </span>
             <h1>{section.label}</h1>
             <p>{section.description}</p>
           </div>

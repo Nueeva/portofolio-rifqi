@@ -437,7 +437,7 @@ export default function Auth() {
   return (
     <Layout>
       <div className="auth-composition">
-        <aside className="auth-brand-panel" aria-label="Celah">
+        <aside className="auth-brand-panel" aria-label="Pengelolaan portofolio">
           <span className="console-eyebrow">Pengelolaan portofolio</span>
           <h2>
             Ruang untuk
@@ -454,7 +454,7 @@ export default function Auth() {
           </p>
           <div className="auth-brand-footer">
             <span>Rifqi Ariansyah</span>
-            <span>Celah — 01</span>
+            <span>Portofolio pribadi</span>
           </div>
         </aside>
         <section className="auth-form-panel">{panel}</section>

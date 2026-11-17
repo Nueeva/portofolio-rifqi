@@ -1,0 +1,133 @@
+{
+  "date": "2026-11-17",
+  "scope": "local production preview; console API fixtures; public ink regression",
+  "baselineCommit": "391c3a61778d1f36279e3a9d7f29d69722403504",
+  "build": "passed",
+  "typecheck": "passed",
+  "frontendTests": 73,
+  "consoleBrowser": {
+    "passed": [
+      "auth validation, autofill, password visibility and login",
+      "session errors are retryable instead of anonymous",
+      "unavailable recovery and malformed tokens are honest",
+      "workspace navigation, contextual actions and theme-scoped dialog",
+      "safe replacement: upload failure never saves or deletes cover",
+      "atomic workspace saves study and project together; failed save retains fields",
+      "dirty edits block sidebar and browser Back navigation",
+      "pagination clamps after deleting final item on last page",
+      "responsive dark 320px",
+      "responsive dark 390px",
+      "responsive dark 1440px",
+      "responsive light 320px",
+      "responsive light 390px",
+      "responsive light 1440px",
+      "mobile account menu supports logout",
+      "export failures do not produce partial downloads",
+      "light auth action contrast and mobile reflow",
+      "auth shares the public ink animation (view) and preserves edits",
+      "auth shares the public ink animation (layers) and preserves edits",
+      "admin shares the public ink animation (view) and preserves edits",
+      "admin shares the public ink animation (layers) and preserves edits",
+      "theme preferences animate and System stays synchronized with OS changes",
+      "public and console branding/theme follow the same CMS identity and preference",
+      "auth respects reduced motion during theme switching",
+      "admin respects reduced motion during theme switching"
+    ],
+    "pageErrors": []
+  },
+  "publicInkBrowser": [
+    {
+      "mode": "view",
+      "direction": "light",
+      "fullCoverageMismatch": 0.0066552734375,
+      "preparationMs": 300.10000000009313
+    },
+    {
+      "mode": "view",
+      "direction": "dark",
+      "fullCoverageMismatch": 0.0093408203125,
+      "preparationMs": 139.19999999995343
+    },
+    {
+      "mode": "view",
+      "rapidClicks": "passed",
+      "resize": "passed",
+      "reducedMotion": "passed"
+    },
+    {
+      "mode": "layers",
+      "direction": "light",
+      "fullCoverageMismatch": 0.0021337890625,
+      "preparationMs": 705.6999999999534
+    },
+    {
+      "mode": "layers",
+      "direction": "dark",
+      "fullCoverageMismatch": 0.0002998046875,
+      "preparationMs": 520.1999999999534
+    },
+    {
+      "mode": "layers",
+      "rapidClicks": "passed",
+      "resize": "passed",
+      "reducedMotion": "passed"
+    },
+    {
+      "mode": "layers",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "stateAndAlignment": "passed"
+    },
+    {
+      "mode": "view",
+      "viewport": {
+        "width": 1600,
+        "height": 420
+      },
+      "stateAndAlignment": "passed"
+    },
+    {
+      "mode": "layers",
+      "viewport": {
+        "width": 420,
+        "height": 1200
+      },
+      "stateAndAlignment": "passed"
+    },
+    {
+      "fault": "mask",
+      "settled": "passed"
+    },
+    {
+      "fault": "transition",
+      "settled": "passed"
+    },
+    {
+      "fault": "unmount",
+      "settled": "passed"
+    },
+    {
+      "fault": "scroll",
+      "settled": "passed"
+    },
+    {
+      "mode": "view",
+      "workerUnavailable": "raster fallback passed"
+    },
+    {
+      "mode": "layers",
+      "workerUnavailable": "raster fallback passed"
+    },
+    {
+      "preparationCancellation": "worker terminated, destination settled"
+    }
+  ],
+  "lint": {
+    "errors": 0,
+    "warnings": 12
+  },
+  "initialJsGzipBytes": 185622,
+  "initialJsBudget": 200000
+}

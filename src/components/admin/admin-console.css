@@ -122,26 +122,25 @@
 .console-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-family: "Space Grotesk", sans-serif;
-  font-size: 25px;
-  line-height: 1.1;
-  letter-spacing: -0.05em;
+  gap: 11px;
+  min-height: 44px;
+  font-family: Inter, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 .console-mark {
-  width: 35px;
-  height: 35px;
+  width: 28px;
+  height: 28px;
   color: hsl(var(--primary));
   flex-shrink: 0;
 }
-.console-brand-caption {
-  display: block;
-  font-family: Inter, sans-serif;
-  font-size: 11px;
-  letter-spacing: 0.02em;
-  color: hsl(var(--muted-foreground));
-  margin-top: 5px;
+.console-brand > span {
+  max-width: 260px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .console-header-actions {
   display: flex;
   align-items: center;
@@ -165,6 +164,10 @@
   flex-shrink: 0;
   background: transparent;
   color: hsl(var(--foreground));
+}
+.console-icon-button svg {
+  width: 18px;
+  height: 18px;
 }
 .console-icon-button:hover {
   background: hsl(var(--accent));
@@ -885,7 +888,11 @@
     gap: 10px;
   }
   .console-brand {
-    font-size: 23px;
+    font-size: 12px;
+    gap: 7px;
+  }
+  .console-brand > span {
+    max-width: calc(100vw - 190px);
   }
   .console-auth-layout {
     grid-template-rows: 72px 1fr;

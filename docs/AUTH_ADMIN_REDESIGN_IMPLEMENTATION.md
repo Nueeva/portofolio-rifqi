@@ -4,6 +4,8 @@ Tanggal: 17 November 2026. Berdasarkan [riset](research/AUTH_ADMIN_REDESIGN_RESE
 
 ## Hasil
 
+- Navbar auth/admin memakai identitas `hero_name` yang sama dengan halaman publik (default Rifqi Ariansyah), tanpa label Celah sebagai brand produk.
+- Pergantian tema publik/auth/admin dan pilihan light/dark/system memakai komponen ink bersama. Fallback snapshot mendukung token console dan selector light/dark; reduced motion mengganti tema langsung.
 - Console Celah dengan TembusMark, palet petrol/ivory dan champagne/bronze, tipografi yang lebih tenang, serta portal dialog yang mengikuti scope tema.
 - Auth dengan komposisi dua kolom desktop dan form tunggal mobile. Autofill, show/hide password, validasi terkait field, fokus error, loading bernama, retry session-check dan state non-admin.
 - Login sebagai jalan utama. Signup tetap tersedia melalui informasi pembuatan akun, tanpa menjanjikan hak admin. Kemampuan email mengikuti `/api/config`; SMTP yang belum tersedia dijelaskan dengan jujur. Reset malformed dan URL keluar dari recovery ditangani.
@@ -18,7 +20,7 @@ Tanggal: 17 November 2026. Berdasarkan [riset](research/AUTH_ADMIN_REDESIGN_RESE
 
 ## Bukti visual
 
-Semua gambar memakai fixture lokal, bukan data atau akun produksi.
+Semua gambar memakai fixture lokal, bukan data atau akun produksi. Empat gambar berikut merekam implementasi awal; koreksi brand navbar dan integrasi ink sesudahnya dicatat pada bagian Hasil.
 
 - [Auth desktop dark](media/console-redesign/auth-dark.png).
 - [Auth mobile light](media/console-redesign/auth-light-mobile.png).
@@ -43,3 +45,15 @@ Frontend baru memerlukan backend baru yang menyediakan `POST /api/projects/save`
 Tidak ada fitur passkey/MFA, draft server, autosave server, scheduling atau deployment job yang ditambahkan. Preferensi tema memakai light/dark/system yang tersimpan di browser; editor palet sementara lama tidak dipromosikan sebagai pengaturan situs yang dipersist.
 
 Kandidat media dari hasil save yang tidak dapat dikonfirmasi dipertahankan agar tidak merusak commit yang mungkin sudah berhasil. Pembersihan orphan media adalah pekerjaan operator berikutnya, dengan pemeriksaan referensi. Jika koneksi putus tepat setelah membuat proyek, muat ulang daftar sebelum mengulangi pembuatan; endpoint menolak ID create yang sudah tersimpan.
+
+## Koreksi identitas dan integrasi ink
+
+Navbar auth/admin kini membaca `hero_name` dari provider pengaturan publik yang sama, dengan fallback Rifqi Ariansyah. Ukuran mark dan wordmark mengikuti navbar publik, termasuk batas lebar mobile. Label Celah pada navbar, footer console, panel auth dan breadcrumb admin dihapus.
+
+`InkThemeSwitch` digunakan oleh navbar publik, auth/admin, serta pilihan Terang/Gelap/Sistem. Mesin ink tetap lazy-loaded. Pilihan Sistem disimpan sebagai `system`, sementara target warna animasi mengikuti OS. Snapshot fallback mengisolasi selector light/dark terhadap kelas tema dokumen, memakai warna latar console dan memperbarui ikon toggle. Resize dan owner yang dilepas membatalkan animasi dengan cleanup cache.
+
+Uji console mencakup kedua renderer ink pada auth/admin, isi login dan draf proyek yang dipertahankan, preferensi sistem, branding CMS, persistensi tema antarhalaman dan reduced motion. Suite ink publik juga memeriksa cache atlas tunggal yang memang dipertahankan untuk klik berikutnya, reuse, cleanup, kegagalan worker/capture dan pembatalan. Isolasi browser fixture memblokir service worker agar auto-update tidak me-reload sesi pengujian, serta menginisialisasi preferensi sekali per context sehingga navigasi menguji persistensi sebenarnya.
+
+Bukti fixture lokal terbaru: [auth](media/console-identity-ink/auth.png), [admin](media/console-identity-ink/admin.png), [ink auth mobile](media/console-identity-ink/auth-ink-mobile.png), [ink admin mobile](media/console-identity-ink/admin-ink-mobile.png).
+
+Hasil koreksi: build dan TypeScript lulus, 73 tes frontend, 25 skenario browser console dan 16 skenario ink publik lulus. ESLint: 0 error, 12 warning lama. JavaScript awal 185.622 byte gzip, di bawah batas 200.000 byte. [Detail verifikasi lokal](media/console-identity-ink/results.json).

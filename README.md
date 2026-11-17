@@ -103,6 +103,8 @@ Older proposals, research, measurements and release receipts are labeled with th
 
 ## Auth and admin workspace
 
+Public, auth and admin headers use the same `hero_name` setting (default: Rifqi Ariansyah). Their theme controls share `InkThemeSwitch` and the ink transition engine; light/dark/system preferences persist across routes. Reduced-motion users receive a direct theme change, and browsers without View Transitions use inert theme layers.
+
 The current console uses grouped, URL-backed navigation at `/admin?section=projects`, with `edit=<id>` or `edit=new` for the project workspace. Auth modes remain compatible with `/auth`, `/auth?mode=forgot`, `/auth?mode=register` and existing reset links. Registrations still require verification and do not grant admin rights.
 
 Projects and studies save through the authorized `POST /api/projects/save` transaction. Deploy frontend and backend together; the new editor requires that endpoint. The change requires no schema migration. Existing CRUD, storage, session, Origin and role checks remain authoritative.

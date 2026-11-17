@@ -77,3 +77,7 @@ Auth uses a shared TanStack Query session/role cache, explicit failure states an
 The admin workspace groups navigation by tasks, persists section/search/page/editor in URL state, and uses React Router data-router blocking to protect dirty project edits (including Back navigation). Project and editorial records save atomically through `/api/projects/save`; previous image removal happens only after confirmed save and a reference check. Failed/uncertain candidate writes retain media rather than risk breaking a successful but unconfirmed save. Retained orphan candidates may need later operator cleanup.
 
 Exports support JSON and CSV across nine resources, fail closed on resource errors or the 2,000-record ceiling, and explicitly exclude uploaded files and private auth/configuration. A database/uploads backup remains a separate operator workflow.
+
+## Shared identity and theme controls
+
+Public, auth and admin headers read the same `hero_name` setting, defaulting to Rifqi Ariansyah. Celah names the design internally, not the product brand in the console. `src/components/InkThemeSwitch.tsx` owns the shared theme control; navbar toggles and admin preferences use the same lazy ink engine, native View Transitions, inert-layer fallback and reduced-motion handling. Selecting System persists `system` while resolving the animation destination from the OS preference. Console form state stays in the live React tree during the reveal.

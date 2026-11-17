@@ -15,11 +15,13 @@ function scopedSelector(selector: string) {
     let value = selector.trim();
     if (value.includes("::view-transition") || value.includes("data-ink-") || value.includes("ink-overlay")) return "";
     value = value.replace(/\.dark(?=[\s.:)>+~#[]|$)/g, '[data-ink-scope="dark"]');
+    value = value.replace(/\.light(?=[\s.:)>+~#[]|$)/g, '[data-ink-scope="light"]');
     value = value.replace(/:root/g, "[data-ink-scope]");
     value = value.replace(/:hover/g, "[data-ink-hover]").replace(/:focus-visible/g, "[data-ink-focus-visible]").replace(/:focus(?!-)/g, "[data-ink-focus]");
     value = value.replace(/(^|[\s>+~,(])(html|body)(?=$|[\s>+~.#:[,)])/g, "$1[data-ink-scope]");
-    return value.startsWith("[data-ink-scope]") || value.startsWith('[data-ink-scope="dark"]')
-        ? value : `[data-ink-scope] ${value}`;
+    const scoped = value.startsWith("[data-ink-scope") ? value : `[data-ink-scope] ${value}`;
+    // Outrank the live document's html.light/:root:not(.dark) selectors in both copies.
+    return scoped.replace(/^(\[data-ink-scope(?:="(?:dark|light)")?\])/, "$1[data-ink-scope]");
 }
 function scopeRules(rules: CSSRuleList): string {
     return Array.from(rules).map(rule => {
@@ -36,7 +38,7 @@ function scopeRules(rules: CSSRuleList): string {
 }
 
 function updateIcon(scope: HTMLElement, theme: Theme) {
-    const icon = scope.querySelector(".public-theme-switch svg");
+    const icon = scope.querySelector('[data-ink-theme-switch="toggle"] svg');
     if (!icon) return;
     icon.innerHTML = theme === "dark"
         ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/>'
@@ -106,7 +108,7 @@ export function createThemeLayers(from: Theme, to: Theme) {
     document.head.append(style); document.body.append(overlay);
     try {
         for (const { scope, pairs } of [oldCopy, newCopy]) {
-            const css = getComputedStyle(scope.querySelector(".public-design") ?? scope);
+            const css = getComputedStyle(scope.querySelector('.public-design, [data-design="legacy"]') ?? scope);
             const colors = Object.fromEntries(["--site-bg", "--site-cyan", "--site-violet", "--site-copper"].map(key => [key, css.getPropertyValue(key).trim()]));
             const background = css.getPropertyValue("--site-bg").trim() || css.backgroundColor;
             scope.style.background = background; (scope.parentElement as HTMLElement).style.background = background;

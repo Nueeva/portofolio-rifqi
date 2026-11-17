@@ -1,8 +1,9 @@
 import { consoleSections, canLeaveConsole } from "@/lib/consoleNavigation";
 import { useState, type ReactNode } from "react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
-import { ArrowUpRight, LogOut, Menu, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+import { ArrowUpRight, LogOut, Menu } from "lucide-react";
+import { InkThemeSwitch } from "@/components/InkThemeSwitch";
+import { usePublicSettings } from "@/hooks/usePublicSettings";
 import { TembusMark } from "@/components/TembusMark";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,8 @@ export function ConsoleLayout({ children }: { children: ReactNode }) {
   const [params] = useSearchParams();
   const authPage = pathname === "/auth";
   const active = params.get("section") || "projects";
-  const { resolvedTheme, setTheme } = useTheme();
+  const { get } = usePublicSettings();
+  const name = get("hero_name", "Rifqi Ariansyah");
   const { user, signOut } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -79,30 +81,15 @@ export function ConsoleLayout({ children }: { children: ReactNode }) {
         Lewati ke konten utama
       </a>
       <header className="console-header">
-        <Link className="console-brand" to="/">
+        <Link className="console-brand" to="/" aria-label={`${name} — Beranda`}>
           <TembusMark className="console-mark" />
-          <span>
-            Celah<span className="console-brand-caption">Rifqi Ariansyah</span>
-          </span>
+          <span>{name}</span>
         </Link>
         <div className="console-header-actions">
           <Link className="console-public-link" to="/">
             Lihat portofolio <ArrowUpRight size={16} />
           </Link>
-          <button
-            className="console-icon-button"
-            type="button"
-            aria-label={
-              resolvedTheme === "dark"
-                ? "Gunakan tema terang"
-                : "Gunakan tema gelap"
-            }
-            onClick={() =>
-              setTheme(resolvedTheme === "dark" ? "light" : "dark")
-            }
-          >
-            {resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-          </button>
+          <InkThemeSwitch className="console-icon-button" />
           {!authPage && (
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               <SheetTrigger asChild>
@@ -139,7 +126,7 @@ export function ConsoleLayout({ children }: { children: ReactNode }) {
       </main>
       {!authPage && (
         <footer className="console-footer">
-          Celah <span>Ruang untuk merawat karya.</span>
+          {name} <span>Ruang untuk merawat karya.</span>
         </footer>
       )}
     </div>
