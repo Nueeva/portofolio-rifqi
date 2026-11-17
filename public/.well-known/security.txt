@@ -1,4 +1,4 @@
-Contact: https://rifqi.apexsions.com/contact
+Contact: https://rifqi.apexsions.my.id/contact
 Expires: 2027-10-26T00:00:00.000Z
 Preferred-Languages: en, id
-Canonical: https://rifqi.apexsions.com/.well-known/security.txt
+Canonical: https://rifqi.apexsions.my.id/.well-known/security.txt

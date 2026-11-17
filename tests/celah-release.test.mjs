@@ -15,7 +15,7 @@ test("production metadata and discovery files use the current my.id domain",()=>
   const metadata=source.replace(/<script id="public-content" type="application\/json">[\s\S]*?<\/script>/g, "");
   assert.ok(!metadata.includes("rifqi.apexsions.com"),page);
  }
- for(const file of ["robots.txt","sitemap.xml","llms.txt","llms-full.txt","cv-rifqi-ariansyah.html"]){
+ for(const file of ["robots.txt","sitemap.xml","llms.txt","llms-full.txt","cv-rifqi-ariansyah.html",".well-known/security.txt"]){
   const source=read("dist/"+file);
   assert.ok(source.includes("rifqi.apexsions.my.id"),file);
   assert.ok(!source.includes("rifqi.apexsions.com"),file);
