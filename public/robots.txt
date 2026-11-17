@@ -1,4 +1,4 @@
-# rifqi.apexsions.com — portfolio of Rifqi Ariansyah.
+# rifqi.apexsions.my.id — portfolio of Rifqi Ariansyah.
 # All crawlers are welcome, including AI answer-engine crawlers:
 # this site WANTS to be cited accurately. Machine-readable summary: /llms.txt
 
@@ -51,4 +51,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://rifqi.apexsions.com/sitemap.xml
+Sitemap: https://rifqi.apexsions.my.id/sitemap.xml

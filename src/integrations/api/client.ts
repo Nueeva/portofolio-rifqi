@@ -1,8 +1,9 @@
-import type { ApiTables, AnalyticsSummary } from "./types";
+import type { ProjectEditorial } from "@/data/editorial";
+import type { ApiTables, AnalyticsSummary, ProjectRecord } from "./types";
 import type { Session } from "./types";
-type Tables=ApiTables;type Failure={message:string};type Result<T>={data:T|null;error:Failure|null};
+type Tables=ApiTables;export type Failure={message:string;status?:number;retryAfter?:number};type Result<T>={data:T|null;error:Failure|null};
 async function request<T>(path:string,body?:unknown,method=body===undefined?"GET":"POST"):Promise<Result<T>>{
- try{const response=await fetch(`/api/${path}`,{method,credentials:"same-origin",headers:body instanceof FormData?{}:{"Content-Type":"application/json"},body:body===undefined?undefined:body instanceof FormData?body:JSON.stringify(body)});const result=await response.json();return response.ok?result:{data:null,error:result.error&&typeof result.error==="object"&&typeof result.error.message==="string"?result.error:{message:typeof result.message==="string"?result.message:"Permintaan gagal."}};}catch{return {data:null,error:{message:"Layanan belum terhubung. Coba lagi nanti."}};}
+ try{const response=await fetch(`/api/${path}`,{method,credentials:"same-origin",headers:body instanceof FormData?{}:{"Content-Type":"application/json"},body:body===undefined?undefined:body instanceof FormData?body:JSON.stringify(body)});const result=await response.json();return response.ok?result:{data:null,error:{message:result.error&&typeof result.error==="object"&&typeof result.error.message==="string"?result.error.message:typeof result.message==="string"?result.message:"Permintaan gagal.",status:response.status,retryAfter:Number(response.headers.get("Retry-After"))||undefined}};}catch{return {data:null,error:{message:"Layanan belum terhubung. Coba lagi nanti.",status:0}};}
 }
 class Query<R,I,U> implements PromiseLike<Result<R[]>> {
  private body:{operation:string;filters:{field:string;operator:string;value:unknown}[];values?:unknown;order?:{field:string;ascending:boolean};limit?:number}={operation:"select",filters:[]};
@@ -23,14 +24,20 @@ type AuthListener=(event:string,session:Session|null)=>void;
 const listeners=new Set<AuthListener>();
 function announce(session:Session|null,event:string){listeners.forEach(callback=>callback(event,session));}
 async function login(body:unknown){const result=await request<{session:Session;user:Session["user"]}>("auth/login",body);if(!result.error)announce(result.data?.session??null,"SIGNED_IN");return result;}
+function matchesEventFilter(filter:string|undefined,row:Record<string,unknown>|undefined) {
+ if(!filter)return true;
+ const match=/^([a-zA-Z_][a-zA-Z0-9_]*)=eq\.(.*)$/.exec(filter);
+ return !!match && !!row && String(row[match[1]])===match[2];
+}
 class Channel {
  private source?:EventSource;
- private handlers:{table:string;event:string;callback:(payload:{new:unknown;old:unknown;eventType:string})=>void}[]=[];
- on(_type:string,filter:{table?:string;event?:string;[key:string]:unknown},callback:(payload:{new:unknown;old:unknown;eventType:string})=>void){this.handlers.push({table:filter.table??"",event:filter.event??"*",callback});return this;}
- subscribe(status?:(state:string)=>void){this.source=new EventSource("/api/events",{withCredentials:true});this.source.onopen=()=>status?.("SUBSCRIBED");this.source.onerror=()=>status?.("CHANNEL_ERROR");this.source.onmessage=event=>{try{const payload=JSON.parse(event.data);for(const handler of this.handlers)if(payload.table===handler.table&&(handler.event==="*"||handler.event===payload.eventType))handler.callback(payload);}catch{/* Ignore malformed frames. */}};return this;}
+ private handlers:{table:string;event:string;filter?:string;callback:(payload:{new:unknown;old:unknown;eventType:string})=>void}[]=[];
+ on(_type:string,filter:{table?:string;event?:string;[key:string]:unknown},callback:(payload:{new:unknown;old:unknown;eventType:string})=>void){this.handlers.push({table:filter.table??"",event:filter.event??"*",filter:typeof filter.filter==="string"?filter.filter:undefined,callback});return this;}
+ subscribe(status?:(state:string)=>void){this.source=new EventSource("/api/events",{withCredentials:true});this.source.onopen=()=>status?.("SUBSCRIBED");this.source.onerror=()=>status?.("CHANNEL_ERROR");this.source.onmessage=event=>{try{const payload=JSON.parse(event.data);for(const handler of this.handlers)if(payload.table===handler.table&&(handler.event==="*"||handler.event===payload.eventType)&&matchesEventFilter(handler.filter,payload.new))handler.callback(payload);}catch{/* Ignore malformed frames. */}};return this;}
  close(){this.source?.close();}
 }
 export const api={
+ projects:{save:(body:{project:ProjectRecord;editorial:ProjectEditorial;mode:"create"|"update"})=>request<{project:ProjectRecord;editorial:ProjectEditorial}>("projects/save",body)},
  analytics:{summary:(filters:{timeRange:"7d"|"30d"|"90d"|"all";page:string})=>request<AnalyticsSummary>("analytics/summary",filters)},
  from<K extends keyof Tables>(resource:K){return new Query<Tables[K]["Row"],Tables[K]["Insert"],Tables[K]["Update"]>(resource);},
  rpc:async(name:string,body:unknown)=>request<boolean>(`rpc/${name}`,body),

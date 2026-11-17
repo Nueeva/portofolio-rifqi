@@ -59,3 +59,13 @@ test('public snapshot includes only public resources and preserves empty catalog
  const app=await buildApp({db:database,config:{origin:'https://portfolio.test',cookieSecret:'a'.repeat(64),uploadDir:'/not-used'}});
  try{const response=await app.inject('/api/public-content');assert.equal(response.statusCode,200);const {data}=response.json();assert.deepEqual(data.projects,[]);assert.equal(data.ip_logs,undefined);assert.deepEqual(data.portfolio_project_content[0].challenges,[]);}finally{await app.close();}
 });
+
+test('login throttling exposes server retry timing and email capability is explicit',async()=>{
+ const database={query:async sql=>({rows:sql.includes('count(*)')?[{count:5,retry_after:27}]:[]})};
+ const app=await buildApp({db:database,config:{origin:'https://portfolio.test',cookieSecret:'a'.repeat(64),uploadDir:'/not-used'}});
+ try{
+  const config=await app.inject('/api/config');assert.equal(config.json().emailEnabled,false);
+  const response=await app.inject({method:'POST',url:'/api/auth/login',headers:{origin:'https://portfolio.test'},payload:{email:'owner@example.com',password:'a password'}});
+  assert.equal(response.statusCode,429);assert.equal(response.headers['retry-after'],'27');
+ }finally{await app.close();}
+});

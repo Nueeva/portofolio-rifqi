@@ -1,3 +1,4 @@
+import {saveProjectWorkspace} from './project-workspace.mjs';
 import {validateRecord,normalizeRecord} from './records.mjs';
 import {analyticsSummary} from './analytics.mjs';
 import Fastify from 'fastify';
@@ -24,7 +25,7 @@ export async function buildApp({db,config,mailer,verifyCaptcha}){
  const emailReady=()=>{if(!mailer)throw fail(503,'Layanan email belum dikonfigurasi.');};
  const sendMail=async(to,subject,text)=>{emailReady();await mailer({from:config.mailFrom,to,subject,text});};
  const authToken=async(user,purpose)=>{const value=token();await db.query('INSERT INTO auth_tokens(token_hash,user_id,purpose,expires_at) VALUES($1,$2,$3,now()+interval \'30 minutes\')',[digest(value),user.id,purpose]);return value;};
- app.get('/api/config',async()=>({captchaEnabled:!!verifyCaptcha,captchaSiteKey:verifyCaptcha?config.captchaSiteKey:null}));
+ app.get('/api/config',async()=>({captchaEnabled:!!verifyCaptcha,captchaSiteKey:verifyCaptcha?config.captchaSiteKey:null,emailEnabled:!!mailer}));
  app.get('/api/public-content',async()=>{
   const resources=[...publicResources];
   const {rows}=await db.query('SELECT resource,data FROM content_records WHERE resource=ANY($1::text[]) ORDER BY resource,id',[resources]);
@@ -40,7 +41,7 @@ export async function buildApp({db,config,mailer,verifyCaptcha}){
  app.post('/api/auth/login',{config:{rateLimit:{max:12,timeWindow:'1 minute'}}},async(req,reply)=>{
   const {email,password}=req.body??{};if(!validEmail(email)||typeof password!=='string'||password.length>1024)throw fail(400,'Email atau password tidak valid.');await requireChallenge(req);
   const address=email.toLowerCase();const emailHash=digest(address);
-  const {rows:attempts}=await db.query('SELECT count(*)::int AS count FROM login_attempts WHERE (ip=$1 OR email_hash=$2) AND created_at>now()-interval \'15 minutes\'',[req.ip,emailHash]);if(attempts[0].count>=5)throw fail(429,'Terlalu banyak percobaan. Coba lagi dalam 15 menit.');
+  const {rows:attempts}=await db.query('SELECT count(*)::int AS count, greatest(1,ceil(extract(epoch from (min(created_at)+interval \'15 minutes\'-now()))))::int AS retry_after FROM login_attempts WHERE (ip=$1 OR email_hash=$2) AND created_at>now()-interval \'15 minutes\'',[req.ip,emailHash]);if(attempts[0].count>=5){reply.header('Retry-After',String(attempts[0].retry_after||900));throw fail(429,'Terlalu banyak percobaan. Silakan coba kembali setelah jeda.');}
   const {rows}=await db.query('SELECT * FROM app_users WHERE email=$1',[address]);const user=rows[0];const passwordMatches=await verifyPassword(password,user?.password_hash??dummyPassword);const ok=!!user&&passwordMatches;
   const logId=randomUUID();await record('ip_logs',logId,{id:logId,ip_address:req.ip,action:'login',success:!!(ok&&user.verified),identifier:address,event_type:ok&&user.verified?'login_success':'login_failed',email:address,user_agent:req.headers['user-agent']??'',created_at:new Date().toISOString()});
   if(!ok){await db.query('INSERT INTO login_attempts(ip,email_hash) VALUES($1,$2)',[req.ip,emailHash]);throw fail(401,'Email atau password salah.');}if(!user.verified)throw fail(403,'Verifikasi email terlebih dahulu.');
@@ -58,6 +59,7 @@ export async function buildApp({db,config,mailer,verifyCaptcha}){
 
   throw fail(404,'Fungsi tidak tersedia.');
  });
+ app.post('/api/projects/save',async req=>{await admin(req);const saved=await saveProjectWorkspace(db,req.body??{});emit('projects','UPDATE',saved.project);emit('portfolio_project_content','UPDATE',saved.editorial);return {data:saved,error:null};});
  app.post('/api/analytics/summary',async req=>{await admin(req);return {data:await analyticsSummary(db,req.body??{}),error:null};});
  app.post('/api/rpc/:name',async req=>{const name=req.params.name,body=req.body??{};const user=await currentUser(req);if(name==='has_role')return {data:!!user?.is_admin&&body._user_id===user.id&&body._role==='admin',error:null};await admin(req);if(name==='block_ip'){if(body.p_ip_address===req.ip)throw fail(400,'IP sesi admin aktif tidak dapat diblokir.');if(!isIP(body.p_ip_address)||!Number.isInteger(body.p_hours)||body.p_hours<1||body.p_hours>8760)throw fail(400,'IP atau durasi tidak valid.');const id=body.p_ip_address;await record('blocked_ips',id,{id,created_by:user.id,ip_address:id,reason:String(body.p_reason??'').slice(0,500),blocked_at:new Date().toISOString(),expires_at:new Date(Date.now()+body.p_hours*3600000).toISOString()});}else if(name==='unblock_ip'){const {rows}=await db.query("DELETE FROM content_records WHERE resource='blocked_ips' AND id=$1 RETURNING data",[body.p_ip_address]);for(const row of rows)emit('blocked_ips','DELETE',row.data);}else throw fail(404,'Operasi tidak tersedia.');return {data:true,error:null};});
 

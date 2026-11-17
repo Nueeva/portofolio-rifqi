@@ -84,3 +84,33 @@ test('content updates validate the final record, reject nulls and preserve valid
   await db.query('DELETE FROM app_users WHERE id=$1',[id]);await app.close();await db.end();
  }
 });
+
+test('project workspace saves both resources atomically with authorization and rollback',async()=>{
+ const {saveProjectWorkspace}=await import('../project-workspace.mjs');
+ const db=new pg.Pool({connectionString:process.env.DATABASE_URL});
+ const id=randomUUID(),projectId='workspace-'+randomUUID(),session=token(),password=token();
+ const origin='https://portfolio.test';
+ const app=await buildApp({db,config:{origin,cookieSecret:token(),uploadDir:'/not-used'}});
+ const project={id:projectId,title:'Workspace',problem:'Problem',solution:'Original',category:'tools',tech_stack:['Node.js']};
+ const editorial={project_key:projectId,summary:'',featured:true,sort_order:0,role:'Engineer',period:'2026',overview:'Original study',challenges:[],approach:[],outcomes:[],lessons:''};
+ const save=(payload,cookie=`portfolio_session=${session}`)=>app.inject({method:'POST',url:'/api/projects/save',headers:{origin,cookie},payload});
+ try{
+  assert.equal((await save({project,editorial,mode:'create'},'')).statusCode,403);
+  await db.query('INSERT INTO app_users(id,email,password_hash,verified,is_admin) VALUES($1,$2,$3,true,true)',[id,`${id}@example.invalid`,await hashPassword(password)]);
+  const login=await app.inject({method:'POST',url:'/api/auth/login',headers:{origin},payload:{email:`${id}@example.invalid`,password}});
+  assert.equal(login.statusCode,200,'Password login exercises the real throttle/session SQL');
+  const loginCookie=login.headers['set-cookie'].split(';')[0];
+  assert.equal((await app.inject({method:'POST',url:'/api/auth/logout',headers:{origin,cookie:loginCookie},payload:{}})).statusCode,200);
+  await db.query("INSERT INTO app_sessions(token_hash,user_id,expires_at) VALUES($1,$2,now()+interval '5 minutes')",[digest(session),id]);
+  assert.equal((await save({project,editorial:{project_key:projectId},mode:'create'})).statusCode,400);
+  const created=await save({project,editorial,mode:'create'});assert.equal(created.statusCode,200);const createdAt=created.json().data.project.created_at;
+  assert.equal((await save({project,editorial,mode:'create'})).statusCode,409);
+  assert.equal((await save({project:{...project,solution:'Saved change'},editorial:{...editorial,overview:'Saved study'},mode:'update'})).statusCode,200);
+  const failing={connect:async()=>{const connection=await db.connect();return {query:async(sql,params)=>{if(sql.startsWith('INSERT')&&params?.[0]==='portfolio_project_content')throw Error('Forced study failure');return connection.query(sql,params);},release:()=>connection.release()};}};
+  await assert.rejects(saveProjectWorkspace(failing,{project:{...project,solution:'Must roll back'},editorial,mode:'update'}),/Forced study failure/);
+  const {rows}=await db.query('SELECT resource,data FROM content_records WHERE id=$1',[projectId]);
+  assert.equal(rows.find(row=>row.resource==='projects').data.solution,'Saved change');
+  assert.equal(rows.find(row=>row.resource==='projects').data.created_at,createdAt);
+  assert.equal(rows.find(row=>row.resource==='portfolio_project_content').data.overview,'Saved study');
+ }finally{await db.query("DELETE FROM content_records WHERE resource='ip_logs' AND data->>'identifier'=$1",[`${id}@example.invalid`]);await db.query('DELETE FROM content_records WHERE id=$1',[projectId]);await db.query('DELETE FROM app_users WHERE id=$1',[id]);await app.close();await db.end();}
+});

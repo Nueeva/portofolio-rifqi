@@ -4,7 +4,7 @@ import { join, dirname } from 'node:path';
 import { prerenderRoutes } from '../dist-server/entry-server.js';
 import { readPublicContent } from './public-content.mjs';
 
-const site = 'https://rifqi.apexsions.com';
+const site = 'https://rifqi.apexsions.my.id';
 const baseHtml = readFileSync('dist/index.html', 'utf8');
 const escape = value => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 for (const route of prerenderRoutes(readPublicContent())) {

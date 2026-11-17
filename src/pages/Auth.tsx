@@ -1,743 +1,464 @@
-import { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Link, Navigate, useSearchParams } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { useTheme } from "next-themes";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  Eye,
+  EyeOff,
+  Loader2,
+} from "lucide-react";
+import { z } from "zod";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import {
+  TurnstileCaptcha,
+  type TurnstileCaptchaRef,
+} from "@/components/TurnstileCaptcha";
 import { useAuth } from "@/hooks/useAuth";
-import { Shield, LogIn, UserPlus, Loader2, Clock, AlertTriangle, CheckCircle2, XCircle, ShieldAlert, UserCheck, ShieldX, Mail, KeyRound, ArrowLeft } from "lucide-react";
-import { z } from "zod";
-import { supabase } from "@/integrations/api/client";
-import { TurnstileCaptcha, TurnstileCaptchaRef } from "@/components/TurnstileCaptcha";
-import { Progress } from "@/components/ui/progress";
+import { api, type Failure } from "@/integrations/api/client";
 
-const authSchema = z.object({
-  email: z.string().trim().email({ message: "Email tidak valid" }),
-  password: z.string().min(12, { message: "Password minimal 12 karakter" }),
-});
-
-const emailSchema = z.object({
-  email: z.string().trim().email({ message: "Email tidak valid" }),
-});
-
-const passwordSchema = z.object({
-  password: z.string().min(12, { message: "Password minimal 12 karakter" }),
-  confirmPassword: z.string().min(12, { message: "Password minimal 12 karakter" }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Password tidak cocok",
-  path: ["confirmPassword"],
-});
-
-type AuthMode = "login" | "register" | "forgot" | "reset";
-
-interface RateLimitState {
-  blocked: boolean;
-  blockedType: "ip" | "email" | null;
-  remainingSeconds: number;
-  message: string | null;
-  initialSeconds: number;
-}
-
+type Mode = "login" | "register" | "forgot" | "reset";
+const modes = {
+  login: {
+    title: "Selamat datang kembali.",
+    description: "Masuk untuk merawat karya dan cerita di portofolio Anda.",
+    action: "Masuk",
+  },
+  register: {
+    title: "Buat akun Anda.",
+    description:
+      "Akun baru perlu verifikasi email dan tidak otomatis memiliki akses pengelola.",
+    action: "Buat akun",
+  },
+  forgot: {
+    title: "Lupa kata sandi?",
+    description: "Minta tautan pemulihan untuk akun Anda.",
+    action: "Kirim tautan pemulihan",
+  },
+  reset: {
+    title: "Mulai dengan sandi baru.",
+    description:
+      "Gunakan sedikitnya 12 karakter. Kata sandi baru akan mengakhiri seluruh sesi aktif.",
+    action: "Simpan kata sandi baru",
+  },
+};
 export default function Auth() {
-  const [searchParams] = useSearchParams();
-  const isResetMode = searchParams.get("reset") === "true";
-  
-  const [mode, setMode] = useState<AuthMode>(isResetMode ? "reset" : "login");
+  const [params, setParams] = useSearchParams();
+  const requested = params.get("mode");
+  const mode: Mode =
+    params.get("reset") === "true"
+      ? "reset"
+      : requested === "register" || requested === "forgot"
+        ? requested
+        : "login";
+  const auth = useAuth();
+  const { resolvedTheme } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [rateLimitState, setRateLimitState] = useState<RateLimitState>({
-    blocked: false,
-    blockedType: null,
-    remainingSeconds: 0,
-    message: null,
-    initialSeconds: 0,
+  const [visible, setVisible] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [feedback, setFeedback] = useState("");
+  const [success, setSuccess] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [captcha, setCaptcha] = useState<string | null>(null);
+  const [blockedUntil, setBlockedUntil] = useState(0);
+  const [remaining, setRemaining] = useState(0);
+  const feedbackRef = useRef<HTMLDivElement>(null);
+  const captchaRef = useRef<TurnstileCaptchaRef>(null);
+  const capabilities = useQuery({
+    queryKey: ["auth-capabilities"],
+    retry: false,
+    queryFn: async () => {
+      const response = await fetch("/api/config");
+      if (!response.ok) throw Error("Layanan belum terhubung.");
+      return response.json() as Promise<{ emailEnabled?: boolean }>;
+    },
   });
-  const [resetEmailSent, setResetEmailSent] = useState(false);
-  const turnstileRef = useRef<TurnstileCaptchaRef>(null);
-  const countdownRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const { user, loading, signIn, signUp, resetPassword, updatePassword } = useAuth();
-  const navigate = useNavigate();
-
-  // Check for reset mode from URL
+  const emailUnavailable = capabilities.data?.emailEnabled === false;
+  const badToken =
+    mode === "reset" && !/^[a-f0-9]{64}$/i.test(params.get("token") ?? "");
   useEffect(() => {
-    if (isResetMode) {
-      setMode("reset");
-    }
-  }, [isResetMode]);
-
-  // Cleanup countdown on unmount
+    setFeedback("");
+    setErrors({});
+    setPassword("");
+    setConfirmPassword("");
+    setVisible(false);
+  }, [mode]);
   useEffect(() => {
-    return () => {
-      if (countdownRef.current) {
-        clearInterval(countdownRef.current);
-      }
-    };
-  }, []);
-
-  // Start countdown when blocked
-  const startCountdown = useCallback((seconds: number) => {
-    if (countdownRef.current) {
-      clearInterval(countdownRef.current);
-    }
-
-    setRateLimitState(prev => ({
-      ...prev,
-      remainingSeconds: seconds,
-      initialSeconds: seconds,
-    }));
-
-    countdownRef.current = setInterval(() => {
-      setRateLimitState(prev => {
-        const newRemaining = prev.remainingSeconds - 1;
-        if (newRemaining <= 0) {
-          if (countdownRef.current) {
-            clearInterval(countdownRef.current);
-          }
-          return {
-            blocked: false,
-            blockedType: null,
-            remainingSeconds: 0,
-            message: null,
-            initialSeconds: 0,
-          };
-        }
-        return { ...prev, remainingSeconds: newRemaining };
-      });
-    }, 1000);
-  }, []);
-
+    const tick = () =>
+      setRemaining(Math.max(0, Math.ceil((blockedUntil - Date.now()) / 1000)));
+    tick();
+    if (!blockedUntil) return;
+    const id = window.setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [blockedUntil]);
   useEffect(() => {
-    if (!loading && user && mode !== "reset") {
-      navigate("/admin");
-    }
-  }, [user, loading, navigate, mode]);
-
-  const validateForm = () => {
-    try {
-      if (mode === "forgot") {
-        emailSchema.parse({ email });
-      } else if (mode === "reset") {
-        passwordSchema.parse({ password, confirmPassword });
-      } else {
-        authSchema.parse({ email, password });
-      }
-      setErrors({});
-      return true;
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        const newErrors: { email?: string; password?: string; confirmPassword?: string } = {};
-        error.errors.forEach((err) => {
-          if (err.path[0] === "email") newErrors.email = err.message;
-          if (err.path[0] === "password") newErrors.password = err.message;
-          if (err.path[0] === "confirmPassword") newErrors.confirmPassword = err.message;
-        });
-        setErrors(newErrors);
-      }
-      return false;
-    }
+    if (feedback) feedbackRef.current?.focus();
+  }, [feedback]);
+  const changeMode = (next: Mode) => {
+    if (busy) return;
+    setSuccess("");
+    setParams(next === "login" ? {} : { mode: next });
   };
-
-  const verifyTurnstile = async (token: string): Promise<boolean> => {
-    try {
-      const { data, error } = await supabase.functions.invoke('verify-turnstile', {
-        body: { token },
-      });
-      
-      if (error) {
-        console.error("Turnstile verification error:", error);
-        return false;
-      }
-      
-      return data?.success === true;
-    } catch (err) {
-      console.error("Failed to verify Turnstile:", err);
-      return false;
-    }
+  const report = (error: Failure) => {
+    setFeedback(error.message);
+    if (error.status === 429)
+      setBlockedUntil(Date.now() + (error.retryAfter || 60) * 1000);
   };
-
-  const checkRateLimit = async (identifier: string): Promise<{ 
-    blocked: boolean; 
-    blockedType?: "ip" | "email";
-    message?: string;
-    remainingSeconds?: number;
-  }> => {
-    try {
-      const { data, error } = await supabase.functions.invoke<{blocked:boolean;blockedType?:'ip'|'email';message?:string;remainingSeconds?:number}>('check-rate-limit', {
-        body: { identifier, action: 'check' },
-      });
-      
-      if (error) {
-        console.error("Rate limit check error:", error);
-        return { blocked: false };
-      }
-      
-      return data || { blocked: false };
-    } catch (err) {
-      console.error("Failed to check rate limit:", err);
-      return { blocked: false };
-    }
-  };
-
-  const recordLoginAttempt = async (identifier: string, success: boolean) => {
-    try {
-      await supabase.functions.invoke<{blocked:boolean;blockedType?:'ip'|'email';message?:string;remainingSeconds?:number}>('check-rate-limit', {
-        body: { 
-          identifier, 
-          action: 'record', 
-          success,
-          userAgent: navigator.userAgent,
-        },
-      });
-    } catch (err) {
-      console.error("Failed to record login attempt:", err);
-    }
-  };
-
-  const resetTurnstile = () => {
-    setTurnstileToken(null);
-    turnstileRef.current?.reset();
-  };
-
-  const formatTime = (seconds: number): string => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const handleForgotPassword = async () => {
-    if (!validateForm()) return;
-    
-    setIsSubmitting(true);
-    try {
-      // Use Supabase's built-in password reset - it will send email with the actual reset link
-      const { error } = await resetPassword(email);
-      if (error) {
-        toast.error("Gagal Mengirim Email", {
-          description: error.message,
-          icon: <XCircle className="h-5 w-5" />,
-        });
-      } else {
-        setResetEmailSent(true);
-        toast.success("Email Terkirim", {
-          description: "Silakan cek email Anda untuk link reset password",
-          icon: <Mail className="h-5 w-5" />,
-        });
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleResetPassword = async () => {
-    if (!validateForm()) return;
-    
-    setIsSubmitting(true);
-    try {
-      const { error } = await updatePassword(password);
-      if (error) {
-        toast.error("Gagal Reset Password", {
-          description: error.message,
-          icon: <XCircle className="h-5 w-5" />,
-        });
-      } else {
-        toast.success("Password Berhasil Diubah", {
-          description: "Silakan login dengan password baru",
-          icon: <CheckCircle2 className="h-5 w-5" />,
-        });
-        setMode("login");
-        navigate("/auth");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (mode === "forgot") {
-      await handleForgotPassword();
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (busy || (mode === "login" && remaining > 0)) return;
+    setFeedback("");
+    setSuccess("");
+    const next: Record<string, string> = {};
+    const parsed = z
+      .string()
+      .trim()
+      .email("Masukkan alamat email yang valid.")
+      .safeParse(email);
+    if (mode !== "reset" && !parsed.success)
+      next.email = "Masukkan alamat email yang valid.";
+    if (mode !== "forgot" && password.length < (mode === "login" ? 1 : 12))
+      next.password =
+        mode === "login"
+          ? "Masukkan kata sandi Anda."
+          : "Gunakan sedikitnya 12 karakter.";
+    if (mode === "reset" && password !== confirmPassword)
+      next.confirmPassword = "Kedua kata sandi harus sama.";
+    setErrors(next);
+    if (Object.keys(next).length) {
+      document.getElementById(Object.keys(next)[0])?.focus();
       return;
     }
-    
-    if (mode === "reset") {
-      await handleResetPassword();
+    if ((mode === "login" || mode === "register") && !captcha) {
+      setFeedback("Selesaikan verifikasi keamanan sebelum melanjutkan.");
       return;
     }
-    
-    if (rateLimitState.blocked) {
-      return;
-    }
-    
-    if (!validateForm()) return;
-
-    if (!turnstileToken) {
-      toast.warning("Verifikasi Diperlukan", {
-        description: "Silakan selesaikan verifikasi keamanan",
-        icon: <ShieldAlert className="h-5 w-5" />,
-      });
-      return;
-    }
-
-    setIsSubmitting(true);
-
+    setBusy(true);
     try {
-      if (mode === "login") {
-        const rateLimitResult = await checkRateLimit(email.toLowerCase());
-        if (rateLimitResult.blocked) {
-          setRateLimitState({
-            blocked: true,
-            blockedType: rateLimitResult.blockedType || "email",
-            remainingSeconds: rateLimitResult.remainingSeconds || 900,
-            message: rateLimitResult.message || "Terlalu banyak percobaan login.",
-            initialSeconds: rateLimitResult.remainingSeconds || 900,
-          });
-          
-          if (rateLimitResult.remainingSeconds) {
-            startCountdown(rateLimitResult.remainingSeconds);
-          }
-          
-          toast.error("Akses Diblokir", {
-            description: rateLimitResult.blockedType === "ip" 
-              ? "IP Anda telah diblokir sementara" 
-              : "Terlalu banyak percobaan gagal",
-            icon: <ShieldX className="h-5 w-5" />,
-            duration: 5000,
-          });
-          
-          setIsSubmitting(false);
+      if (mode === "login" || mode === "register") {
+        const verification = await api.functions.invoke<{ success: boolean }>(
+          "verify-turnstile",
+          { body: { token: captcha } },
+        );
+        if (verification.error || !verification.data?.success) {
+          report(
+            verification.error || {
+              message: "Verifikasi kedaluwarsa. Silakan coba kembali.",
+            },
+          );
           return;
         }
       }
-
-      const isValid = await verifyTurnstile(turnstileToken);
-      if (!isValid) {
-        toast.error("Verifikasi Gagal", {
-          description: "Verifikasi keamanan gagal, silakan coba lagi",
-          icon: <ShieldAlert className="h-5 w-5" />,
-        });
-        resetTurnstile();
-        setIsSubmitting(false);
+      const address = parsed.success ? parsed.data : email.trim();
+      const result =
+        mode === "login"
+          ? await auth.signIn(address, password)
+          : mode === "register"
+            ? await auth.signUp(address, password)
+            : mode === "forgot"
+              ? await auth.resetPassword(address)
+              : await auth.updatePassword(password);
+      if (result.error) {
+        report(result.error);
         return;
       }
-
-      if (mode === "login") {
-        const { error } = await signIn(email, password);
-        if (error) {
-          await recordLoginAttempt(email.toLowerCase(), false);
-          
-          const updatedRateLimit = await checkRateLimit(email.toLowerCase());
-          if (updatedRateLimit.blocked) {
-            setRateLimitState({
-              blocked: true,
-              blockedType: updatedRateLimit.blockedType || "email",
-              remainingSeconds: updatedRateLimit.remainingSeconds || 900,
-              message: updatedRateLimit.message || "Terlalu banyak percobaan login.",
-              initialSeconds: updatedRateLimit.remainingSeconds || 900,
-            });
-            
-            if (updatedRateLimit.remainingSeconds) {
-              startCountdown(updatedRateLimit.remainingSeconds);
-            }
-            
-            toast.error("Akses Diblokir", {
-              description: "Terlalu banyak percobaan gagal. Silakan tunggu.",
-              icon: <ShieldX className="h-5 w-5" />,
-              duration: 5000,
-            });
-          } else if (error.message.includes("Invalid login credentials")) {
-            toast.error("Login Gagal", {
-              description: "Email atau password salah",
-              icon: <XCircle className="h-5 w-5" />,
-            });
-          } else {
-            toast.error("Login Gagal", {
-              description: error.message,
-              icon: <XCircle className="h-5 w-5" />,
-            });
-          }
-        } else {
-          await recordLoginAttempt(email.toLowerCase(), true);
-          
-          if (countdownRef.current) {
-            clearInterval(countdownRef.current);
-          }
-          setRateLimitState({
-            blocked: false,
-            blockedType: null,
-            remainingSeconds: 0,
-            message: null,
-            initialSeconds: 0,
-          });
-          
-          toast.success("Login Berhasil", {
-            description: "Selamat datang kembali!",
-            icon: <CheckCircle2 className="h-5 w-5" />,
-          });
-        }
-      } else if (mode === "register") {
-        const { error } = await signUp(email, password);
-        if (error) {
-          if (error.message.includes("User already registered")) {
-            toast.error("Registrasi Gagal", {
-              description: "Email sudah terdaftar",
-              icon: <Mail className="h-5 w-5" />,
-            });
-          } else {
-            toast.error("Registrasi Gagal", {
-              description: error.message,
-              icon: <XCircle className="h-5 w-5" />,
-            });
-          }
-        } else {
-          toast.success("Registrasi Berhasil", {
-            description: "Akun berhasil dibuat, silakan login",
-            icon: <UserCheck className="h-5 w-5" />,
-          });
-          setMode("login");
-        }
+      if (mode === "forgot")
+        setSuccess(
+          "Jika alamat ini terhubung dengan akun, tautan pemulihan akan dikirim. Periksa kotak masuk dan folder spam Anda.",
+        );
+      if (mode === "register")
+        setSuccess(
+          "Permintaan akun diterima. Periksa email untuk verifikasi. Hak pengelola diberikan secara terpisah.",
+        );
+      if (mode === "reset") {
+        setParams({}, { replace: true });
+        setSuccess("Kata sandi berhasil diubah. Silakan masuk kembali.");
       }
+    } catch {
+      setFeedback(
+        "Layanan belum terhubung. Isian Anda tetap tersedia untuk dicoba kembali.",
+      );
     } finally {
-      setIsSubmitting(false);
-      resetTurnstile();
+      setBusy(false);
+      if (mode === "login" || mode === "register") {
+        setCaptcha(null);
+        captchaRef.current?.reset();
+      }
     }
   };
-
-  if (loading) {
-    return (
-      <Layout>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+  if (
+    !auth.loading &&
+    !auth.error &&
+    auth.user &&
+    auth.isAdmin &&
+    mode !== "reset"
+  )
+    return <Navigate to="/admin" replace />;
+  const panel = auth.loading ? (
+    <div className="console-state" role="status">
+      <Loader2 className="animate-spin" />
+      <h1>Memeriksa sesi…</h1>
+      <p>Menyiapkan ruang kerja Anda.</p>
+    </div>
+  ) : auth.error ? (
+    <div className="console-state" role="alert">
+      <h1>Sesi belum dapat diperiksa.</h1>
+      <p>Koneksi mungkin terputus. Coba lagi untuk melanjutkan dengan aman.</p>
+      <Button onClick={auth.retry}>Coba lagi</Button>
+    </div>
+  ) : auth.user && !auth.isAdmin && mode !== "reset" ? (
+    <div className="console-state">
+      <h1>Akses pengelola belum tersedia.</h1>
+      <p>
+        Akun ini sudah masuk, tetapi belum memiliki hak untuk mengelola
+        portofolio.
+      </p>
+      <Link to="/">Kembali ke portofolio</Link>
+      <Button
+        variant="outline"
+        onClick={async () => {
+          const { error } = await auth.signOut();
+          if (error) report(error);
+        }}
+      >
+        Gunakan akun lain
+      </Button>
+      {feedback && <p role="alert">{feedback}</p>}
+    </div>
+  ) : (
+    <div className="auth-form-card">
+      <span className="console-eyebrow">
+        {mode === "login" ? "Akses pengelola" : "Akun Anda"}
+      </span>
+      <h1>{badToken ? "Tautan tidak valid." : modes[mode].title}</h1>
+      <p className="auth-description">
+        {badToken
+          ? "Tautan pemulihan tidak lengkap. Minta tautan baru sebelum mengubah kata sandi."
+          : modes[mode].description}
+      </p>
+      {success && (
+        <div className="console-notice console-success" role="status">
+          <Check size={18} />
+          <p>{success}</p>
         </div>
-      </Layout>
-    );
-  }
-
-  const progressValue = rateLimitState.initialSeconds > 0
-    ? ((rateLimitState.initialSeconds - rateLimitState.remainingSeconds) / rateLimitState.initialSeconds) * 100
-    : 0;
-
-  const getTitle = () => {
-    switch (mode) {
-      case "login": return "Login Admin";
-      case "register": return "Registrasi";
-      case "forgot": return "Lupa Password";
-      case "reset": return "Reset Password";
-    }
-  };
-
-  const getDescription = () => {
-    switch (mode) {
-      case "login": return "Masuk untuk mengelola portofolio";
-      case "register": return "Buat akun baru";
-      case "forgot": return "Masukkan email untuk reset password";
-      case "reset": return "Masukkan password baru Anda";
-    }
-  };
-
-  const getIcon = () => {
-    switch (mode) {
-      case "login": return <Shield className="h-8 w-8 text-primary" />;
-      case "register": return <UserPlus className="h-8 w-8 text-primary" />;
-      case "forgot": return <Mail className="h-8 w-8 text-primary" />;
-      case "reset": return <KeyRound className="h-8 w-8 text-primary" />;
-    }
-  };
-
-  // Forgot password email sent success screen
-  if (mode === "forgot" && resetEmailSent) {
-    return (
-      <Layout>
-        <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
-          <div className="w-full max-w-md border border-border bg-card rounded-[2px] shadow-xl overflow-hidden">
-            <div className="flex items-center justify-between border-b border-border/80 px-4 py-2.5 bg-muted/40">
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-[2px] border border-primary/40 bg-background/80 flex items-center justify-center text-primary font-mono text-[10px] font-bold">
-                  H
-                </div>
-                <span className="font-mono text-[11px] tracking-wider text-muted-foreground uppercase">
-                  SECURITY_DISPATCH // TOKEN
-                </span>
-              </div>
-              <span className="font-mono text-[10px] text-primary tracking-wider uppercase font-semibold">DELIVERED</span>
-            </div>
-            <div className="p-6 text-center">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-[2px] border border-primary/30 bg-primary/10 mb-4">
-                <Mail className="h-6 w-6 text-primary" />
-              </div>
-              <h1 className="text-xl font-bold font-mono tracking-tight mb-2 text-foreground">DISPATCH_COMPLETE</h1>
-              <div className="text-sm text-muted-foreground mb-6 font-mono text-left bg-muted/30 p-3 rounded-[2px] border border-border/50">
-                <span className="text-xs text-muted-foreground block mb-1">DESTINATION:</span>
-                <strong className="text-foreground break-all">{email}</strong>
-                <span className="text-[11px] text-muted-foreground block mt-2">Instruksi reset token telah dikirim ke inbox. Silakan periksa email Anda.</span>
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setMode("login");
-                  setResetEmailSent(false);
-                  setEmail("");
-                }}
-                className="w-full gap-2 font-mono text-xs uppercase tracking-wider rounded-[2px]"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Kembali ke Login
-              </Button>
-            </div>
-          </div>
+      )}
+      {feedback && (
+        <div
+          ref={feedbackRef}
+          tabIndex={-1}
+          className="console-notice console-error"
+          role="alert"
+        >
+          {feedback}
         </div>
-      </Layout>
-    );
-  }
-
-  return (
-    <Layout>
-      <div className="min-h-[60vh] flex items-center justify-center py-12 px-4">
-        <div className="w-full max-w-md border border-border bg-card rounded-[2px] shadow-2xl overflow-hidden">
-          {/* Terminal Console Window Bar */}
-          <div className="flex items-center justify-between border-b border-border/80 px-4 py-2.5 bg-muted/40">
-            <div className="flex items-center gap-2">
-              <div className="w-5 h-5 rounded-[2px] border border-primary/40 bg-background/80 flex items-center justify-center text-primary font-mono text-[10px] font-bold">
-                H
-              </div>
-              <span className="font-mono text-[11px] tracking-wider text-muted-foreground uppercase">
-                AUTH_NODE // PRIVILEGED
-              </span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-mono text-[10px] text-muted-foreground tracking-widest">TLS_1.3</span>
-            </div>
-          </div>
-
-          <div className="p-6">
-            <div className="mb-6">
-              <h1 className="text-xl font-bold font-mono tracking-tight text-foreground uppercase">{getTitle()}</h1>
-              <p className="text-xs font-mono text-muted-foreground mt-1 uppercase tracking-wider">{getDescription()}</p>
-            </div>
-
-            {/* Rate Limit Warning Banner - Discreet Telemetry Throttle Rail */}
-            {rateLimitState.blocked && (mode === "login" || mode === "register") && (
-              <div className="mb-5 p-3.5 rounded-[2px] border border-border bg-card border-l-2 border-l-amber-500 animate-in fade-in duration-200">
-                <div className="flex items-start gap-2.5">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <h3 className="font-mono font-semibold text-amber-500 text-xs uppercase tracking-wider">
-                        [TELEMETRY: RATE_LIMIT_ENGAGED]
-                      </h3>
-                      <span className="font-mono text-xs font-bold text-amber-400">
-                        {formatTime(rateLimitState.remainingSeconds)}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {rateLimitState.message}
-                    </p>
-                    
-                    <div className="mt-2.5 space-y-1.5">
-                      <div className="h-1 bg-border/50 rounded-[1px] overflow-hidden">
-                        <div 
-                          className="h-full bg-amber-500 transition-all duration-300" 
-                          style={{ width: `${progressValue}%` }}
-                        />
-                      </div>
-                      <p className="text-[10px] font-mono text-muted-foreground">
-                        {rateLimitState.blockedType === "ip"
-                          ? "IP sementara dibatasi karena percobaan berulang."
-                          : "Cooldown keamanan aktif sebelum percobaan berikutnya."}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className={`transition-opacity duration-300 ${rateLimitState.blocked ? 'opacity-50 pointer-events-none' : ''}`}>
-              <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email field - shown for login, register, forgot */}
-              {(mode === "login" || mode === "register" || mode === "forgot") && (
-                <div className="space-y-2">
+      )}
+      {emailUnavailable && (mode === "forgot" || mode === "register") ? (
+        <div className="console-notice">
+          Layanan email belum diaktifkan. Pemulihan dan verifikasi akun melalui
+          email belum tersedia.
+        </div>
+      ) : (
+        !badToken &&
+        !(success && mode !== "login") && (
+          <form onSubmit={submit} noValidate aria-busy={busy}>
+            <fieldset disabled={busy} className="auth-fields">
+              {mode !== "reset" && (
+                <div className="console-field">
                   <Label htmlFor="email">Email</Label>
                   <Input
                     id="email"
+                    name="email"
                     type="email"
-                    placeholder="admin@example.com"
+                    autoComplete="username"
+                    inputMode="email"
+                    autoCapitalize="none"
+                    spellCheck={false}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className={errors.email ? "border-destructive" : ""}
-                    disabled={rateLimitState.blocked}
+                    aria-invalid={!!errors.email}
+                    aria-describedby={errors.email ? "email-error" : undefined}
+                    placeholder="nama@contoh.com"
                   />
-                  <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.email ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <p className="text-sm text-destructive">{errors.email}</p>
-                  </div>
+                  {errors.email && (
+                    <p id="email-error" className="console-field-error">
+                      {errors.email}
+                    </p>
+                  )}
                 </div>
               )}
-
-              {/* Password field - shown for login, register, reset */}
-              {(mode === "login" || mode === "register" || mode === "reset") && (
-                <div className="space-y-2">
+              {mode !== "forgot" && (
+                <div className="console-field">
                   <Label htmlFor="password">
-                    {mode === "reset" ? "Password Baru" : "Password"}
+                    {mode === "reset" ? "Kata sandi baru" : "Kata sandi"}
+                  </Label>
+                  <div className="console-password">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={visible ? "text" : "password"}
+                      autoComplete={
+                        mode === "login" ? "current-password" : "new-password"
+                      }
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      aria-invalid={!!errors.password}
+                      aria-describedby={
+                        errors.password ? "password-error" : undefined
+                      }
+                    />
+                    <button
+                      type="button"
+                      aria-label={
+                        visible
+                          ? "Sembunyikan kata sandi"
+                          : "Tampilkan kata sandi"
+                      }
+                      aria-pressed={visible}
+                      onClick={() => setVisible(!visible)}
+                    >
+                      {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  {errors.password && (
+                    <p id="password-error" className="console-field-error">
+                      {errors.password}
+                    </p>
+                  )}
+                </div>
+              )}
+              {mode === "reset" && (
+                <div className="console-field">
+                  <Label htmlFor="confirmPassword">
+                    Ulangi kata sandi baru
                   </Label>
                   <Input
-                    id="password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={errors.password ? "border-destructive" : ""}
-                    disabled={rateLimitState.blocked}
-                  />
-                  <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.password ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <p className="text-sm text-destructive">{errors.password}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Confirm Password field - shown for reset */}
-              {mode === "reset" && (
-                <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Konfirmasi Password</Label>
-                  <Input
                     id="confirmPassword"
-                    type="password"
-                    placeholder="••••••••"
+                    name="confirmPassword"
+                    type={visible ? "text" : "password"}
+                    autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={errors.confirmPassword ? "border-destructive" : ""}
+                    aria-invalid={!!errors.confirmPassword}
+                    aria-describedby={
+                      errors.confirmPassword ? "confirm-error" : undefined
+                    }
                   />
-                  <div className={`overflow-hidden transition-all duration-300 ease-out ${errors.confirmPassword ? 'max-h-6 opacity-100' : 'max-h-0 opacity-0'}`}>
-                    <p className="text-sm text-destructive">{errors.confirmPassword}</p>
-                  </div>
+                  {errors.confirmPassword && (
+                    <p id="confirm-error" className="console-field-error">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
                 </div>
               )}
-
-              {/* Forgot password link - only on login */}
               {mode === "login" && (
-                <div className="text-right">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMode("forgot");
-                      setErrors({});
-                    }}
-                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    Lupa password?
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  className="auth-recovery"
+                  onClick={() => changeMode("forgot")}
+                >
+                  Lupa kata sandi?
+                </button>
               )}
-
-              {/* Turnstile CAPTCHA - Hardened Integrity Bay */}
-              {!rateLimitState.blocked && (mode === "login" || mode === "register") && (
-                <div className="p-3 border border-border/70 bg-background/50 rounded-[2px] space-y-2">
-                  <div className="flex items-center justify-between font-mono text-[10px] text-muted-foreground uppercase tracking-wider">
-                    <span>INTEGRITY_CHECK // TURNSTILE</span>
-                    <span className="text-primary font-bold">SHA-256</span>
-                  </div>
+              {(mode === "login" || mode === "register") && (
+                <div className="auth-verification">
                   <TurnstileCaptcha
-                    ref={turnstileRef}
-                    onVerify={setTurnstileToken}
-                    onExpire={() => setTurnstileToken(null)}
-                    onError={() => setTurnstileToken(null)}
-                    theme="auto"
+                    key={mode}
+                    ref={captchaRef}
+                    onVerify={setCaptcha}
+                    onExpire={() => setCaptcha(null)}
+                    onError={() => setCaptcha(null)}
+                    theme={resolvedTheme === "light" ? "light" : "dark"}
                   />
                 </div>
               )}
-
-              <Button 
-                type="submit" 
-                className="w-full font-mono text-xs uppercase tracking-wider font-bold rounded-[2px] bg-primary text-primary-foreground hover:bg-primary/90 active:translate-y-[0.5px] transition-all py-2.5 h-auto shadow-sm"
-                disabled={
-                  isSubmitting || 
-                  ((mode === "login" || mode === "register") && (!turnstileToken || rateLimitState.blocked))
-                }
+              {mode === "login" && remaining > 0 && (
+                <p className="console-notice" role="status">
+                  Tunggu {Math.floor(remaining / 60)}:
+                  {String(remaining % 60).padStart(2, "0")} sebelum mencoba
+                  masuk kembali.
+                </p>
+              )}
+              <Button
+                type="submit"
+                className="auth-submit"
+                disabled={busy || (mode === "login" && remaining > 0)}
               >
-                {rateLimitState.blocked && (mode === "login" || mode === "register") ? (
+                {busy ? (
                   <>
-                    <Clock className="h-4 w-4 mr-2" />
-                    Tunggu {formatTime(rateLimitState.remainingSeconds)}
-                  </>
-                ) : isSubmitting ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : mode === "login" ? (
-                  <>
-                    <LogIn className="h-4 w-4 mr-2" />
-                    Login
-                  </>
-                ) : mode === "register" ? (
-                  <>
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Registrasi
-                  </>
-                ) : mode === "forgot" ? (
-                  <>
-                    <Mail className="h-4 w-4 mr-2" />
-                    Kirim Link Reset
+                    <Loader2 size={18} className="animate-spin" />
+                    Memproses…
                   </>
                 ) : (
                   <>
-                    <KeyRound className="h-4 w-4 mr-2" />
-                    Ubah Password
+                    {modes[mode].action}
+                    <ArrowRight size={18} />
                   </>
                 )}
               </Button>
-            </form>
-
-            <div className="mt-6 text-center space-y-2">
-              {mode === "login" && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("register");
-                    setErrors({});
-                  }}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  disabled={rateLimitState.blocked}
-                >
-                  Belum punya akun? Registrasi
-                </button>
-              )}
-              
-              {mode === "register" && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("login");
-                    setErrors({});
-                  }}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                  disabled={rateLimitState.blocked}
-                >
-                  Sudah punya akun? Login
-                </button>
-              )}
-              
-              {(mode === "forgot" || mode === "reset") && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("login");
-                    setErrors({});
-                    setPassword("");
-                    setConfirmPassword("");
-                  }}
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center justify-center gap-1 mx-auto"
-                >
-                  <ArrowLeft className="h-3 w-3" />
-                  Kembali ke Login
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+            </fieldset>
+          </form>
+        )
+      )}
+      {mode === "login" ? (
+        <p className="auth-access-note">
+          Area ini untuk pengelola portofolio.{" "}
+          {emailUnavailable ? (
+            ""
+          ) : (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => changeMode("register")}
+            >
+              Informasi pembuatan akun
+            </button>
+          )}
+        </p>
+      ) : (
+        <button
+          className="auth-back"
+          type="button"
+          disabled={busy}
+          onClick={() => changeMode("login")}
+        >
+          <ArrowLeft size={16} />
+          Kembali ke halaman masuk
+        </button>
+      )}
     </div>
-  </Layout>
-);
+  );
+  return (
+    <Layout>
+      <div className="auth-composition">
+        <aside className="auth-brand-panel" aria-label="Celah">
+          <span className="console-eyebrow">Pengelolaan portofolio</span>
+          <h2>
+            Ruang untuk
+            <br />
+            karya berikutnya<span>.</span>
+          </h2>
+          <div className="auth-seam" aria-hidden="true">
+            <span />
+            <span />
+          </div>
+          <p>
+            Rawat karya, susun cerita, dan bagikan perjalanan Anda dengan lebih
+            utuh.
+          </p>
+          <div className="auth-brand-footer">
+            <span>Rifqi Ariansyah</span>
+            <span>Celah — 01</span>
+          </div>
+        </aside>
+        <section className="auth-form-panel">{panel}</section>
+      </div>
+    </Layout>
+  );
 }

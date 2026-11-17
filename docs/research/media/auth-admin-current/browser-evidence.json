@@ -1,0 +1,1496 @@
+[
+  {
+    "admin": false,
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "metrics": {
+      "language": "en",
+      "title": "Rifqi Ariansyah — Cybersecurity Engineer",
+      "viewport": 1440,
+      "scrollWidth": 1440,
+      "headings": [
+        "Login Admin"
+      ],
+      "buttons": [
+        {
+          "text": "",
+          "aria": "Switch to light mode",
+          "width": 56,
+          "height": 28
+        },
+        {
+          "text": "Lupa password?",
+          "aria": null,
+          "width": 106,
+          "height": 20
+        },
+        {
+          "text": "Login",
+          "aria": null,
+          "width": 398,
+          "height": 36
+        },
+        {
+          "text": "Belum punya akun? Registrasi",
+          "aria": null,
+          "width": 193,
+          "height": 20
+        }
+      ],
+      "fields": [
+        {
+          "id": "email",
+          "type": "email",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        },
+        {
+          "id": "password",
+          "type": "password",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        }
+      ],
+      "tabs": [],
+      "bodyBackground": "rgb(11, 25, 29)",
+      "submit": [
+        {
+          "color": "rgb(11, 25, 29)",
+          "background": "rgb(200, 181, 146)"
+        }
+      ]
+    },
+    "errors": []
+  },
+  {
+    "authInvalid": {
+      "focused": "",
+      "errors": [
+        {
+          "text": "Email tidak valid",
+          "color": "rgb(215, 71, 60)",
+          "id": "",
+          "role": null
+        },
+        {
+          "text": "Password minimal 12 karakter",
+          "color": "rgb(215, 71, 60)",
+          "id": "",
+          "role": null
+        }
+      ],
+      "email": {
+        "invalid": null,
+        "describedBy": null
+      }
+    }
+  },
+  {
+    "admin": false,
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "metrics": {
+      "language": "en",
+      "title": "Rifqi Ariansyah — Cybersecurity Engineer",
+      "viewport": 1440,
+      "scrollWidth": 1440,
+      "headings": [
+        "Login Admin"
+      ],
+      "buttons": [
+        {
+          "text": "",
+          "aria": "Switch to dark mode",
+          "width": 56,
+          "height": 28
+        },
+        {
+          "text": "Lupa password?",
+          "aria": null,
+          "width": 106,
+          "height": 20
+        },
+        {
+          "text": "Login",
+          "aria": null,
+          "width": 398,
+          "height": 36
+        },
+        {
+          "text": "Belum punya akun? Registrasi",
+          "aria": null,
+          "width": 193,
+          "height": 20
+        }
+      ],
+      "fields": [
+        {
+          "id": "email",
+          "type": "email",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        },
+        {
+          "id": "password",
+          "type": "password",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        }
+      ],
+      "tabs": [],
+      "bodyBackground": "rgb(244, 241, 236)",
+      "submit": [
+        {
+          "color": "rgb(244, 241, 236)",
+          "background": "rgb(152, 115, 67)"
+        }
+      ]
+    },
+    "errors": []
+  },
+  {
+    "admin": false,
+    "theme": "dark",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "metrics": {
+      "language": "en",
+      "title": "Rifqi Ariansyah — Cybersecurity Engineer",
+      "viewport": 390,
+      "scrollWidth": 390,
+      "headings": [
+        "Login Admin"
+      ],
+      "buttons": [
+        {
+          "text": "",
+          "aria": "Switch to light mode",
+          "width": 56,
+          "height": 28
+        },
+        {
+          "text": "Lupa password?",
+          "aria": null,
+          "width": 106,
+          "height": 20
+        },
+        {
+          "text": "Login",
+          "aria": null,
+          "width": 308,
+          "height": 36
+        },
+        {
+          "text": "Belum punya akun? Registrasi",
+          "aria": null,
+          "width": 193,
+          "height": 20
+        }
+      ],
+      "fields": [
+        {
+          "id": "email",
+          "type": "email",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        },
+        {
+          "id": "password",
+          "type": "password",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        }
+      ],
+      "tabs": [],
+      "bodyBackground": "rgb(11, 25, 29)",
+      "submit": [
+        {
+          "color": "rgb(11, 25, 29)",
+          "background": "rgb(200, 181, 146)"
+        }
+      ]
+    },
+    "errors": []
+  },
+  {
+    "admin": false,
+    "theme": "dark",
+    "viewport": {
+      "width": 320,
+      "height": 740
+    },
+    "metrics": {
+      "language": "en",
+      "title": "Rifqi Ariansyah — Cybersecurity Engineer",
+      "viewport": 320,
+      "scrollWidth": 320,
+      "headings": [
+        "Login Admin"
+      ],
+      "buttons": [
+        {
+          "text": "",
+          "aria": "Switch to light mode",
+          "width": 56,
+          "height": 28
+        },
+        {
+          "text": "Lupa password?",
+          "aria": null,
+          "width": 106,
+          "height": 20
+        },
+        {
+          "text": "Login",
+          "aria": null,
+          "width": 238,
+          "height": 36
+        },
+        {
+          "text": "Belum punya akun? Registrasi",
+          "aria": null,
+          "width": 193,
+          "height": 20
+        }
+      ],
+      "fields": [
+        {
+          "id": "email",
+          "type": "email",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        },
+        {
+          "id": "password",
+          "type": "password",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        }
+      ],
+      "tabs": [],
+      "bodyBackground": "rgb(11, 25, 29)",
+      "submit": [
+        {
+          "color": "rgb(11, 25, 29)",
+          "background": "rgb(200, 181, 146)"
+        }
+      ]
+    },
+    "errors": []
+  },
+  {
+    "admin": true,
+    "theme": "dark",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "metrics": {
+      "language": "en",
+      "title": "Rifqi Ariansyah — Cybersecurity Engineer",
+      "viewport": 1440,
+      "scrollWidth": 1440,
+      "headings": [
+        "Admin Dashboard"
+      ],
+      "buttons": [
+        {
+          "text": "Logout",
+          "aria": null,
+          "width": 82,
+          "height": 30
+        },
+        {
+          "text": "",
+          "aria": "Switch to light mode",
+          "width": 56,
+          "height": 28
+        },
+        {
+          "text": "Logout",
+          "aria": null,
+          "width": 104,
+          "height": 36
+        },
+        {
+          "text": "Notifikasi",
+          "aria": null,
+          "width": 119,
+          "height": 36
+        },
+        {
+          "text": "Activity Log",
+          "aria": null,
+          "width": 136,
+          "height": 36
+        },
+        {
+          "text": "Export",
+          "aria": null,
+          "width": 101,
+          "height": 36
+        },
+        {
+          "text": "Tambah Project",
+          "aria": null,
+          "width": 159,
+          "height": 36
+        },
+        {
+          "text": "Projects",
+          "aria": null,
+          "width": 92,
+          "height": 38
+        },
+        {
+          "text": "Analytics",
+          "aria": null,
+          "width": 95,
+          "height": 38
+        },
+        {
+          "text": "Security",
+          "aria": null,
+          "width": 88,
+          "height": 38
+        },
+        {
+          "text": "Content",
+          "aria": null,
+          "width": 86,
+          "height": 38
+        },
+        {
+          "text": "Settings",
+          "aria": null,
+          "width": 88,
+          "height": 38
+        },
+        {
+          "text": "Sertifikasi",
+          "aria": null,
+          "width": 101,
+          "height": 38
+        },
+        {
+          "text": "Backup",
+          "aria": null,
+          "width": 79,
+          "height": 38
+        },
+        {
+          "text": "Tema",
+          "aria": null,
+          "width": 64,
+          "height": 38
+        },
+        {
+          "text": "Semua Kategori",
+          "aria": null,
+          "width": 180,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "Judul",
+          "aria": null,
+          "width": 57,
+          "height": 17
+        },
+        {
+          "text": "Kategori",
+          "aria": null,
+          "width": 80,
+          "height": 17
+        },
+        {
+          "text": "Tanggal",
+          "aria": null,
+          "width": 72,
+          "height": 17
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        }
+      ],
+      "fields": [
+        {
+          "id": "",
+          "type": "text",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        }
+      ],
+      "tabs": [
+        {
+          "label": "Projects",
+          "rect": {
+            "x": 289.5625,
+            "right": 381.953125
+          }
+        },
+        {
+          "label": "Analytics",
+          "rect": {
+            "x": 405.953125,
+            "right": 500.671875
+          }
+        },
+        {
+          "label": "Security",
+          "rect": {
+            "x": 524.671875,
+            "right": 613.0625
+          }
+        },
+        {
+          "label": "Content",
+          "rect": {
+            "x": 637.0625,
+            "right": 723.171875
+          }
+        },
+        {
+          "label": "Settings",
+          "rect": {
+            "x": 747.171875,
+            "right": 835.09375
+          }
+        },
+        {
+          "label": "Sertifikasi",
+          "rect": {
+            "x": 859.09375,
+            "right": 959.609375
+          }
+        },
+        {
+          "label": "Backup",
+          "rect": {
+            "x": 983.609375,
+            "right": 1062.4375
+          }
+        },
+        {
+          "label": "Tema",
+          "rect": {
+            "x": 1086.4375,
+            "right": 1150.421875
+          }
+        }
+      ],
+      "bodyBackground": "rgb(11, 25, 29)",
+      "submit": []
+    },
+    "errors": []
+  },
+  {
+    "dialog": {
+      "background": "rgb(12, 14, 18)",
+      "color": "rgb(240, 242, 245)",
+      "withinConsole": false,
+      "bounds": {
+        "width": 670.97314453125,
+        "height": 898.624755859375
+      }
+    }
+  },
+  {
+    "admin": true,
+    "theme": "light",
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "metrics": {
+      "language": "en",
+      "title": "Rifqi Ariansyah — Cybersecurity Engineer",
+      "viewport": 1440,
+      "scrollWidth": 1440,
+      "headings": [
+        "Admin Dashboard"
+      ],
+      "buttons": [
+        {
+          "text": "Logout",
+          "aria": null,
+          "width": 82,
+          "height": 30
+        },
+        {
+          "text": "",
+          "aria": "Switch to dark mode",
+          "width": 56,
+          "height": 28
+        },
+        {
+          "text": "Logout",
+          "aria": null,
+          "width": 104,
+          "height": 36
+        },
+        {
+          "text": "Notifikasi",
+          "aria": null,
+          "width": 119,
+          "height": 36
+        },
+        {
+          "text": "Activity Log",
+          "aria": null,
+          "width": 136,
+          "height": 36
+        },
+        {
+          "text": "Export",
+          "aria": null,
+          "width": 101,
+          "height": 36
+        },
+        {
+          "text": "Tambah Project",
+          "aria": null,
+          "width": 159,
+          "height": 36
+        },
+        {
+          "text": "Projects",
+          "aria": null,
+          "width": 92,
+          "height": 38
+        },
+        {
+          "text": "Analytics",
+          "aria": null,
+          "width": 95,
+          "height": 38
+        },
+        {
+          "text": "Security",
+          "aria": null,
+          "width": 88,
+          "height": 38
+        },
+        {
+          "text": "Content",
+          "aria": null,
+          "width": 86,
+          "height": 38
+        },
+        {
+          "text": "Settings",
+          "aria": null,
+          "width": 88,
+          "height": 38
+        },
+        {
+          "text": "Sertifikasi",
+          "aria": null,
+          "width": 101,
+          "height": 38
+        },
+        {
+          "text": "Backup",
+          "aria": null,
+          "width": 79,
+          "height": 38
+        },
+        {
+          "text": "Tema",
+          "aria": null,
+          "width": 64,
+          "height": 38
+        },
+        {
+          "text": "Semua Kategori",
+          "aria": null,
+          "width": 180,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "Judul",
+          "aria": null,
+          "width": 57,
+          "height": 17
+        },
+        {
+          "text": "Kategori",
+          "aria": null,
+          "width": 80,
+          "height": 17
+        },
+        {
+          "text": "Tanggal",
+          "aria": null,
+          "width": 72,
+          "height": 17
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        }
+      ],
+      "fields": [
+        {
+          "id": "",
+          "type": "text",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        }
+      ],
+      "tabs": [
+        {
+          "label": "Projects",
+          "rect": {
+            "x": 289.5625,
+            "right": 381.953125
+          }
+        },
+        {
+          "label": "Analytics",
+          "rect": {
+            "x": 405.953125,
+            "right": 500.671875
+          }
+        },
+        {
+          "label": "Security",
+          "rect": {
+            "x": 524.671875,
+            "right": 613.0625
+          }
+        },
+        {
+          "label": "Content",
+          "rect": {
+            "x": 637.0625,
+            "right": 723.171875
+          }
+        },
+        {
+          "label": "Settings",
+          "rect": {
+            "x": 747.171875,
+            "right": 835.09375
+          }
+        },
+        {
+          "label": "Sertifikasi",
+          "rect": {
+            "x": 859.09375,
+            "right": 959.609375
+          }
+        },
+        {
+          "label": "Backup",
+          "rect": {
+            "x": 983.609375,
+            "right": 1062.4375
+          }
+        },
+        {
+          "label": "Tema",
+          "rect": {
+            "x": 1086.4375,
+            "right": 1150.421875
+          }
+        }
+      ],
+      "bodyBackground": "rgb(244, 241, 236)",
+      "submit": []
+    },
+    "errors": []
+  },
+  {
+    "admin": true,
+    "theme": "dark",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "metrics": {
+      "language": "en",
+      "title": "Rifqi Ariansyah — Cybersecurity Engineer",
+      "viewport": 390,
+      "scrollWidth": 390,
+      "headings": [
+        "Admin Dashboard"
+      ],
+      "buttons": [
+        {
+          "text": "Logout",
+          "aria": null,
+          "width": 34,
+          "height": 26
+        },
+        {
+          "text": "",
+          "aria": "Switch to light mode",
+          "width": 56,
+          "height": 28
+        },
+        {
+          "text": "Logout",
+          "aria": null,
+          "width": 42,
+          "height": 36
+        },
+        {
+          "text": "Notifikasi",
+          "aria": null,
+          "width": 42,
+          "height": 36
+        },
+        {
+          "text": "Activity Log",
+          "aria": null,
+          "width": 42,
+          "height": 36
+        },
+        {
+          "text": "Export",
+          "aria": null,
+          "width": 42,
+          "height": 36
+        },
+        {
+          "text": "Tambah Project",
+          "aria": null,
+          "width": 40,
+          "height": 36
+        },
+        {
+          "text": "Projects",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Analytics",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Security",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Content",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Settings",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Sertifikasi",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Backup",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Tema",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Semua Kategori",
+          "aria": null,
+          "width": 180,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "Judul",
+          "aria": null,
+          "width": 57,
+          "height": 17
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        }
+      ],
+      "fields": [
+        {
+          "id": "",
+          "type": "text",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        }
+      ],
+      "tabs": [
+        {
+          "label": "Projects",
+          "rect": {
+            "x": 15,
+            "right": 39
+          }
+        },
+        {
+          "label": "Analytics",
+          "rect": {
+            "x": 63,
+            "right": 87
+          }
+        },
+        {
+          "label": "Security",
+          "rect": {
+            "x": 111,
+            "right": 135
+          }
+        },
+        {
+          "label": "Content",
+          "rect": {
+            "x": 159,
+            "right": 183
+          }
+        },
+        {
+          "label": "Settings",
+          "rect": {
+            "x": 207,
+            "right": 231
+          }
+        },
+        {
+          "label": "Sertifikasi",
+          "rect": {
+            "x": 255,
+            "right": 279
+          }
+        },
+        {
+          "label": "Backup",
+          "rect": {
+            "x": 303,
+            "right": 327
+          }
+        },
+        {
+          "label": "Tema",
+          "rect": {
+            "x": 351,
+            "right": 375
+          }
+        }
+      ],
+      "bodyBackground": "rgb(11, 25, 29)",
+      "submit": []
+    },
+    "errors": []
+  },
+  {
+    "mobileWidth": 390,
+    "mobileTabNames": [
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      }
+    ],
+    "accessibleProjectsTabs": 0
+  },
+  {
+    "admin": true,
+    "theme": "dark",
+    "viewport": {
+      "width": 320,
+      "height": 740
+    },
+    "metrics": {
+      "language": "en",
+      "title": "Rifqi Ariansyah — Cybersecurity Engineer",
+      "viewport": 320,
+      "scrollWidth": 320,
+      "headings": [
+        "Admin Dashboard"
+      ],
+      "buttons": [
+        {
+          "text": "Logout",
+          "aria": null,
+          "width": 34,
+          "height": 26
+        },
+        {
+          "text": "",
+          "aria": "Switch to light mode",
+          "width": 56,
+          "height": 28
+        },
+        {
+          "text": "Logout",
+          "aria": null,
+          "width": 42,
+          "height": 36
+        },
+        {
+          "text": "Notifikasi",
+          "aria": null,
+          "width": 42,
+          "height": 36
+        },
+        {
+          "text": "Activity Log",
+          "aria": null,
+          "width": 42,
+          "height": 36
+        },
+        {
+          "text": "Export",
+          "aria": null,
+          "width": 42,
+          "height": 36
+        },
+        {
+          "text": "Tambah Project",
+          "aria": null,
+          "width": 40,
+          "height": 36
+        },
+        {
+          "text": "Projects",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Analytics",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Security",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Content",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Settings",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Sertifikasi",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Backup",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Tema",
+          "aria": null,
+          "width": 24,
+          "height": 38
+        },
+        {
+          "text": "Semua Kategori",
+          "aria": null,
+          "width": 180,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "Judul",
+          "aria": null,
+          "width": 57,
+          "height": 17
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        },
+        {
+          "text": "",
+          "aria": null,
+          "width": 40,
+          "height": 40
+        }
+      ],
+      "fields": [
+        {
+          "id": "",
+          "type": "text",
+          "name": "",
+          "autocomplete": "",
+          "invalid": null,
+          "describedBy": null
+        }
+      ],
+      "tabs": [
+        {
+          "label": "Projects",
+          "rect": {
+            "x": -20,
+            "right": 4
+          }
+        },
+        {
+          "label": "Analytics",
+          "rect": {
+            "x": 28,
+            "right": 52
+          }
+        },
+        {
+          "label": "Security",
+          "rect": {
+            "x": 76,
+            "right": 100
+          }
+        },
+        {
+          "label": "Content",
+          "rect": {
+            "x": 124,
+            "right": 148
+          }
+        },
+        {
+          "label": "Settings",
+          "rect": {
+            "x": 172,
+            "right": 196
+          }
+        },
+        {
+          "label": "Sertifikasi",
+          "rect": {
+            "x": 220,
+            "right": 244
+          }
+        },
+        {
+          "label": "Backup",
+          "rect": {
+            "x": 268,
+            "right": 292
+          }
+        },
+        {
+          "label": "Tema",
+          "rect": {
+            "x": 316,
+            "right": 340
+          }
+        }
+      ],
+      "bodyBackground": "rgb(11, 25, 29)",
+      "submit": []
+    },
+    "errors": []
+  },
+  {
+    "mobileWidth": 320,
+    "mobileTabNames": [
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      },
+      {
+        "text": "",
+        "aria": null
+      }
+    ],
+    "accessibleProjectsTabs": 0
+  }
+]

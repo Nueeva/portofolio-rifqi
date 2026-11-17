@@ -1,371 +1,999 @@
-/* ==========================================================================
-   CELAH CONSOLE SHELL - ARCHITECTURAL DESIGN TOKENS & ANTI-SLOP SYSTEM
-   Target Boundary: [data-design="legacy"] (/admin and /auth)
-   Esthetic: Deep Mineral Petrol, Champagne Gold, Hairline Bronze & Obsidian
-   Zero Slop: Razor-sharp micro-radii, discrete telemetry, anti-pill killswitch
-   ========================================================================== */
-
-/* --------------------------------------------------------------------------
-   1. CORE PALETTE & SHADCN/TAILWIND TOKEN MAPPINGS
-   -------------------------------------------------------------------------- */
-
+/* Celah workspace. Tokens also inherit into the console's scoped portal host. */
 [data-design="legacy"] {
-  /* Default: Dark Obsidian / Petrol Console */
-  --background: 194 44% 8%;           /* #0b181c: Obsidian Void */
-  --foreground: 41 36% 91%;           /* #f1ece1: Warm Ivory / Bleached Bone */
-  --card: 195 40% 11%;                 /* #112328: Elevated Petrol Surface */
-  --card-foreground: 41 36% 91%;      /* #f1ece1 */
-  --popover: 195 40% 11%;              /* #112328 */
-  --popover-foreground: 41 36% 91%;   /* #f1ece1 */
-  --primary: 39 33% 68%;              /* #c7b594: Champagne Gold / Pale Bronze */
-  --primary-foreground: 194 44% 8%;   /* #0b181c: Dark Petrol Contrast */
-  --secondary: 195 39% 15%;           /* #152930: Sunken Secondary */
-  --secondary-foreground: 41 36% 91%; /* #f1ece1 */
-  --muted: 195 39% 14%;               /* #14272d: Muted Surface */
-  --muted-foreground: 173 15% 65%;    /* #97aba8: Metallic Muted Slate */
-  --accent: 195 39% 16%;              /* #172e35: Interactive Hover Surface */
-  --accent-foreground: 41 36% 91%;    /* #f1ece1 */
-  --destructive: 4 66% 54%;           /* #c4413b: Mineral Crimson */
-  --destructive-foreground: 0 0% 100%;
-  --border: 194 33% 21%;              /* #243f47: Precision Hairline Border */
-  --input: 194 33% 21%;               /* #243f47: Input Hairline Border */
-  --ring: 39 33% 68%;                 /* #c7b594: Champagne Gold Focus Ring */
-  --radius: 0.25rem;                  /* 4px: Architectural Sharp Radius */
-
-  /* Surface & Base Layout */
-  background-color: hsl(var(--background));
-  background-image: 
-    radial-gradient(ellipse 65% 45% at 85% -5%, rgba(199, 181, 148, 0.04), transparent 70%),
-    radial-gradient(ellipse 55% 35% at 15% 105%, rgba(142, 221, 213, 0.03), transparent 60%);
-  background-attachment: fixed;
+  --background: 194 44% 8%;
+  --foreground: 41 36% 91%;
+  --card: 195 36% 12%;
+  --card-foreground: 41 36% 91%;
+  --popover: 195 36% 12%;
+  --popover-foreground: 41 36% 91%;
+  --primary: 39 33% 68%;
+  --primary-foreground: 194 44% 8%;
+  --secondary: 195 28% 17%;
+  --secondary-foreground: 41 36% 91%;
+  --muted: 195 28% 16%;
+  --muted-foreground: 174 13% 70%;
+  --accent: 195 28% 19%;
+  --accent-foreground: 41 36% 91%;
+  --destructive: 4 78% 78%;
+  --destructive-foreground: 194 44% 8%;
+  --border: 193 18% 29%;
+  --input: 188 12% 48%;
+  --ring: 39 33% 68%;
+  --radius: 0.375rem;
+  background: hsl(var(--background));
   color: hsl(var(--foreground));
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: Inter, sans-serif;
+  line-height: 1.6;
   min-height: 100vh;
-  letter-spacing: -0.01em;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
-
-/* Light Mode Overrides for Console (/admin and /auth) */
 .light [data-design="legacy"],
 :root:not(.dark) [data-design="legacy"] {
-  --background: 43 25% 94%;           /* #f2efe9: Warm Limestone Parchment */
-  --foreground: 195 44% 12%;          /* #11242a: Deep Petrol Ink */
-  --card: 42 24% 97%;                 /* #faf8f4: Crisp Chalk Surface */
-  --card-foreground: 195 44% 12%;     /* #11242a */
-  --popover: 42 24% 97%;              /* #faf8f4 */
-  --popover-foreground: 195 44% 12%;  /* #11242a */
-  --primary: 34 39% 43%;              /* #985e33 / #92400e: Burnished Bronze */
-  --primary-foreground: 43 25% 94%;   /* #f2efe9: Limestone Contrast */
-  --secondary: 40 20% 88%;            /* #e3ddd1 */
-  --secondary-foreground: 195 44% 12%;
-  --muted: 40 20% 88%;                /* #e3ddd1 */
-  --muted-foreground: 195 20% 40%;    /* #526e77: Muted Petrol Slate */
-  --accent: 40 20% 86%;               /* #ded7ca */
-  --accent-foreground: 195 44% 12%;
-  --destructive: 4 66% 45%;
+  --background: 42 28% 96%;
+  --foreground: 210 13% 9%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 13% 9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 13% 9%;
+  --primary: 23 83% 31%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 40 23% 90%;
+  --secondary-foreground: 210 13% 9%;
+  --muted: 40 23% 92%;
+  --muted-foreground: 195 16% 36%;
+  --accent: 40 23% 89%;
+  --accent-foreground: 210 13% 9%;
+  --destructive: 0 64% 39%;
   --destructive-foreground: 0 0% 100%;
-  --border: 40 18% 79%;               /* #ccc4b5: Soft Mineral Hairline */
-  --input: 40 18% 79%;                /* #ccc4b5 */
-  --ring: 34 39% 43%;                 /* #985e33 */
-  --radius: 0.25rem;
-
-  background-color: hsl(var(--background));
-  background-image: 
-    radial-gradient(ellipse 65% 45% at 85% -5%, rgba(146, 64, 14, 0.04), transparent 70%),
-    radial-gradient(ellipse 55% 35% at 15% 105%, rgba(15, 118, 110, 0.03), transparent 60%);
-  background-attachment: fixed;
+  --border: 40 15% 80%;
+  --input: 137 3% 48%;
+  --ring: 23 83% 31%;
 }
-
-/* --------------------------------------------------------------------------
-   2. ANTI-PILL KILLSWITCH & ARCHITECTURAL GEOMETRY
-   Eliminates all cartoonish pill badges, stadium containers, and bubble icons.
-   -------------------------------------------------------------------------- */
-
-/* Universal killswitch: Force all .rounded-full to architectural sharp radius (2px) */
-[data-design="legacy"] .rounded-full {
-  border-radius: 2px !important;
+[data-design="legacy"] *,
+[data-design="legacy"] *::before,
+[data-design="legacy"] *::after {
+  box-sizing: border-box;
 }
-
-/* Strict Exemption: Micro status dots & pulse indicators (<= 16px) */
-[data-design="legacy"] .rounded-full.h-1,
-[data-design="legacy"] .rounded-full.w-1,
-[data-design="legacy"] .rounded-full.h-1\.5,
-[data-design="legacy"] .rounded-full.w-1\.5,
-[data-design="legacy"] .rounded-full.h-2,
-[data-design="legacy"] .rounded-full.w-2,
-[data-design="legacy"] .rounded-full.h-2\.5,
-[data-design="legacy"] .rounded-full.w-2\.5,
-[data-design="legacy"] .rounded-full.h-3,
-[data-design="legacy"] .rounded-full.w-3,
-[data-design="legacy"] .rounded-full.h-3\.5,
-[data-design="legacy"] .rounded-full.w-3\.5,
-[data-design="legacy"] .rounded-full.h-4,
-[data-design="legacy"] .rounded-full.w-4,
-[data-design="legacy"] .status-dot,
-[data-design="legacy"] [data-status-dot],
-[data-design="legacy"] .animate-ping,
-[data-design="legacy"] .h-2.w-2 .rounded-full,
-[data-design="legacy"] .w-2.h-2 .rounded-full,
-[data-design="legacy"] span.relative.flex.h-2.w-2 span {
-  border-radius: 9999px !important;
-}
-
-/* Purge Large Circular Icon Containers (w-16, w-14, w-12 bubbles) */
-[data-design="legacy"] .w-16.h-16.rounded-full,
-[data-design="legacy"] .w-14.h-14.rounded-full,
-[data-design="legacy"] .w-12.h-12.rounded-full,
-[data-design="legacy"] .w-10.h-10.rounded-full {
-  border-radius: 4px !important;
-  border: 1px solid hsl(var(--border));
-  background-color: hsl(var(--card)) !important;
-}
-
-/* --------------------------------------------------------------------------
-   3. TYPOGRAPHY MATRIX (Editorial Grotesk + Monospaced Telemetry)
-   -------------------------------------------------------------------------- */
-
 [data-design="legacy"] h1,
 [data-design="legacy"] h2,
-[data-design="legacy"] h3,
-[data-design="legacy"] .font-display,
-[data-design="legacy"] .admin-heading {
-  font-family: 'Space Grotesk', -apple-system, sans-serif;
-  letter-spacing: -0.025em;
-  font-weight: 500;
-  color: hsl(var(--foreground));
+[data-design="legacy"] h3 {
+  font-family: "Space Grotesk", sans-serif;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
 }
-
-[data-design="legacy"] pre,
-[data-design="legacy"] code,
-[data-design="legacy"] .font-mono,
-[data-design="legacy"] .telemetry-mono,
-[data-design="legacy"] [data-mono] {
-  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
-  font-feature-settings: "zero" 1, "ss01" 1;
+[data-design="legacy"] button,
+[data-design="legacy"] a,
+[data-design="legacy"] input,
+[data-design="legacy"] textarea {
+  touch-action: manipulation;
 }
-
-/* --------------------------------------------------------------------------
-   4. HIGH-CRAFT SURFACES, CARDS & PANELS
-   -------------------------------------------------------------------------- */
-
-[data-design="legacy"] .bg-card,
-[data-design="legacy"] .card {
-  background-color: hsl(var(--card));
-  border: 1px solid hsl(var(--border) / 0.85);
-  border-radius: 4px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.25), 0 1px 2px -1px rgba(0, 0, 0, 0.2);
-  transition: border-color 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+[data-design="legacy"] :focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 4px;
 }
-
-.light [data-design="legacy"] .bg-card,
-:root:not(.dark) [data-design="legacy"] .bg-card {
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.03);
-}
-
-[data-design="legacy"] .bg-card:hover {
-  border-color: hsl(var(--border));
-}
-
-/* --------------------------------------------------------------------------
-   5. FORM CONTROLS & INPUT SYSTEM
-   -------------------------------------------------------------------------- */
-
-[data-design="legacy"] input:not([type="checkbox"]):not([type="radio"]),
+[data-design="legacy"] input:not([type="file"]):not([type="checkbox"]),
 [data-design="legacy"] textarea,
-[data-design="legacy"] select {
-  background-color: hsl(var(--background) / 0.75);
-  border: 1px solid hsl(var(--input));
-  border-radius: 2px;
+[data-design="legacy"] [role="combobox"] {
+  font-size: 16px;
+  min-height: 46px;
+  background: hsl(var(--background));
+  border-color: hsl(var(--input));
   color: hsl(var(--foreground));
-  font-size: 0.875rem;
-  letter-spacing: -0.01em;
-  transition: border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s ease;
+  border-radius: 5px;
 }
-
-[data-design="legacy"] input:hover,
-[data-design="legacy"] textarea:hover,
-[data-design="legacy"] select:hover {
-  border-color: hsl(var(--border) / 1.4);
-}
-
-[data-design="legacy"] input:focus,
-[data-design="legacy"] textarea:focus,
-[data-design="legacy"] select:focus {
-  outline: none;
-  background-color: hsl(var(--background));
-  border-color: hsl(var(--primary));
-  box-shadow: 0 0 0 1px hsl(var(--primary) / 0.45);
-}
-
 [data-design="legacy"] input::placeholder,
 [data-design="legacy"] textarea::placeholder {
-  color: hsl(var(--muted-foreground) / 0.65);
-}
-
-/* Checkbox & Selection controls */
-[data-design="legacy"] [role="checkbox"] {
-  border-radius: 2px;
-  border-color: hsl(var(--border));
-}
-
-[data-design="legacy"] [role="checkbox"][data-state="checked"] {
-  background-color: hsl(var(--primary));
-  color: hsl(var(--primary-foreground));
-  border-color: hsl(var(--primary));
-}
-
-/* --------------------------------------------------------------------------
-   6. ACTION BUTTONS & INTERACTION WEIGHT
-   -------------------------------------------------------------------------- */
-
-/* Primary Action Buttons */
-[data-design="legacy"] button[class*="bg-primary"],
-[data-design="legacy"] .btn-primary {
-  background-color: hsl(var(--primary)) !important;
-  color: hsl(var(--primary-foreground)) !important;
-  font-weight: 500;
-  border-radius: 2px !important;
-  letter-spacing: -0.01em;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
-  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease, box-shadow 0.15s ease;
-}
-
-[data-design="legacy"] button[class*="bg-primary"]:hover,
-[data-design="legacy"] .btn-primary:hover {
-  opacity: 0.94;
-  transform: translateY(-0.5px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
-}
-
-[data-design="legacy"] button[class*="bg-primary"]:active,
-[data-design="legacy"] .btn-primary:active {
-  transform: translateY(0);
-}
-
-/* Secondary & Ghost Buttons */
-[data-design="legacy"] button[class*="border-input"],
-[data-design="legacy"] button[class*="bg-secondary"],
-[data-design="legacy"] button[class*="hover:bg-accent"] {
-  border-radius: 2px !important;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-/* --------------------------------------------------------------------------
-   7. SEGMENTED HAIRLINE TABS (Operational Console Style)
-   -------------------------------------------------------------------------- */
-
-[data-design="legacy"] [role="tablist"] {
-  background-color: transparent !important;
-  border-bottom: 1px solid hsl(var(--border));
-  border-radius: 0 !important;
-  padding: 0 !important;
-  gap: 1.5rem;
-  overflow-x: auto;
-}
-
-[data-design="legacy"] [role="tab"] {
-  position: relative;
-  background-color: transparent !important;
-  border-radius: 0 !important;
-  padding: 0.625rem 0.25rem !important;
-  font-family: 'Space Grotesk', -apple-system, sans-serif;
-  font-size: 0.8125rem;
-  font-weight: 500;
-  letter-spacing: -0.01em;
   color: hsl(var(--muted-foreground));
-  transition: color 0.15s ease;
-  border-bottom: 2px solid transparent !important;
-  margin-bottom: -1px;
+  opacity: 1;
 }
-
-[data-design="legacy"] [role="tab"]:hover {
+[data-design="legacy"] input[aria-invalid="true"],
+[data-design="legacy"] textarea[aria-invalid="true"] {
+  border-color: hsl(var(--destructive));
+}
+[data-design="legacy"] [role="dialog"],
+[data-design="legacy"] [role="alertdialog"] {
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--border));
+  border-radius: 10px;
+}
+[data-design="legacy"] [role="dialog"] button,
+[data-design="legacy"] [role="alertdialog"] button {
+  min-height: 40px;
+}
+.console-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 244px minmax(0, 1fr);
+  grid-template-rows: 80px 1fr auto;
+}
+.console-header {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  border-bottom: 1px solid hsl(var(--border) / 0.65);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: hsl(var(--background) / 0.97);
+  gap: 16px;
+}
+.console-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 25px;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+}
+.console-mark {
+  width: 35px;
+  height: 35px;
+  color: hsl(var(--primary));
+  flex-shrink: 0;
+}
+.console-brand-caption {
+  display: block;
+  font-family: Inter, sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: hsl(var(--muted-foreground));
+  margin-top: 5px;
+}
+.console-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.console-public-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  min-height: 44px;
+  color: hsl(var(--muted-foreground));
+}
+.console-icon-button {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 1px solid hsl(var(--border));
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: transparent;
   color: hsl(var(--foreground));
 }
-
-[data-design="legacy"] [role="tab"][data-state="active"],
-[data-design="legacy"] [role="tab"][aria-selected="true"] {
-  color: hsl(var(--foreground)) !important;
-  border-bottom-color: hsl(var(--primary)) !important;
-  box-shadow: none !important;
+.console-icon-button:hover {
+  background: hsl(var(--accent));
 }
-
-/* --------------------------------------------------------------------------
-   8. DATA TABLES & TELEMETRY LISTS
-   -------------------------------------------------------------------------- */
-
-[data-design="legacy"] table {
+.console-menu-toggle {
+  display: none;
+}
+.console-sidebar {
+  grid-column: 1;
+  grid-row: 2/4;
+  border-right: 1px solid hsl(var(--border) / 0.65);
+  padding: 32px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 80px);
+  height: calc(100vh - 80px);
+  align-self: start;
+  overflow: auto;
+}
+.console-nav-group {
+  margin-bottom: 24px;
+}
+.console-nav-group > p,
+.console-eyebrow {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+.console-nav-group > p {
+  padding: 0 12px;
+  margin-bottom: 9px;
+}
+.console-nav-group a {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-height: 46px;
+  font-size: 13px;
+  padding: 10px 12px;
+  border-radius: 5px;
+  color: hsl(var(--muted-foreground));
+  border: 1px solid transparent;
+  line-height: 1.4;
+}
+.console-nav-group a:hover {
+  color: hsl(var(--foreground));
+  background: hsl(var(--muted));
+}
+.console-nav-group a[aria-current="page"] {
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.08);
+  border-color: hsl(var(--primary) / 0.17);
+}
+.console-account {
+  border-top: 1px solid hsl(var(--border) / 0.65);
+  padding: 20px 10px 0;
+  margin-top: auto;
+  font-size: 12px;
+}
+.console-account > p {
+  overflow-wrap: anywhere;
+  margin: 8px 0 12px;
+  color: hsl(var(--muted-foreground));
+}
+.console-account button {
+  padding-left: 0;
+  gap: 8px;
+  font-size: 13px;
+}
+.console-main {
+  min-width: 0;
+  padding: 40px clamp(24px, 4vw, 64px) 64px;
+  max-width: 1550px;
+  width: 100%;
+  margin: 0 auto;
+  align-self: start;
+}
+.console-footer {
+  grid-column: 2;
+  border-top: 1px solid hsl(var(--border) / 0.65);
+  padding: 20px clamp(24px, 4vw, 64px);
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.console-skip {
+  position: fixed;
+  left: 16px;
+  top: -100px;
+  z-index: 150;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 12px 18px;
+  border-radius: 5px;
+}
+.console-skip:focus {
+  top: 12px;
+}
+.console-mobile-menu {
+  padding: 28px 20px;
+  width: 290px;
+  max-width: 90vw;
+  overflow: auto;
+}
+.console-mobile-menu nav {
+  margin-top: 28px;
+}
+.console-page-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 30px;
+}
+.console-page-heading h1 {
+  font-size: clamp(28px, 3vw, 38px);
+  font-weight: 400;
+  margin: 9px 0 10px;
+}
+.console-page-heading p {
+  font-size: 14px;
+  color: hsl(var(--muted-foreground));
+  max-width: 60ch;
+}
+.console-page-heading button {
+  min-height: 44px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.console-panel {
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.8);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.console-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.console-search {
+  position: relative;
+  flex: 1;
+  min-width: 190px;
+}
+.console-search > svg {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  color: hsl(var(--muted-foreground));
+  width: 18px;
+  height: 18px;
+}
+.console-search input {
+  padding-left: 42px;
+  width: 100%;
+}
+.console-toolbar select {
+  min-height: 46px;
+  border: 1px solid hsl(var(--input));
+  background: hsl(var(--background));
+  border-radius: 5px;
+  padding: 0 34px 0 12px;
+  font-size: 14px;
+  max-width: 100%;
+}
+.console-selection {
+  padding: 14px 18px;
+  background: hsl(var(--primary) / 0.08);
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  flex-wrap: wrap;
+  border-bottom: 1px solid hsl(var(--border));
+  font-size: 13px;
+}
+.console-selection > span {
+  margin-right: auto;
+}
+.console-table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 13px;
 }
-
-[data-design="legacy"] table th {
-  font-family: 'JetBrains Mono', monospace;
-  text-transform: uppercase;
-  font-size: 0.6875rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
+.console-table th {
+  text-align: left;
   color: hsl(var(--muted-foreground));
-  padding: 0.625rem 0.75rem;
+  font-weight: 500;
+  font-size: 11px;
+  padding: 16px 18px;
   border-bottom: 1px solid hsl(var(--border));
-  background-color: hsl(var(--card) / 0.4);
+  white-space: nowrap;
+}
+.console-table td {
+  padding: 18px;
+  border-bottom: 1px solid hsl(var(--border) / 0.6);
+  vertical-align: middle;
+}
+.console-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+.console-table tbody tr:hover {
+  background: hsl(var(--muted) / 0.4);
+}
+.console-table th:first-child,
+.console-table td:first-child {
+  width: 46px;
+  padding-right: 0;
+}
+.console-table input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: hsl(var(--primary));
+  cursor: pointer;
+}
+.console-check {
+  min-width: 30px;
+  min-height: 30px;
+  display: inline-grid;
+  place-items: center;
+}
+.console-project-title {
+  display: block;
+  text-align: left;
+  font-weight: 500;
+  color: hsl(var(--foreground));
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 32px;
+}
+.console-project-title:hover {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.console-project-meta {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 4px;
+}
+.console-tag {
+  font-size: 11px;
+  display: inline-block;
+  padding: 3px 8px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.console-row-actions {
+  display: flex;
+  gap: 5px;
+  justify-content: flex-end;
+}
+.console-row-actions button {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 5px;
+  color: hsl(var(--muted-foreground));
+}
+.console-row-actions button:hover {
+  color: hsl(var(--foreground));
+  background: hsl(var(--accent));
+}
+.console-row-actions button[data-delete]:hover {
+  color: hsl(var(--destructive));
+}
+.console-list-footer {
+  padding: 15px 18px;
+  border-top: 1px solid hsl(var(--border));
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  flex-wrap: wrap;
+}
+.console-list-footer > span {
+  margin-right: auto;
+}
+.console-list-footer button {
+  min-width: 40px;
+  min-height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid hsl(var(--border));
+  border-radius: 5px;
+}
+.console-empty,
+.console-state {
+  padding: 48px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+.console-empty h2,
+.console-state h1 {
+  font-size: 24px;
+}
+.console-empty p,
+.console-state p {
+  color: hsl(var(--muted-foreground));
+  font-size: 14px;
+  max-width: 45ch;
+}
+.console-notice {
+  padding: 14px 16px;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--muted) / 0.45);
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.65;
+  margin-bottom: 20px;
+  overflow-wrap: anywhere;
+}
+.console-error {
+  color: hsl(var(--destructive));
+  border-color: hsl(var(--destructive) / 0.5);
+}
+.console-success {
+  display: flex;
+  gap: 10px;
+  color: hsl(var(--foreground));
+  border-color: hsl(var(--primary) / 0.45);
+}
+.console-success svg {
+  flex-shrink: 0;
+  color: hsl(var(--primary));
+  margin-top: 2px;
+}
+.console-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.console-field > label {
+  font-size: 13px;
+  font-weight: 500;
+}
+.console-field small,
+.console-field > p:not(.console-field-error) {
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+}
+.console-field-error {
+  font-size: 13px;
+  color: hsl(var(--destructive));
+}
+.console-fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+.console-password {
+  position: relative;
+}
+.console-password input {
+  padding-right: 48px;
+  width: 100%;
+}
+.console-password button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  color: hsl(var(--muted-foreground));
+}
+.console-auth-layout {
+  grid-template-columns: 1fr;
+  grid-template-rows: 80px 1fr;
+}
+.console-auth-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(28px, 6vw, 80px) 32px;
+}
+.auth-composition {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 1120px;
+  width: 100%;
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: 10px;
+  overflow: hidden;
+  min-height: 650px;
+}
+.auth-brand-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 48px;
+  background: hsl(var(--card));
+  overflow: hidden;
+  border-right: 1px solid hsl(var(--border) / 0.7);
+}
+.auth-brand-panel h2 {
+  font-size: clamp(38px, 4.5vw, 62px);
+  font-weight: 400;
+  line-height: 1.1;
+  margin-top: 48px;
+  position: relative;
+  z-index: 1;
+}
+.auth-brand-panel h2 > span {
+  color: hsl(var(--primary));
+}
+.auth-brand-panel > p {
+  font-size: 14px;
+  color: hsl(var(--muted-foreground));
+  max-width: 32ch;
+  position: relative;
+  margin-top: auto;
+  line-height: 1.8;
+}
+.auth-brand-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 30px;
+  margin-top: 30px;
+  border-top: 1px solid hsl(var(--border));
+  font-size: 10px;
+  color: hsl(var(--muted-foreground));
+}
+.auth-seam {
+  height: 140px;
+  position: relative;
+  margin: 16px -75px 28px;
+  transform: rotate(-15deg);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.auth-seam span {
+  height: 50%;
+  background: linear-gradient(
+    95deg,
+    hsl(var(--primary) / 0),
+    hsl(var(--primary) / 0.07),
+    hsl(var(--primary) / 0.14)
+  );
+  border-bottom: 1px solid hsl(var(--primary) / 0.4);
+}
+.auth-seam span + span {
+  border-bottom: 0;
+  border-top: 1px solid hsl(var(--primary) / 0.4);
+  background: linear-gradient(
+    95deg,
+    hsl(var(--primary) / 0.12),
+    hsl(var(--primary) / 0.04),
+    hsl(var(--primary) / 0)
+  );
+}
+.auth-form-panel {
+  display: flex;
+  align-items: center;
+  padding: 48px;
+  background: hsl(var(--background));
+}
+.auth-form-card {
+  width: 100%;
+  max-width: 400px;
+  margin: auto;
+}
+.auth-form-card h1 {
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.15;
+  margin: 18px 0 16px;
+}
+.auth-description {
+  font-size: 14px;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 28px;
+  line-height: 1.75;
+}
+.auth-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+}
+.auth-recovery {
+  align-self: flex-end;
+  font-size: 12px;
+  min-height: 32px;
+  color: hsl(var(--muted-foreground));
+  margin-top: -12px;
+}
+.auth-recovery:hover,
+.auth-back:hover,
+.auth-access-note button:hover {
+  color: hsl(var(--primary));
+}
+.auth-verification {
+  font-size: 12px;
+  padding: 12px 0;
+  border-top: 1px solid hsl(var(--border) / 0.7);
+  border-bottom: 1px solid hsl(var(--border) / 0.7);
+}
+.auth-verification [role="status"] {
+  font-size: 12px;
+  line-height: 1.6;
+  color: hsl(var(--muted-foreground));
+}
+.auth-submit {
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 0 18px;
+}
+.auth-access-note {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 24px;
+  line-height: 1.8;
+}
+.auth-access-note button {
+  display: block;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  min-height: 32px;
   text-align: left;
 }
-
-[data-design="legacy"] table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid hsl(var(--border) / 0.4);
-  font-size: 0.8125rem;
-  color: hsl(var(--foreground));
-  transition: background-color 0.12s ease;
+.auth-back {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 24px;
+  min-height: 44px;
 }
-
-[data-design="legacy"] table tr:hover td {
-  background-color: hsl(var(--muted) / 0.4);
+.console-editor-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
 }
-
-/* --------------------------------------------------------------------------
-   9. DIALOGS, MODALS & RADIX OVERLAYS
-   -------------------------------------------------------------------------- */
-
-[data-design="legacy"] [role="dialog"],
-[data-design="legacy"] [role="alertdialog"],
-[data-design="legacy"] [data-radix-popper-content-wrapper] [role="menu"] {
-  background-color: hsl(var(--card));
+.console-editor-top button {
+  min-height: 44px;
+  gap: 8px;
+}
+.console-editor-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 24px;
+  align-items: start;
+}
+.console-editor-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+.console-editor-section {
+  padding: 28px;
+  background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
-  border-radius: 4px !important;
-  box-shadow: 0 16px 40px -8px rgba(0, 0, 0, 0.45);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.console-editor-section h2 {
+  font-size: 20px;
+  font-weight: 400;
+}
+.console-editor-section > p {
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  margin-top: -10px;
+}
+.console-editor-review {
+  position: sticky;
+  top: 104px;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 8px;
+  padding: 24px;
+  font-size: 13px;
+}
+.console-editor-review h2 {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+.console-editor-review dl {
+  display: grid;
+  gap: 16px;
+}
+.console-editor-review dt {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 4px;
+}
+.console-editor-review dd {
+  overflow-wrap: anywhere;
+}
+.console-editor-review button {
+  width: 100%;
+  min-height: 46px;
+  margin-top: 24px;
+  gap: 8px;
+}
+.console-editor-review > p {
+  font-size: 11px;
+  color: hsl(var(--muted-foreground));
+  margin-top: 14px;
+  line-height: 1.7;
+}
+.console-cover {
+  padding: 20px;
+  border: 1px dashed hsl(var(--input));
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.console-cover img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+.console-cover input {
+  max-width: 100%;
+  font-size: 13px;
+}
+.console-preferences {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.console-preferences button {
+  min-height: 56px;
+  min-width: 110px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 6px;
+  padding: 12px 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.console-preferences button[aria-pressed="true"] {
+  border-color: hsl(var(--primary));
+  color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.07);
+}
+@media (min-width: 1600px) {
+  .auth-composition {
+    min-height: 700px;
+  }
+  .auth-brand-panel,
+  .auth-form-panel {
+    padding: 56px;
+  }
+}
+@media (max-width: 1100px) {
+  .console-editor-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .console-editor-review {
+    position: static;
+  }
+  .console-project-tech {
+    display: none;
+  }
+  .auth-brand-panel,
+  .auth-form-panel {
+    padding: 36px;
+  }
+  .auth-brand-panel h2 {
+    font-size: 44px;
+  }
+}
+@media (max-width: 800px) {
+  .console-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: 72px 1fr auto;
+  }
+  .console-header {
+    padding: 0 20px;
+  }
+  .console-sidebar {
+    display: none;
+  }
+  .console-menu-toggle {
+    display: grid;
+  }
+  .console-main {
+    padding: 28px 20px 48px;
+  }
+  .console-footer {
+    grid-column: 1;
+    padding: 20px;
+  }
+  .console-header-actions {
+    gap: 10px;
+  }
+  .console-brand {
+    font-size: 23px;
+  }
+  .console-auth-layout {
+    grid-template-rows: 72px 1fr;
+  }
+  .auth-composition {
+    grid-template-columns: 1fr;
+    max-width: 480px;
+    min-height: 0;
+  }
+  .auth-brand-panel {
+    display: none;
+  }
+  .console-auth-main {
+    padding: 32px 20px;
+  }
+  .auth-form-panel {
+    padding: 36px;
+  }
+  .console-editor-section {
+    padding: 22px;
+  }
+  .console-page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .console-page-heading h1 {
+    font-size: 30px;
+  }
+  .console-table .console-project-date {
+    display: none;
+  }
+}
+@media (max-width: 480px) {
+  .console-public-link {
+    display: none;
+  }
+  .console-fields-grid {
+    grid-template-columns: 1fr;
+  }
+  .auth-form-panel {
+    padding: 28px 24px;
+  }
+  .auth-form-card h1 {
+    font-size: 30px;
+  }
+  .console-main {
+    padding: 24px 16px 40px;
+  }
+  .console-table th,
+  .console-table td {
+    padding: 14px 12px;
+  }
+  .console-table th:first-child,
+  .console-table td:first-child {
+    padding-left: 12px;
+    width: 34px;
+  }
+  .console-table .console-project-category {
+    display: none;
+  }
+  .console-project-title {
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+  .console-row-actions {
+    flex-direction: column;
+  }
+  .console-row-actions button {
+    width: 36px;
+    height: 36px;
+  }
+  .console-editor-section {
+    padding: 20px;
+  }
+  .console-footer {
+    font-size: 11px;
+  }
+  .console-list-footer {
+    gap: 10px;
+  }
+  .console-editor-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-design="legacy"] *,
+  [data-design="legacy"] *::before,
+  [data-design="legacy"] *::after {
+    scroll-behavior: auto;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
-/* --------------------------------------------------------------------------
-   10. DISCREET TELEMETRY ALERTS (No Rounded Slop Boxes)
-   -------------------------------------------------------------------------- */
-
-[data-design="legacy"] [role="alert"],
-[data-design="legacy"] .alert-box {
-  background-color: hsl(var(--card)) !important;
-  border: 1px solid hsl(var(--border)) !important;
-  border-left: 2px solid hsl(var(--primary)) !important;
-  border-radius: 2px !important;
-  color: hsl(var(--foreground));
+html:has([data-design="legacy"]) {
+  scroll-padding-top: 100px;
 }
-
-[data-design="legacy"] [role="alert"].destructive,
-[data-design="legacy"] .alert-destructive {
-  border-left-color: hsl(var(--destructive)) !important;
+[data-design="legacy"] input,
+[data-design="legacy"] textarea,
+[data-design="legacy"] [tabindex="-1"] {
+  scroll-margin-top: 100px;
 }
-
-/* --------------------------------------------------------------------------
-   11. ARCHITECTURAL MICRO-TAGS & BADGES
-   -------------------------------------------------------------------------- */
-
-[data-design="legacy"] .badge,
-[data-design="legacy"] [class*="rounded-full"][class*="text-xs"],
-[data-design="legacy"] [class*="rounded-full"][class*="text-sm"],
-[data-design="legacy"] span[class*="px-2.5"][class*="py-0.5"] {
-  border-radius: 2px !important;
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.7rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.console-account button {
+  min-height: 44px;
+}
+.console-overlays {
+  position: relative;
+  z-index: 100;
 }

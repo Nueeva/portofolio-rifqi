@@ -1,6 +1,6 @@
 # Current codebase — 15 November 2026
 
-This guide describes the checked-in implementation. Earlier research and release receipts are historical evidence, not proof of the currently running production version. This revision changes source and documentation only; it does not publish the cloud environment, access the VPS, send email or deploy the site.
+This guide describes the checked-in implementation. The local auth/admin redesign on 17 November 2026 is documented in [its implementation receipt](AUTH_ADMIN_REDESIGN_IMPLEMENTATION.md); it is not yet deployed. Earlier research and release receipts are historical evidence, not proof of the currently running production version. This revision changes source and documentation only; it does not publish the cloud environment, access the VPS, send email or deploy the site.
 
 ## Runtime and data contracts
 
@@ -46,9 +46,9 @@ Verify through local requests to `/api/health`, public content reads and rejecte
 
 ## Design and motion
 
-Public routes use the Celah shell and scoped portals; exact `/admin` and `/auth` use legacy presentation. MotionPolicy reacts to reduced-motion changes. Optional optical WebGL and cursor enhancements retain readable HTML/SVG fallbacks. HomeMotion provides landing-specific studies; case studies retain their process figures.
+Public routes use the Celah shell and scoped portals; exact `/admin` and `/auth` use the dedicated Celah console (the compatibility boundary still uses `data-design="legacy"`). MotionPolicy reacts to reduced-motion changes. Optional optical WebGL and cursor enhancements retain readable HTML/SVG fallbacks. HomeMotion provides landing-specific studies; case studies retain their process figures.
 
-Public ink timing comes from `src/lib/inkRaster.ts`: 780 ms, 390 ms midpoint, 64 frames, 480 px maximum mask tile edge. Preparation uses a worker when supported, with bounded atlas dimensions and a decoded cache. Native View Transition update callbacks are synchronous; never await requestAnimationFrame inside them. Unsupported native transitions use inert page-copy layers. Reduced motion uses a short opacity crossfade (approximately 150 ms), without atlas preparation. Scroll does not cancel the ink transition. Legacy ThemeToggle remains separate. No universal zero-latency or 120 Hz guarantee follows from these constants.
+Public ink timing comes from `src/lib/inkRaster.ts`: 780 ms, 390 ms midpoint, 64 frames, 480 px maximum mask tile edge. Preparation uses a worker when supported, with bounded atlas dimensions and a decoded cache. Native View Transition update callbacks are synchronous; never await requestAnimationFrame inside them. Unsupported native transitions use inert page-copy layers. Reduced motion uses a short opacity crossfade (approximately 150 ms), without atlas preparation. Scroll does not cancel the ink transition. The console uses its own native light/dark control; legacy ThemeToggle is not used by the new auth/admin shell. No universal zero-latency or 120 Hz guarantee follows from these constants.
 
 ## Validation and remaining limits
 
@@ -68,3 +68,12 @@ Browser appearance, keyboard interaction, worker fallbacks, real email delivery,
 - All 15 pre-existing tracked Markdown files were updated; this maintained guide was added. Local Markdown file links were checked.
 
 These are local results for this source correction, not a production deployment receipt. Browser regression and real SMTP delivery were not run.
+
+
+### Console revision — 17 November 2026
+
+Auth uses a shared TanStack Query session/role cache, explicit failure states and mode-specific semantic fields. `/api/config` now includes non-secret `emailEnabled` alongside CAPTCHA configuration. Server login throttling supplies `Retry-After`; the UI preserves HTTP status and timing.
+
+The admin workspace groups navigation by tasks, persists section/search/page/editor in URL state, and uses React Router data-router blocking to protect dirty project edits (including Back navigation). Project and editorial records save atomically through `/api/projects/save`; previous image removal happens only after confirmed save and a reference check. Failed/uncertain candidate writes retain media rather than risk breaking a successful but unconfirmed save. Retained orphan candidates may need later operator cleanup.
+
+Exports support JSON and CSV across nine resources, fail closed on resource errors or the 2,000-record ceiling, and explicitly exclude uploaded files and private auth/configuration. A database/uploads backup remains a separate operator workflow.

@@ -7,7 +7,7 @@ export function ContentManager() {
     const [busy, setBusy] = useState(false);
     const cache = useQueryClient();
     const { toast } = useToast();
-    return <div className="space-y-10"><section className="space-y-4"><h2 className="text-2xl">CV publik</h2><p>PDF maksimal 10 MB. Setelah diterbitkan, tombol CV di Home dan Tentang mengikuti file ini.</p><label className="block">Pilih PDF<input disabled={busy} className="block" type="file" accept="application/pdf" onChange={async (e) => { const file = e.target.files?.[0]; if (!file)
+    return <div className="space-y-10"><section className="space-y-4"><h2 className="text-2xl">CV publik</h2><p>PDF maksimal 10 MB. Tautan CV di Home dan Tentang mengikuti data CMS. HTML statis diperbarui pada rilis berikutnya.</p><label className="block">Pilih PDF<input disabled={busy} className="block" type="file" accept="application/pdf" onChange={async (e) => { const file = e.target.files?.[0]; if (!file)
         return; if (file.type !== "application/pdf" || file.size > 10 * 1024 * 1024) {
         toast({ title: "Pilih PDF maksimal 10 MB", variant: "destructive" });
         return;
@@ -23,7 +23,7 @@ export function ContentManager() {
             throw result.error;
         }
         await cache.invalidateQueries({ queryKey: ["public-site-settings"] });
-        toast({ title: "CV diterbitkan" });
+        toast({ title: "CV tersimpan" });
     }
     catch (error) {
         toast({ title: "Gagal menerbitkan CV", description: error instanceof Error ? error.message : "Periksa koneksi dan izin penyimpanan.", variant: "destructive" });
@@ -31,5 +31,5 @@ export function ContentManager() {
     finally {
         setBusy(false);
         e.target.value = "";
-    } }}/></label>{busy && <p role="status">Mengunggah dan menerbitkan…</p>}</section><EditorialManager /></div>;
+    } }}/></label>{busy && <p role="status">Mengunggah dan menerbitkan…</p>}</section><EditorialManager skillsOnly /></div>;
 }

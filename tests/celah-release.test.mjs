@@ -6,6 +6,21 @@ import { gzipSync } from "node:zlib";
 const read = path => readFileSync(new URL("../"+path,import.meta.url),"utf8");
 const sw = read("dist/sw.js");
 const pages = ["index.html","about/index.html","projects/index.html","contact/index.html",...['apexsions','portfolio71','xssscope','ctf-toolkit'].map(id=>`projects/curated-${id}/index.html`)];
+test("production metadata and discovery files use the current my.id domain",()=>{
+ const origin="https://rifqi.apexsions.my.id";
+ for(const page of pages){
+  const source=read("dist/"+page);
+  assert.ok(source.includes(`<link rel="canonical" href="${origin}/`),page);
+  assert.ok(source.includes(`<meta property="og:url" content="${origin}/`),page);
+  const metadata=source.replace(/<script id="public-content" type="application\/json">[\s\S]*?<\/script>/g, "");
+  assert.ok(!metadata.includes("rifqi.apexsions.com"),page);
+ }
+ for(const file of ["robots.txt","sitemap.xml","llms.txt","llms-full.txt","cv-rifqi-ariansyah.html"]){
+  const source=read("dist/"+file);
+  assert.ok(source.includes("rifqi.apexsions.my.id"),file);
+  assert.ok(!source.includes("rifqi.apexsions.com"),file);
+ }
+});
 for(const page of pages)test(`PWA revisions match final prerender: ${page}`,()=>{
  const source=read("dist/"+page);const digest=createHash("md5").update(source).digest("hex");
  assert.ok(sw.includes(`url:"${page}",revision:"${digest}"`),`final HTML revision missing: ${page}`);

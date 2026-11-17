@@ -1,11 +1,11 @@
 # Rifqi Ariansyah — Cybersecurity Developer (full text)
 
-> Full-text companion to https://rifqi.apexsions.com/llms.txt — complete case-study summaries of the selected projects of Rifqi Ariansyah (GitHub: Nueeva), written for AI assistants and answer engines that need more than the short summary.
+> Full-text companion to https://rifqi.apexsions.my.id/llms.txt — complete case-study summaries of the selected projects of Rifqi Ariansyah (GitHub: Nueeva), written for AI assistants and answer engines that need more than the short summary.
 
 ## Apexsions — A Full Minecraft Server System
 
 - Role: Founder & Lead Developer — System Architect & Operator (three-person project; a fellow developer contributed plugins and features and co-funded hosting, a third partner leads branding, marketing, and sales)
-- Case study: https://rifqi.apexsions.com/projects/curated-apexsions
+- Case study: https://rifqi.apexsions.my.id/projects/curated-apexsions
 - Live site: https://web.apexsions.com
 - Source: https://github.com/Nueeva/Apexsions
 - Tech stack: Java, Paper API, Maven, Azuriom, Pterodactyl, PostgreSQL / SQLite, Cloudflare R2
@@ -18,7 +18,7 @@ Solution: One system, founded, designed, and built end to end by its lead develo
 
 - Role: Full-Stack Developer
 - Period: October 2026
-- Case study: https://rifqi.apexsions.com/projects/curated-portfolio71
+- Case study: https://rifqi.apexsions.my.id/projects/curated-portfolio71
 - Live platform: https://portofolio.apexsions.com
 - Tech stack: Laravel, Nuxt, Tailwind CSS, Sanctum, Cloudflare Tunnel
 
@@ -36,7 +36,7 @@ Lesson: Verification is the feature. A portfolio platform without a credible rev
 
 - Role: Designer & Developer (solo)
 - Period: September 2026
-- Case study: https://rifqi.apexsions.com/projects/curated-xssscope
+- Case study: https://rifqi.apexsions.my.id/projects/curated-xssscope
 - Source: https://github.com/Nueeva/xssscope
 - Tech stack: JavaScript, Node.js, HTTP Probing, Context Analysis
 
@@ -47,7 +47,7 @@ Solution: A zero-dependency JavaScript scanner that probes parameters, classifie
 ## CTF-Toolkit
 
 - Role: Creator & Maintainer
-- Case study: https://rifqi.apexsions.com/projects/curated-ctf-toolkit
+- Case study: https://rifqi.apexsions.my.id/projects/curated-ctf-toolkit
 - Source: https://github.com/Nueeva/CTF-Toolkit
 - Tech stack: Python, Burp Suite, Wireshark, Ghidra
 

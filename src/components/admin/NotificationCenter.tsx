@@ -87,6 +87,7 @@ export const NotificationCenter = () => {
         },
         (payload) => {
           const log = payload.new as {
+            success?: boolean;
             id: string;
             ip_address: string;
             identifier: string | null;
@@ -95,6 +96,7 @@ export const NotificationCenter = () => {
             created_at: string;
           };
 
+          if (log.success !== false) return;
           const newAlert: SecurityAlert = {
             id: log.id,
             type: "failed_login",

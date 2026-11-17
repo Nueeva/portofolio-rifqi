@@ -1,4 +1,4 @@
-# Include inside the existing rifqi.apexsions.com server block at full release cutover.
+# Include inside the existing rifqi.apexsions.my.id server block at full release cutover.
 # Keep the current server-level security headers. Do not add this to other sites.
 # For this host's local Cloudflare Tunnel, trust only its loopback connection.
 # Set these at server scope, before the location block; never trust all peers.

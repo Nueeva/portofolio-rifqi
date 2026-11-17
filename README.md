@@ -1,8 +1,8 @@
 # Portofolio — Rifqi Ariansyah
 
-Personal portfolio and content administration application for Rifqi Ariansyah, presented publicly as a Cybersecurity Engineer. Public pages use the Indonesian **Celah** design. `/admin` and `/auth` retain a separate legacy presentation.
+Personal portfolio and content administration application for Rifqi Ariansyah, presented publicly as a Cybersecurity Engineer. Public pages use the Indonesian **Celah** design. `/admin` and `/auth` use a dedicated Celah console with scoped themes and native form interactions.
 
-Production domain: https://rifqi.apexsions.com. This repository does not establish which commit is currently deployed; earlier deployment receipts in `docs/` are historical records.
+Production domain: https://rifqi.apexsions.my.id. This repository does not establish which commit is currently deployed; earlier deployment receipts in `docs/` are historical records.
 
 ## Current architecture
 
@@ -96,6 +96,15 @@ Browser theme regression checks are separate: `tests/ink-theme.browser.cjs` requ
 - `src/integrations/api`: owned API client and contracts; legacy imports bridge to this client.
 - `server`: Fastify API, schema, local scripts, security and tests.
 - `scripts`: public content capture, prerender, OG cards and final PWA generation.
-- [Current codebase and operations](docs/current-codebase.md), [design specification](DESIGN.md), [editorial workflow](docs/celah-editorial-release.md).
+- [Production deployment](docs/DEPLOYMENT.md), [current codebase and operations](docs/current-codebase.md), [design specification](DESIGN.md), [editorial workflow](docs/celah-editorial-release.md).
 
 Older proposals, research, measurements and release receipts are labeled with their scope. They document past observations and do not authorize server access, deployment or rollback.
+
+
+## Auth and admin workspace
+
+The current console uses grouped, URL-backed navigation at `/admin?section=projects`, with `edit=<id>` or `edit=new` for the project workspace. Auth modes remain compatible with `/auth`, `/auth?mode=forgot`, `/auth?mode=register` and existing reset links. Registrations still require verification and do not grant admin rights.
+
+Projects and studies save through the authorized `POST /api/projects/save` transaction. Deploy frontend and backend together; the new editor requires that endpoint. The change requires no schema migration. Existing CRUD, storage, session, Origin and role checks remain authoritative.
+
+For local UI regression checks, start Vite or a production preview, then run `node tests/console.browser.cjs`. Override `CONSOLE_BASE_URL`, `PLAYWRIGHT_MODULE`, `CHROME_PATH` and `CONSOLE_SCREENSHOTS` when needed. The runner accepts only a local target and mocks API requests; it never uses a production admin account. See [the implementation receipt](docs/AUTH_ADMIN_REDESIGN_IMPLEMENTATION.md) for scope, screenshots, checks and limitations.

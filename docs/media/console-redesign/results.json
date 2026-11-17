@@ -1,0 +1,48 @@
+{
+  "date": "2026-11-17",
+  "baselineCommit": "c6aa304",
+  "build": "passed",
+  "typecheck": "passed",
+  "frontend": {
+    "passed": 72,
+    "failed": 0
+  },
+  "backend": {
+    "passed": 19,
+    "failed": 0
+  },
+  "postgres": {
+    "passed": 4,
+    "failed": 0
+  },
+  "browser": {
+    "mode": "Chromium production preview, mocked API",
+    "passed": [
+      "auth validation, autofill, password visibility and login",
+      "session errors are retryable instead of anonymous",
+      "unavailable recovery and malformed tokens are honest",
+      "workspace navigation, contextual actions and theme-scoped dialog",
+      "safe replacement: upload failure never saves or deletes cover",
+      "atomic workspace saves study and project together; failed save retains fields",
+      "dirty edits block sidebar and browser Back navigation",
+      "pagination clamps after deleting final item on last page",
+      "responsive dark 320px",
+      "responsive dark 390px",
+      "responsive dark 1440px",
+      "responsive light 320px",
+      "responsive light 390px",
+      "responsive light 1440px",
+      "mobile account menu supports logout",
+      "export failures do not produce partial downloads",
+      "light auth action contrast and mobile reflow"
+    ],
+    "pageErrors": []
+  },
+  "lint": {
+    "errors": 0,
+    "warnings": 12
+  },
+  "initialJsGzipBytes": 185450,
+  "initialJsBudget": 200000,
+  "deployed": false
+}

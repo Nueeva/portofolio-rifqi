@@ -1,122 +1,63 @@
-import { useState, useEffect } from "react";
-import { User, Session } from "@/integrations/api/types";
-import { supabase } from "@/integrations/api/client";
+import { useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/integrations/api/client";
+import type { Session } from "@/integrations/api/types";
 
 export function useAuth() {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Defer role check with setTimeout to prevent deadlock
-        if (session?.user) {
-          setTimeout(() => {
-            checkAdminRole(session.user.id);
-          }, 0);
-        } else {
-          setIsAdmin(false);
-          setLoading(false);
-        }
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        checkAdminRole(session.user.id);
-      } else {
-        setLoading(false);
-      }
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const checkAdminRole = async (userId: string) => {
-    try {
-      const { data, error } = await supabase.rpc("has_role", {
-        _user_id: userId,
+  const cache = useQueryClient();
+  const sessionQuery = useQuery({
+    queryKey: ["auth-session"],
+    staleTime: 30000,
+    retry: false,
+    refetchOnWindowFocus: true,
+    queryFn: async () => {
+      const result = await api.auth.getSession();
+      if (result.error) throw result.error;
+      return result.data.session;
+    },
+  });
+  const session = sessionQuery.data ?? null;
+  const user = session?.user ?? null;
+  const roleQuery = useQuery({
+    queryKey: ["admin-role", user?.id],
+    enabled: !!user,
+    staleTime: 30000,
+    retry: false,
+    queryFn: async () => {
+      const result = await api.rpc("has_role", {
+        _user_id: user!.id,
         _role: "admin",
       });
-
-      if (error) {
-        console.error("Error checking admin role:", error);
-        setIsAdmin(false);
-      } else {
-        setIsAdmin(data === true);
-      }
-    } catch (error) {
-      console.error("Error checking admin role:", error);
-      setIsAdmin(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+      if (result.error) throw result.error;
+      return result.data === true;
+    },
+  });
+  useEffect(() => {
+    const {
+      data: { subscription },
+    } = api.auth.onAuthStateChange((_event, next: Session | null) => {
+      cache.setQueryData(["auth-session"], next);
+      void cache.invalidateQueries({ queryKey: ["admin-role"] });
     });
-    return { error };
-  };
-
-  const signUp = async (email: string, password: string) => {
-    const redirectUrl = `${window.location.origin}/`;
-    
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-      },
-    });
-    return { error };
-  };
-
-  const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (!error) {
-      setIsAdmin(false);
-    }
-    return { error };
-  };
-
-  const resetPassword = async (email: string) => {
-    const redirectUrl = `${window.location.origin}/auth?reset=true`;
-    
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: redirectUrl,
-    });
-    return { error };
-  };
-
-  const updatePassword = async (newPassword: string) => {
-    const { error } = await supabase.auth.updateUser({
-      password: newPassword,
-    });
-    return { error };
-  };
-
+    return () => subscription.unsubscribe();
+  }, [cache]);
   return {
     user,
     session,
-    isAdmin,
-    loading,
-    signIn,
-    signUp,
-    signOut,
-    resetPassword,
-    updatePassword,
+    isAdmin: !!user && roleQuery.data === true,
+    loading: sessionQuery.isPending || (!!user && roleQuery.isPending),
+    error: sessionQuery.error ?? (user ? roleQuery.error : null),
+    retry: () => {
+      void sessionQuery.refetch();
+      if (user) void roleQuery.refetch();
+    },
+    signIn: (email: string, password: string) =>
+      api.auth.signInWithPassword({ email: email.trim(), password }),
+    signUp: (email: string, password: string) =>
+      api.auth.signUp({ email: email.trim(), password }),
+    signOut: () => api.auth.signOut(),
+    resetPassword: (email: string) =>
+      api.auth.resetPasswordForEmail(email.trim()),
+    updatePassword: (password: string) => api.auth.updateUser({ password }),
   };
 }

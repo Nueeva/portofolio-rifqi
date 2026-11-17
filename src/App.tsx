@@ -1,9 +1,8 @@
 import { createQueryClient } from "@/lib/publicContentCache";
 import type { PublicContent } from "@/integrations/api/types";
 import { useState, useEffect, lazy, Suspense } from "react";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, StaticRouter, Routes, Route, useLocation } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, StaticRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AnimatePresence, MotionConfig } from "motion/react";
 import { PublicShell } from "@/components/public/PublicShell";
@@ -62,6 +61,7 @@ const App = ({ ssrPath, publicContent }: {
 } = {}) => {
     // Each SSR request owns its cache; browser navigation retains this instance.
     const [queryClient] = useState(() => createQueryClient(publicContent));
+    const [browserRouter] = useState(() => ssrPath === undefined ? createBrowserRouter([{ path: "*", element: <AnimatedRoutes /> }]) : null);
     // Flipped in an effect after mount (never on the server, never on
     // the first render): from then on, client-side navigations animate
     // through the PageTransition camera lift, while the first page — server
@@ -121,7 +121,6 @@ const App = ({ ssrPath, publicContent }: {
     }, []);
     return (<ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
       <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
           {/* Respect the visitor's OS-level reduced-motion setting for
             every motion animation in the tree (motion/react reads this
             context instead of its own media query). */}
@@ -132,12 +131,9 @@ const App = ({ ssrPath, publicContent }: {
         // Build-time prerender (entry-server.tsx): same tree, static router.
         <StaticRouter location={ssrPath}>
               <AnimatedRoutes />
-            </StaticRouter>) : (<BrowserRouter>
-              <AnimatedRoutes />
-            </BrowserRouter>)}
+            </StaticRouter>) : (<RouterProvider router={browserRouter!} />)}
           </PageTransitionReadyContext.Provider>
           </MotionConfig>
-        </TooltipProvider>
       </QueryClientProvider>
     </ThemeProvider>);
 };

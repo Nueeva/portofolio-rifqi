@@ -7,8 +7,8 @@ import { createHash } from 'node:crypto';
 
 const root = process.env.RELEASE_ROOT;
 assert.ok(root?.startsWith('/var/www/rifqi-releases/'), 'Set RELEASE_ROOT to the staged release');
-const origin = 'https://rifqi.apexsions.com';
-const headers = { Host: 'rifqi.apexsions.com', Origin: origin, Connection: 'close', 'User-Agent': 'Celah release verification' };
+const origin = 'https://rifqi.apexsions.my.id';
+const headers = { Host: 'rifqi.apexsions.my.id', Origin: origin, Connection: 'close', 'User-Agent': 'Celah release verification' };
 function request(path, options = {}) {
   return new Promise((resolve, reject) => {
     const req = http.request({ hostname: '127.0.0.1', port: 80, path, method: options.method ?? 'GET', headers: { ...headers, ...options.headers } }, response => {

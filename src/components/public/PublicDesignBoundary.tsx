@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
 import { PublicDesignContext } from "./PublicDesignContext";
 import { getPublicProject } from "@/data/projectCopy.id";
 import "./public-design.css";
@@ -11,9 +10,9 @@ import "@/components/admin/admin-console.css";
 export function PublicDesignBoundary({ children, pathname }: { children: ReactNode; pathname: string }) {
   const isPublic = !/^\/(admin|auth)\/?$/.test(pathname);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
-  const value = useMemo(() => ({ isPublic, portalContainer: isPublic ? container ?? undefined : undefined }), [isPublic, container]);
+  const value = useMemo(() => ({ isPublic, portalContainer: container ?? undefined }), [isPublic, container]);
   useEffect(() => {
-    document.documentElement.lang = isPublic ? "id" : "en";
+    document.documentElement.lang = "id";
     if (!isPublic) return;
     const titles: Record<string, string> = { "/": "Cybersecurity Engineer", "/about": "Tentang", "/projects": "Karya", "/contact": "Kontak", "/403": "403 — Akses terbatas", "/500": "500 — Kendala sistem", "/502": "502 — Layanan belum terhubung", "/503": "503 — Layanan tidak tersedia", "/429": "429 — Terlalu banyak permintaan" };
     const project = pathname.startsWith("/projects/") ? getPublicProject(pathname.split("/")[2]) : undefined;
@@ -26,8 +25,7 @@ export function PublicDesignBoundary({ children, pathname }: { children: ReactNo
       <div className={isPublic ? "public-design" : undefined} data-design={isPublic ? "celah" : "legacy"}>
         {children}
         <Toaster />
-        <Sonner containerAriaLabel={isPublic ? "Notifikasi" : undefined} />
-        {isPublic && <div ref={setContainer} className="public-overlays" />}
+        <div ref={setContainer} className={isPublic ? "public-overlays" : "console-overlays"} />
       </div>
     </PublicDesignContext.Provider>
   );

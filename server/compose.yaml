@@ -36,7 +36,7 @@ services:
       HOST: 0.0.0.0
       PORT: 8788
       NODE_ENV: production
-      PUBLIC_ORIGIN: https://rifqi.apexsions.com
+      PUBLIC_ORIGIN: https://rifqi.apexsions.my.id
       DATABASE_URL: postgresql://portfolio_app:${PG_APP_PASSWORD:?required}@database:5432/portfolio
       COOKIE_SECRET: ${COOKIE_SECRET:?required}
       UPLOAD_DIR: /uploads
