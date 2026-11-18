@@ -143,11 +143,11 @@ export default function Projects() {
             {/* Desktop Stage: only mounted on desktop to eliminate SVG DOM duplication penalty */}
             <div className="gallery-stage" aria-label="Pratinjau karya terpilih">
               {!isMobile && (
-                <m.div layout layoutId="project-preview" key={selected.id}>
+                <m.div layout layoutId="project-preview" key={selected.id} data-vt-visual={selected.id}>
                   <ProjectArtwork project={selected} />
                 </m.div>
               )}
-              <h2>{selected.title}</h2>
+              <h2 data-vt-title={!isMobile ? selected.id : undefined}>{selected.title}</h2>
               <ProjectActions project={selected} />
             </div>
 

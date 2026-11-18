@@ -174,7 +174,7 @@ export default function Contact() {
             <span>Jejak Kriptografi PGP</span>
           </div>
         </div>
-        <div className="contact-pgp-fingerprint">
+        <div className="contact-pgp-fingerprint" data-copied={copiedKey ? "true" : undefined}>
           B9F1 2D8E 46A3 7C55 01F9  E3B8 6D20 C71A 9E54 1168
         </div>
         <div className="contact-pgp-actions">

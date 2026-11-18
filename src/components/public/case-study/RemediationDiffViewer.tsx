@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import * as m from "motion/react-m";
 import { Code2, GitCompare, Check, Copy } from "lucide-react";
 
 interface DiffLine {
@@ -182,6 +183,9 @@ export function RemediationDiffViewer({ projectId }: { projectId: string }) {
           >
             <span className="diff-tab-id">{sc.vulnId}</span>
             <span className="diff-tab-name">{sc.title.split("(")[0]}</span>
+            {activeScenarioId === sc.id && (
+              <m.span layoutId="diff-tab-line" className="diff-tab-indicator" />
+            )}
           </button>
         ))}
       </div>
@@ -215,7 +219,7 @@ export function RemediationDiffViewer({ projectId }: { projectId: string }) {
         {/* Diff Code Viewer */}
         <div className="diff-code-viewport">
           <table className="diff-table">
-            <tbody>
+            <tbody key={activeScenario.id} className="diff-tbody">
               {activeScenario.lines.map((line, idx) => (
                 <tr key={idx} className={`diff-line-row diff-${line.type}`}>
                   <td className="diff-num old-num">{line.oldLineNumber ?? ""}</td>

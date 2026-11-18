@@ -121,6 +121,7 @@ export function ConsoleLayout({ children }: { children: ReactNode }) {
       <main
         id="main-content"
         className={authPage ? "console-auth-main" : "console-main"}
+        data-section={!authPage ? active : undefined}
       >
         {children}
       </main>

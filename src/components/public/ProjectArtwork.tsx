@@ -2,9 +2,10 @@ import { ProjectDiagram } from "./ProjectDiagram";
 import { projectVisuals } from "./projectVisuals";
 import { useState } from "react";
 import { ArrowDown, ArrowRight, ArrowUpRight, ExternalLink, Github } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { caseStudyIds, type Project } from "@/data/projects";
 import { categoryLabels } from "@/data/projectCopy.id";
+import { navigateWithViewTransition } from "@/lib/viewNavigate";
 /** Editorial diagrams of documented work; these are not simulated screenshots. */
 export function ProjectArtwork({ project }: {
     project: Project;
@@ -39,8 +40,9 @@ export function ProjectActions({ project, showStudy = true }: {
     project: Project;
     showStudy?: boolean;
 }) {
+    const navigate = useNavigate();
     return <div className="project-actions">
-    {showStudy && (caseStudyIds.has(project.id) || !!(project as import("@/data/projects").CuratedProject).caseStudy) && <Link to={`/projects/${project.id}`}>Baca studi kasus <ArrowUpRight aria-hidden="true"/></Link>}
+    {showStudy && (caseStudyIds.has(project.id) || !!(project as import("@/data/projects").CuratedProject).caseStudy) && <Link to={`/projects/${project.id}`} data-cursor="STUDI KASUS" onClick={(e) => navigateWithViewTransition(e, navigate, `/projects/${project.id}`, { projectId: project.id, direction: "forward" })}>Baca studi kasus <ArrowUpRight aria-hidden="true"/></Link>}
     {project.github_url && <a href={project.github_url} target="_blank" rel="noopener noreferrer" aria-label={`Kode ${project.title} di GitHub`}><Github aria-hidden="true"/>Kode</a>}
     {project.demo_url && <a href={project.demo_url} target="_blank" rel="noopener noreferrer" aria-label={`Buka situs ${project.title}`}><ExternalLink aria-hidden="true"/>Situs proyek</a>}
   </div>;

@@ -2,8 +2,9 @@ import { useEffect, useId, useRef, useState } from "react";
 import { animate, useInView, useMotionValue, useScroll, useTransform, type MotionValue } from "motion/react";
 import * as m from "motion/react-m";
 import { ArrowUpRight, RotateCcw } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import type { Project } from "@/data/projects";
+import { navigateWithViewTransition } from "@/lib/viewNavigate";
 import { useMotionPolicy } from "./motionPolicyContext";
 import { projectVisuals } from "./projectVisuals";
 import { ProjectArtwork } from "./ProjectArtwork";
@@ -359,6 +360,7 @@ function ToolkitDial({ assembly, selected, pulse }: MechanismProps) {
 export function HomeWork({ project, index }: { project: Project; index: number }) {
     const section = useRef<HTMLElement>(null);
     const figure = useRef<HTMLElement>(null);
+    const navigate = useNavigate();
     const visible = useInView(figure, { amount: .35 });
     const { reduced } = useMotionPolicy();
     const { scrollYProgress } = useScroll({ target: section, offset: ["start end", "end start"] });
@@ -379,11 +381,11 @@ export function HomeWork({ project, index }: { project: Project; index: number }
     return <section ref={section} className="home-section home-proof home-kinetic-work" aria-labelledby={`work-${project.id}`}>
         <div className={`public-container home-split ${index % 2 ? "work-reverse" : ""}`}>
             <div className="home-work-copy">
-                <h2 id={`work-${project.id}`}>{project.title.split(" — ")[0]}</h2>
+                <h2 id={`work-${project.id}`} data-vt-title={project.id}>{project.title.split(" — ")[0]}</h2>
                 <p>{project.solution.split(/\s+/).length > 25 ? project.solution.split(/\s+/).slice(0, 25).join(" ") + "…" : project.solution}</p>
-                <Link className="public-text-link home-work-link" to={`/projects/${project.id}`} data-cursor="TELUSURI">Telusuri karya <span className="home-link-orbit"><ArrowUpRight /></span></Link>
+                <Link className="public-text-link home-work-link" to={`/projects/${project.id}`} data-cursor="TELUSURI" onClick={(e) => navigateWithViewTransition(e, navigate, `/projects/${project.id}`, { projectId: project.id, direction: "forward" })}>Telusuri karya <span className="home-link-orbit"><ArrowUpRight /></span></Link>
             </div>
-            <div className="home-visual">
+            <div className="home-visual" data-vt-visual={project.id}>
                 {!spec || project.image_url ? <ProjectArtwork project={project} /> : <figure ref={figure} className={`home-mechanism mechanism-${project.id}`}>
                     <div className="mechanism-topline"><span>Ilustrasi proses</span><button type="button" onClick={() => setReplay(value => value + 1)} aria-label={`Ulangi ilustrasi ${spec.title}`}><RotateCcw size={15} /><span>Ulangi</span></button></div>
                     <svg className="mechanism-scene" viewBox="0 0 640 440" aria-hidden="true">{mechanism}</svg>
@@ -397,6 +399,8 @@ export function HomeWork({ project, index }: { project: Project; index: number }
 
 export function HomeStory() {
     const section = useRef<HTMLElement>(null);
+    const navigate = useNavigate();
+    const visible = useInView(section, { amount: .15 });
     const { reduced } = useMotionPolicy();
     const { scrollYProgress } = useScroll({ target: section, offset: ["start end", "center center"] });
     const build = useTransform(scrollYProgress, value => reduced ? 1 : clamp(value));
@@ -406,7 +410,7 @@ export function HomeStory() {
     const nodeGlow = useTransform(build, [0.85, 1], [0, 1]);
     const haloScale = useTransform(build, [0.85, 1], [0.6, 1.25]);
 
-    return <section ref={section} className="home-section home-personal home-story-motion" aria-labelledby="home-story"><div className="public-container home-split">
+    return <section ref={section} className={`home-section home-personal home-story-motion${visible && !reduced ? " is-visible" : ""}`} aria-labelledby="home-story"><div className="public-container home-split">
         <div><h2 id="home-story">Kode yang berarti<br /><em>sesuatu di rumah.</em></h2>
             <svg className="home-story-thread" viewBox="0 0 560 215" aria-hidden="true">
                 <defs>
@@ -430,7 +434,7 @@ export function HomeStory() {
             </svg>
         </div>
         <div><p>Saya mulai menghasilkan uang sejak SMP, termasuk dari server Minecraft yang saya jalankan. Penghasilan itu dipakai orang tua untuk cicilan keluarga. Dari sana, saya terus belajar merancang, membangun, mengaudit, dan mengoperasikan sistem sendiri.</p>
-            <Link className="public-text-link home-work-link" to="/about" data-cursor="TENTANG">Kenali perjalanan saya <span className="home-link-orbit"><ArrowUpRight /></span></Link>
+            <Link className="public-text-link home-work-link" to="/about" data-cursor="TENTANG" onClick={(e) => navigateWithViewTransition(e, navigate, "/about", { direction: "forward" })}>Kenali perjalanan saya <span className="home-link-orbit"><ArrowUpRight /></span></Link>
         </div>
     </div></section>;
 }

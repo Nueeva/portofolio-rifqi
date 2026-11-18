@@ -1,10 +1,11 @@
 import { lazy, Suspense, useEffect, useRef, useState, type PointerEvent } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as m from "motion/react-m";
 import { animate, useMotionValue, useMotionValueEvent, useScroll, useSpring, useTransform } from "motion/react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { usePublicSettings } from "@/hooks/usePublicSettings";
 import { presentText } from "@/data/projectCopy.id";
+import { navigateWithViewTransition } from "@/lib/viewNavigate";
 import "./cybersecurity-hero.css";
 import { OptionalFeatureBoundary } from "./public/OptionalFeatureBoundary";
 import { useMotionPolicy } from "./public/motionPolicyContext";
@@ -17,6 +18,7 @@ export function CybersecurityHero() {
     const { reduced, allowWebGL } = useMotionPolicy();
     const [sticky, setSticky] = useState(false);
     const ref = useRef<HTMLElement>(null);
+    const navigate = useNavigate();
     const { get } = usePublicSettings();
     const { scrollYProgress } = useScroll({
         target: ref,
@@ -48,6 +50,8 @@ export function CybersecurityHero() {
     const titleY = useTransform(camera, [0, 0.22, 0.72, 1], [0, -3, -34, -42]);
     const engineerX = useTransform(camera, [0, 0.22, 0.72, 1], [0, 0, 28, 34]);
     const lowerY = useTransform(camera, [0, 0.22, 0.72, 1], [0, 2, 44, 50]);
+    // Translate the lower tectonic plate strictly along the -8deg normal vector (sin 8deg ~= 0.1391731)
+    const lowerX = useTransform(lowerY, value => value * 0.1391731);
     const upperLip = useTransform(camera, [0, 0.22, 0.72, 1], [-10, -14, -52, -56]);
     const lowerLip = useTransform(camera, [0, 0.22, 0.72, 1], [10, 14, 52, 56]);
     const aperture = useTransform(camera, [0, 0.22, 0.72, 1], [
@@ -62,6 +66,8 @@ export function CybersecurityHero() {
     const reflectionY = useTransform(camera, [0, 1], [-4, 14]);
     const pointerX = useSpring(0, { stiffness: 110, damping: 26 });
     const pointerY = useSpring(0, { stiffness: 110, damping: 26 });
+    const reflectionX = useTransform(pointerX, value => value * -0.45);
+    const reflectionCompositeY = useTransform([reflectionY, pointerY], (values: number[]) => values[0] - values[1] * 0.35);
     const pointerFrame = useRef(0);
     const pendingPointer = useRef<{ x: number; y: number; target: HTMLElement } | null>(null);
     useEffect(() => () => cancelAnimationFrame(pointerFrame.current), []);
@@ -113,14 +119,14 @@ export function CybersecurityHero() {
           <m.div className="celah-tracer" style={{ x: railSweep }} />
         </div>
         <div className="cyber-upper" aria-hidden="true"/>
-        <m.div className="cyber-lower" aria-hidden="true" style={{ y: lowerY }}/>
+        <m.div className="cyber-lower" aria-hidden="true" style={{ x: reduced ? 0 : lowerX, y: reduced ? 0 : lowerY }}/>
         <m.div className="cyber-heading" style={{ y: reduced ? 0 : titleY }}>
           <h1 id="cyber-title"><span>Cybersecurity</span><m.em style={{ x: engineerX }}>Engineer.</m.em></h1>
         </m.div>
 
         <div className="cyber-seam-frame" aria-hidden="true">
           <m.div className="cyber-cavity" style={{ clipPath: aperture }}>
-            <m.div className="cyber-reflection" style={{ y: reflectionY }}><span>Cybersecurity</span><em>Engineer.</em></m.div>
+            <m.div className="cyber-reflection" style={{ x: reduced ? 0 : reflectionX, y: reduced ? 0 : reflectionCompositeY }}><span>Cybersecurity</span><em>Engineer.</em></m.div>
             <div className="cyber-seam-copy"><span>xssscope</span><span>Konteks refleksi <ArrowRight /> verifikasi</span></div>
           </m.div>
           <m.div className="cyber-lip cyber-lip-top" style={{ y: upperLip }}>
@@ -136,13 +142,13 @@ export function CybersecurityHero() {
             <p>{presentText(get("hero_description", "Membangun tooling dan memperbaiki celah pada sistem produksi."))}</p>
           </div>
           <div className="cyber-project">
-            <Link to="/projects" data-cursor="JELAJAHI"><span>Jelajahi karya</span><span className="cyber-project-arrow"><ArrowUpRight /></span></Link>
+            <Link to="/projects" data-cursor="JELAJAHI" onClick={(e) => navigateWithViewTransition(e, navigate, "/projects", { direction: "forward" })}><span>Jelajahi karya</span><span className="cyber-project-arrow"><ArrowUpRight /></span></Link>
             <a href={get("portfolio_cv_url", "/cv-rifqi-ariansyah.pdf")} download data-cursor="UNDUH CV"><span>Unduh CV</span><span className="cyber-project-arrow"><ArrowUpRight /></span></a>
           </div>
         </div>
         <div className="cyber-bottom">
-          <Link to="/contact" data-cursor="KONTAK">Diskusikan keamanan sistemmu <ArrowUpRight /></Link>
-          <Link to="/projects/curated-apexsions" data-cursor="AUDIT">Apexsions — 32 temuan diperbaiki <ArrowUpRight /></Link>
+          <Link to="/contact" data-cursor="KONTAK" onClick={(e) => navigateWithViewTransition(e, navigate, "/contact", { direction: "forward" })}>Diskusikan keamanan sistemmu <ArrowUpRight /></Link>
+          <Link to="/projects/curated-apexsions" data-cursor="AUDIT" onClick={(e) => navigateWithViewTransition(e, navigate, "/projects/curated-apexsions", { direction: "forward" })}>Apexsions — 32 temuan diperbaiki <ArrowUpRight /></Link>
         </div>
       </div>
     </section>);

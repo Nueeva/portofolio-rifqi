@@ -123,7 +123,7 @@
 .home-case-links { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 28px; }
 .home-personal { border-top: 1px solid var(--site-line); }
 .home-personal .public-text-link { margin-top: 26px; }
-.public-aperture { overflow: hidden; }
+.public-aperture { overflow: hidden; min-width: 0; max-width: 100%; }
 .project-visual { min-height: 340px; position: relative; overflow: hidden; background: var(--site-surface); padding: clamp(25px, 5vw, 56px); display: flex; flex-direction: column; justify-content: center; color: var(--site-ink); }
 .project-visual::after { content: ''; position: absolute; left: -12%; right: -12%; bottom: 19%; height: 1px; background: linear-gradient(90deg, transparent, var(--site-cool), var(--site-metal), transparent); transform: rotate(-8deg); }
 .project-visual img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -158,14 +158,14 @@
 .project-actions svg { width: 15px; height: 15px; }
 .public-empty { padding: 60px 0; color: var(--site-muted); }
 .public-notice { font-size: 12px; padding-block: 16px; color: var(--site-muted); }
-.study-header { margin-bottom: 60px; }
+.study-header { margin-bottom: 60px; min-width: 0; max-width: 100%; }
 .study-header .public-text-link { margin-bottom: 45px; }
 .study-header h1 { font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1.08; max-width: 22ch; margin-bottom: 28px; }
 .study-meta { display: flex; flex-wrap: wrap; gap: 25px 60px; padding-block: 26px; margin-top: 38px; border-block: 1px solid var(--site-line); }
 .study-meta dt { color: var(--site-muted); font-size: 12px; margin-bottom: 7px; }
 .study-meta dd { font-size: 14px; max-width: 45ch; }
-.study-article { max-width: 72ch; margin-inline: auto; }
-.study-section { padding-block: 36px; border-bottom: 1px solid var(--site-line); }
+.study-article { width: 100%; min-width: 0; max-width: min(72ch, 100%); margin-inline: auto; }
+.study-section { min-width: 0; max-width: 100%; padding-block: 36px; border-bottom: 1px solid var(--site-line); }
 .study-section h2 { font-size: clamp(1.75rem, 3.2vw, 2.5rem); margin-bottom: 22px; }
 .study-section p, .study-section li { color: var(--site-muted); line-height: 1.95; margin-bottom: 18px; }
 .study-section ul, .study-section ol { list-style: disc; padding-left: 20px; }
@@ -289,8 +289,16 @@
   .public-aperture { clip-path: none !important; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .public-design *, .public-design *::before, .public-design *::after { animation: none !important; scroll-behavior: auto !important; transition-duration: 0s !important; }
+  .public-design *, .public-design *::before, .public-design *::after {
+    animation: none !important;
+    scroll-behavior: auto !important;
+    transition-property: color, background-color, border-color, opacity, box-shadow, filter !important;
+    transition-duration: 120ms !important;
+  }
   .public-aperture { clip-path: none !important; }
+  ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
 
 .public-design{--site-cyan:#0F766E;--site-violet:#6366F1;--site-copper:#B45309;scrollbar-color:var(--scrollbar-thumb) transparent}
@@ -346,7 +354,23 @@
 .contact-pgp-card { margin-top: 36px; padding: 22px; border: 1px solid var(--site-line); background: var(--site-surface); border-radius: 6px; }
 .contact-pgp-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
 .contact-pgp-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--site-metal); text-transform: uppercase; letter-spacing: 0.05em; }
-.contact-pgp-fingerprint { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--site-ink); background: var(--site-bg); padding: 10px 12px; border: 1px solid var(--site-line); border-radius: 4px; word-break: break-all; margin-bottom: 14px; line-height: 1.6; letter-spacing: 0.02em; }
+.contact-pgp-fingerprint { position: relative; overflow: hidden; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--site-ink); background: var(--site-bg); padding: 10px 12px; border: 1px solid var(--site-line); border-radius: 4px; word-break: break-all; margin-bottom: 14px; line-height: 1.6; letter-spacing: 0.02em; transition: border-color .2s ease; }
+.contact-pgp-fingerprint[data-copied="true"] { border-color: var(--site-cyan); }
+@media (prefers-reduced-motion: no-preference) {
+  .contact-pgp-fingerprint::after {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 45%;
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--site-cyan) 28%, transparent), transparent);
+    transform: translateX(-140%) skewX(-12deg);
+    pointer-events: none;
+  }
+  .contact-pgp-fingerprint[data-copied="true"]::after {
+    transform: translateX(280%) skewX(-12deg);
+    transition: transform .55s cubic-bezier(.16, 1, .3, 1);
+  }
+}
 .contact-pgp-actions { display: flex; flex-wrap: wrap; gap: 10px; }
 .contact-pgp-btn { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 6px 12px; border: 1px solid var(--site-line); background: var(--site-bg); color: var(--site-muted); border-radius: 4px; transition: color .18s, border-color .18s; cursor: pointer; }
 .contact-pgp-btn:hover { color: var(--site-metal); border-color: var(--site-metal); }
@@ -392,4 +416,102 @@
 .meter-track { width: 100%; height: 6px; background: var(--site-bg); border: 1px solid var(--site-line); border-radius: 3px; overflow: hidden; margin-bottom: 12px; }
 .meter-fill { height: 100%; background: linear-gradient(90deg, var(--site-cyan), var(--site-metal)); transition: width 1s linear; }
 .meter-footer { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; color: var(--site-muted); font-size: 11px; }
+
+/* --- Pillar 2: Same-Document & Directional View Transitions --- */
+[data-vt-title] { width: fit-content; }
+::view-transition-group(root),
+::view-transition-group(celah-project-visual),
+::view-transition-group(celah-project-title) {
+  animation-duration: 0.32s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+::view-transition-old(celah-project-visual),
+::view-transition-new(celah-project-visual),
+::view-transition-old(celah-project-title),
+::view-transition-new(celah-project-title) {
+  height: 100%;
+  object-fit: cover;
+}
+@keyframes vt-root-out-left {
+  to { opacity: 0; transform: translateX(-18px); }
+}
+@keyframes vt-root-in-right {
+  from { opacity: 0; transform: translateX(18px); }
+}
+@keyframes vt-root-out-right {
+  to { opacity: 0; transform: translateX(18px); }
+}
+@keyframes vt-root-in-left {
+  from { opacity: 0; transform: translateX(-18px); }
+}
+html:active-view-transition-type(forward)::view-transition-old(root) {
+  animation: vt-root-out-left 0.2s cubic-bezier(0.32, 0, 0.67, 0) both;
+}
+html:active-view-transition-type(forward)::view-transition-new(root) {
+  animation: vt-root-in-right 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+html:active-view-transition-type(backward)::view-transition-old(root) {
+  animation: vt-root-out-right 0.2s cubic-bezier(0.32, 0, 0.67, 0) both;
+}
+html:active-view-transition-type(backward)::view-transition-new(root) {
+  animation: vt-root-in-left 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* --- Pillar 3: Technical Diagram Parity & CSS Scroll-Driven Reading Seam --- */
+.system-diagram .diagram-syntax-delim { fill: var(--site-metal); }
+.system-diagram .diagram-syntax-payload { fill: var(--site-copper); font-weight: 700; }
+.system-diagram .diagram-tag-bg { fill: var(--site-surface); stroke: var(--site-line); stroke-width: 1; }
+.system-diagram .diagram-tag-text { font: 600 11.5px 'JetBrains Mono', monospace; fill: var(--site-cyan); letter-spacing: .04em; }
+.system-diagram .diagram-subnote { font: 500 11px 'JetBrains Mono', monospace; fill: var(--site-muted); }
+@media (max-width: 480px) {
+  .system-diagram .diagram-tag-text,
+  .system-diagram .diagram-subnote { font-size: 12.5px; }
+}
+.system-diagram .diagram-bay-title { font: 600 17px 'Space Grotesk', sans-serif; fill: var(--site-ink); }
+.system-diagram .diagram-interconnect { stroke: var(--site-cyan); stroke-width: 1; stroke-dasharray: 2 2; opacity: .5; }
+.system-diagram .plugin-cell.is-core { fill: var(--site-surface); stroke: var(--site-cyan); stroke-width: 1.6; }
+.system-diagram .db-tier { fill: var(--site-bg); stroke: var(--site-line); stroke-width: 1; transition: stroke .2s, fill .2s; }
+.system-diagram .db-tier.is-primary,
+.system-diagram .db-tier.is-failover-active { fill: var(--site-surface); stroke: var(--site-cyan); stroke-width: 1.5; }
+.system-diagram .db-tier.is-severed { stroke: var(--site-copper); stroke-dasharray: 4 3; opacity: .65; }
+.system-diagram .dial-center-hub { fill: var(--site-surface); stroke: var(--site-cyan); stroke-width: 1.5; }
+.system-diagram .mechanism-trace { fill: none; stroke: var(--site-cyan); stroke-width: 2; stroke-linecap: round; }
+
+.public-scroll-seam { display: none; }
+@supports (animation-timeline: scroll()) {
+  @media (prefers-reduced-motion: no-preference) {
+    @keyframes celah-scroll-seam {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+    .public-scroll-seam {
+      display: block;
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -1px;
+      height: 1.5px;
+      background: linear-gradient(90deg, var(--site-cyan), var(--site-metal) 60%, var(--site-copper));
+      transform-origin: 0 50%;
+      transform: scaleX(0);
+      pointer-events: none;
+      animation: celah-scroll-seam linear both;
+      animation-timeline: scroll(root);
+    }
+  }
+}
+
+/* --- Pillar 4: TembusMark Micro-Parting --- */
+@media (prefers-reduced-motion: no-preference) {
+  .public-brand .tembus-pillar-left,
+  .public-brand .tembus-pillar-right {
+    transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .public-brand:is(:hover, :focus-visible) .tembus-pillar-left {
+    transform: translate(-6px, 4px);
+  }
+  .public-brand:is(:hover, :focus-visible) .tembus-pillar-right {
+    transform: translate(6px, -4px);
+  }
+}
 

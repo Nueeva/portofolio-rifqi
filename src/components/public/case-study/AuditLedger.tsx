@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
-import { ShieldAlert, ShieldCheck, Search, ChevronDown, ChevronUp, GitCommit, AlertTriangle, ExternalLink } from "lucide-react";
+import * as m from "motion/react-m";
+import { ShieldAlert, ShieldCheck, Search, ChevronDown, GitCommit, AlertTriangle, ExternalLink } from "lucide-react";
 
 export interface VulnerabilityFinding {
   id: string;
@@ -410,6 +411,7 @@ export function AuditLedger({ projectId }: { projectId: string }) {
             aria-pressed={filterSeverity === "all"}
           >
             Semua ({findings.length})
+            {filterSeverity === "all" && <m.span layoutId="audit-filter-line" className="audit-tab-indicator" />}
           </button>
           <button
             type="button"
@@ -418,6 +420,7 @@ export function AuditLedger({ projectId }: { projectId: string }) {
             aria-pressed={filterSeverity === "critical"}
           >
             Critical ({criticalCount})
+            {filterSeverity === "critical" && <m.span layoutId="audit-filter-line" className="audit-tab-indicator" />}
           </button>
           <button
             type="button"
@@ -426,6 +429,7 @@ export function AuditLedger({ projectId }: { projectId: string }) {
             aria-pressed={filterSeverity === "major"}
           >
             Major ({majorCount})
+            {filterSeverity === "major" && <m.span layoutId="audit-filter-line" className="audit-tab-indicator" />}
           </button>
         </div>
 
@@ -494,7 +498,7 @@ export function AuditLedger({ projectId }: { projectId: string }) {
                     </td>
                     <td className="text-right">
                       <span className="expand-indicator" aria-hidden="true">
-                        {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        <ChevronDown size={16} className="audit-chevron" />
                       </span>
                     </td>
                   </tr>

@@ -1,6 +1,6 @@
 import * as m from "motion/react-m";
 import { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useLocation } from "react-router-dom";
 import { ArrowUpRight, Github, Linkedin, Mail, Menu, Twitter } from "lucide-react";
 import { InkThemeSwitch as PublicThemeSwitch } from "@/components/InkThemeSwitch";
 import { TembusMark } from "@/components/TembusMark";
@@ -11,6 +11,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 const links = [{ to: "/", label: "Beranda" }, { to: "/projects", label: "Karya" }, { to: "/about", label: "Tentang" }, { to: "/contact", label: "Kontak" }];
 
 export function PublicNavbar() {
+    const { pathname } = useLocation();
     const { get } = usePublicSettings();
     const name = get("hero_name", "Rifqi Ariansyah");
     const [open, setOpen] = useState(false);
@@ -58,7 +59,7 @@ export function PublicNavbar() {
         <nav aria-label="Navigasi seluler">{links.map(link => <NavLink key={link.to} to={link.to} end={link.to === "/"} onClick={() => setOpen(false)}>{link.label}<ArrowUpRight aria-hidden="true"/></NavLink>)}{account}</nav>
       </DialogContent>
     </Dialog></div>
-  </div></header>;
+  </div>{pathname !== "/" && <span className="public-scroll-seam" aria-hidden="true" />}</header>;
 }
 
 export function PublicFooter() {

@@ -13,7 +13,14 @@ export function TembusMark({ className }: { className?: string }) {
       aria-hidden="true"
       focusable="false"
     >
-      <path d="M144 176L144 160L176 160L176 144L128 144L128 112L144 112L144 32L224 32L224 224L144 224L144 208L176 208L176 176Z M32 32L96 32L96 96L128 96L128 112L96 112L96 144L128 144L128 176L144 176L144 208L96 208L96 224L32 224Z" />
+      <path
+        className="tembus-pillar-left"
+        d="M32 32L96 32L96 96L128 96L128 112L96 112L96 144L128 144L128 176L144 176L144 208L96 208L96 224L32 224Z"
+      />
+      <path
+        className="tembus-pillar-right"
+        d="M144 176L144 160L176 160L176 144L128 144L128 112L144 112L144 32L224 32L224 224L144 224L144 208L176 208L176 176Z"
+      />
     </svg>
   );
 }

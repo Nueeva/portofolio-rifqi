@@ -26,23 +26,46 @@
 
 /* 1. Telemetry Stats Grid */
 .case-telemetry-section {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding-block: 40px;
 }
 .telemetry-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr));
   gap: 20px;
 }
 .telemetry-card {
+  position: relative;
+  overflow: hidden;
   background: var(--site-surface);
   border: 1px solid var(--site-line);
   padding: 24px;
   display: flex;
   flex-direction: column;
-  transition: border-color 0.2s ease, transform 0.2s ease;
+  transition: border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.telemetry-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1.5px;
+  background: linear-gradient(90deg, var(--site-cyan), var(--site-metal));
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .telemetry-card:hover {
   border-color: var(--site-cyan);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .telemetry-card:hover {
+    transform: translateY(-2px);
+  }
+}
+.telemetry-card:hover::before {
+  transform: scaleX(1);
 }
 .telemetry-card-top {
   margin-bottom: 16px;
@@ -97,11 +120,14 @@
 
 /* 2. Audit Ledger */
 .audit-ledger-section {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding-block: 44px;
 }
 .audit-summary-bar {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(130px, 100%), 1fr));
   gap: 16px;
   background: var(--site-surface);
   border: 1px solid var(--site-line);
@@ -127,7 +153,7 @@
   color: var(--site-ink);
 }
 .stat-critical .stat-value {
-  color: #dc2626;
+  color: hsl(var(--destructive));
 }
 .stat-major .stat-value {
   color: var(--site-copper);
@@ -156,6 +182,7 @@
   flex-wrap: wrap;
 }
 .audit-tab {
+  position: relative;
   font-family: 'Space Grotesk', sans-serif;
   font-size: 12px;
   font-weight: 600;
@@ -164,7 +191,7 @@
   border: 1px solid var(--site-line);
   color: var(--site-muted);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
 }
 .audit-tab:hover {
   color: var(--site-ink);
@@ -176,18 +203,26 @@
   border-color: var(--site-ink);
 }
 .audit-tab-critical.active {
-  background: #dc2626;
-  color: #ffffff;
-  border-color: #dc2626;
+  background: hsl(var(--destructive));
+  color: hsl(var(--destructive-foreground));
+  border-color: hsl(var(--destructive));
 }
 .audit-tab-major.active {
   background: var(--site-copper);
-  color: #ffffff;
+  color: var(--site-bg);
   border-color: var(--site-copper);
+}
+.audit-tab-indicator {
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 2px;
+  background: var(--site-metal);
+  pointer-events: none;
 }
 .audit-search-wrapper {
   position: relative;
-  min-width: 260px;
+  min-width: min(260px, 100%);
+  width: 100%;
   flex: 1;
   max-width: 380px;
 }
@@ -213,6 +248,9 @@
   border-color: var(--site-cyan);
 }
 .audit-table-wrapper {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
   border: 1px solid var(--site-line);
   background: var(--site-surface);
@@ -268,9 +306,9 @@
   border-radius: 2px;
 }
 .cvss-critical {
-  background: color-mix(in srgb, #dc2626 15%, transparent);
-  color: #dc2626;
-  border: 1px solid color-mix(in srgb, #dc2626 40%, transparent);
+  background: color-mix(in srgb, hsl(var(--destructive)) 15%, var(--site-surface));
+  color: hsl(var(--destructive));
+  border: 1px solid color-mix(in srgb, hsl(var(--destructive)) 40%, transparent);
 }
 .cvss-major {
   background: color-mix(in srgb, var(--site-copper) 15%, transparent);
@@ -307,6 +345,13 @@
   justify-content: center;
   color: var(--site-muted);
 }
+.audit-chevron {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.audit-row.row-expanded .audit-chevron {
+  transform: rotate(180deg);
+  color: var(--site-cyan);
+}
 .audit-detail-row td {
   padding: 0;
   border-bottom: 1px solid var(--site-line);
@@ -315,6 +360,15 @@
   padding: 20px 24px;
   background: var(--site-low);
   border-top: 1px dashed var(--site-line);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .finding-expanded-card {
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    @starting-style {
+      opacity: 0;
+      transform: translateY(-6px);
+    }
+  }
 }
 .finding-expanded-grid {
   display: grid;
@@ -382,6 +436,9 @@
 
 /* 3. Remediation Diff Viewer */
 .remediation-diff-section {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding-block: 44px;
 }
 .diff-tabs-bar {
@@ -393,6 +450,7 @@
   border-bottom: 1px solid var(--site-line);
 }
 .diff-tab-btn {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -403,7 +461,7 @@
   cursor: pointer;
   white-space: nowrap;
   font-size: 13px;
-  transition: all 0.15s ease;
+  transition: border-color 0.15s ease, color 0.15s ease;
 }
 .diff-tab-btn:hover {
   border-color: var(--site-input);
@@ -413,7 +471,13 @@
   background: var(--site-surface);
   border-color: var(--site-cyan);
   color: var(--site-ink);
-  border-bottom-width: 2px;
+}
+.diff-tab-indicator {
+  position: absolute;
+  inset: auto 0 -1px 0;
+  height: 2px;
+  background: var(--site-cyan);
+  pointer-events: none;
 }
 .diff-tab-id {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -425,24 +489,39 @@
   font-weight: 500;
 }
 .diff-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   background: var(--site-surface);
   border: 1px solid var(--site-line);
 }
 .diff-card-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
   padding: 12px 18px;
   background: var(--site-low);
   border-bottom: 1px solid var(--site-line);
 }
 .diff-file-info {
   display: flex;
+  flex: 1 1 200px;
+  flex-wrap: wrap;
   align-items: center;
   gap: 10px;
+  min-width: 0;
+  max-width: 100%;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
   color: var(--site-ink);
+}
+.diff-file-path {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 .diff-badge-lang {
   font-family: 'Space Grotesk', sans-serif;
@@ -470,6 +549,9 @@
   border-color: var(--site-cyan);
 }
 .diff-code-viewport {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   font-size: 12px;
@@ -506,18 +588,31 @@
   color: inherit;
 }
 .diff-removed {
-  background: color-mix(in srgb, #dc2626 12%, transparent);
-  color: #ef4444;
+  background: color-mix(in srgb, hsl(var(--destructive)) 12%, transparent);
+  color: hsl(var(--destructive));
 }
 .diff-removed .diff-marker {
-  color: #dc2626;
+  color: hsl(var(--destructive));
 }
 .diff-added {
-  background: color-mix(in srgb, #10b981 12%, transparent);
-  color: #10b981;
+  background: color-mix(in srgb, var(--site-cyan) 11%, transparent);
+  color: var(--site-cyan);
 }
 .diff-added .diff-marker {
-  color: #10b981;
+  color: var(--site-cyan);
+}
+@keyframes diff-patch-reveal {
+  from {
+    background: color-mix(in srgb, var(--site-cyan) 28%, transparent);
+  }
+  to {
+    background: color-mix(in srgb, var(--site-cyan) 11%, transparent);
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .diff-tbody .diff-added {
+    animation: diff-patch-reveal 0.24s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 }
 .diff-context {
   color: var(--site-ink);
@@ -548,14 +643,20 @@
 
 /* 4. Architectural Trade-Off Cards (ADR) */
 .adr-section {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   padding-block: 44px;
 }
 .adr-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 24px;
 }
 .adr-card {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   background: var(--site-surface);
   border: 1px solid var(--site-line);
   padding: 24px;
@@ -568,8 +669,10 @@
 }
 .adr-card-top {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   margin-bottom: 14px;
 }
 .adr-id-badge {

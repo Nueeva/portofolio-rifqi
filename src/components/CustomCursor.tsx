@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useMotionValue, useSpring } from "motion/react";
 
 /**
@@ -33,6 +33,7 @@ export function CustomCursor() {
   // Instantaneous hardware coordinates (0ms latency direct tracker)
   const cursorX = useMotionValue(-100);
   const cursorY = useMotionValue(-100);
+  const lastTargetRef = useRef<EventTarget | null>(null);
 
   // Critically damped spring coordinates for trailing reticle HUD
   const smoothX = useSpring(cursorX, { stiffness: 480, damping: 27, mass: 0.35 });
@@ -62,13 +63,14 @@ export function CustomCursor() {
     pointerFineQuery.addEventListener("change", checkSupport);
     reducedMotionQuery.addEventListener("change", checkSupport);
 
-    const onMove = (e: MouseEvent) => {
-      cursorX.set(e.clientX);
-      cursorY.set(e.clientY);
-      setIsOffscreen(false);
-
-      const target = e.target as HTMLElement | null;
-      if (!target || typeof target.closest !== "function") return;
+    const syncTarget = (rawTarget: EventTarget | null) => {
+      const target = rawTarget as HTMLElement | null;
+      if (!target || typeof target.closest !== "function") {
+        setOnField(false);
+        setLabel(null);
+        setHovering(false);
+        return;
+      }
 
       // Input suppression: auto-hide custom cursor over form inputs
       const isFormInput = !!target.closest("input, textarea, select, [contenteditable='true']");
@@ -85,24 +87,59 @@ export function CustomCursor() {
       setHovering(isInteractive);
     };
 
+    let scrollSyncFrame = 0;
+
+    const onMove = (e: MouseEvent) => {
+      cursorX.set(e.clientX);
+      cursorY.set(e.clientY);
+      setIsOffscreen(false);
+
+      if (e.target === lastTargetRef.current) return;
+      lastTargetRef.current = e.target;
+      syncTarget(e.target);
+    };
+
     const onDown = () => setPressed(true);
     const onUp = () => setPressed(false);
-    const onMouseLeave = () => setIsOffscreen(true);
+    const onMouseLeave = () => { lastTargetRef.current = null; setIsOffscreen(true); };
     const onMouseEnter = () => setIsOffscreen(false);
+    const onScroll = () => {
+      lastTargetRef.current = null;
+      if (scrollSyncFrame) return;
+      scrollSyncFrame = requestAnimationFrame(() => {
+        scrollSyncFrame = 0;
+        const hit = document.elementFromPoint(cursorX.get(), cursorY.get());
+        lastTargetRef.current = hit;
+        syncTarget(hit);
+      });
+    };
+    const onRouteReset = () => {
+      lastTargetRef.current = null;
+      setLabel(null);
+      setHovering(false);
+      setPressed(false);
+    };
 
     window.addEventListener("mousemove", onMove, { passive: true });
     window.addEventListener("mousedown", onDown);
     window.addEventListener("mouseup", onUp);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("celah:navigation", onRouteReset);
+    window.addEventListener("popstate", onRouteReset);
     document.addEventListener("mouseleave", onMouseLeave);
     document.addEventListener("mouseenter", onMouseEnter);
 
     return () => {
+      cancelAnimationFrame(scrollSyncFrame);
       document.documentElement.classList.remove("has-custom-cursor");
       pointerFineQuery.removeEventListener("change", checkSupport);
       reducedMotionQuery.removeEventListener("change", checkSupport);
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mousedown", onDown);
       window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("celah:navigation", onRouteReset);
+      window.removeEventListener("popstate", onRouteReset);
       document.removeEventListener("mouseleave", onMouseLeave);
       document.removeEventListener("mouseenter", onMouseEnter);
     };
@@ -132,12 +169,12 @@ export function CustomCursor() {
       rotate: 0,
     },
     badge: {
-      scale: 1.5,
-      rotate: 0,
+      scale: 1.48,
+      rotate: -8, // Celah signature 8-degree diagonal lock
     },
     active: {
       scale: 0.78,
-      rotate: -8, // Celah signature 8-degree diagonal angle
+      rotate: -8,
     },
   };
 

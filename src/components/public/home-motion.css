@@ -110,9 +110,13 @@
 .story-thread-base { fill:none; stroke:var(--site-line); }
 .story-thread-light,.story-house { fill:none; stroke:var(--site-metal); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
 .story-thread-node { fill:var(--site-cyan); }
-.story-node-aura { fill:none; stroke:var(--site-cyan); stroke-width:1; stroke-dasharray:3 3; animation:story-aura-pulse 2.8s ease-in-out infinite; }
-.story-node-halo { fill:var(--site-cyan); filter:blur(4px); animation:story-halo-pulse 2.8s ease-in-out infinite; }
+.story-node-aura { fill:none; stroke:var(--site-cyan); stroke-width:1; stroke-dasharray:3 3; }
+.story-node-halo { fill:var(--site-cyan); filter:blur(4px); }
 .story-final-node { fill:var(--site-cyan); filter:drop-shadow(0 0 6px var(--site-cyan)); }
+@media (prefers-reduced-motion: no-preference) {
+  .home-story-motion.is-visible .story-node-aura { animation:story-aura-pulse 2.8s ease-in-out infinite; }
+  .home-story-motion.is-visible .story-node-halo { animation:story-halo-pulse 2.8s ease-in-out infinite; }
+}
 @keyframes story-aura-pulse {
   0%, 100% { transform:scale(1); opacity:.4; }
   50% { transform:scale(1.35); opacity:.85; }

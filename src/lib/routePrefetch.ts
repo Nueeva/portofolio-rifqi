@@ -31,30 +31,53 @@ type RouteKey = keyof typeof routeImporters;
 
 const warmed = new Set<RouteKey>();
 
-function warm(key: RouteKey) {
-  if (warmed.has(key)) return;
-  warmed.add(key);
-  // Fire and forget: a failed prefetch (e.g. offline) must never surface.
-  // Real navigation still goes through React.lazy and retries on its own;
-  // dropping the key here lets a later intent try warming again.
-  routeImporters[key]().catch(() => {
-    warmed.delete(key);
-  });
+const inflight = new Map<RouteKey, Promise<void>>();
+
+function warm(key: RouteKey): Promise<void> {
+  if (warmed.has(key)) return Promise.resolve();
+  const existing = inflight.get(key);
+  if (existing) return existing;
+  // Fire and forget / reusable promise: a failed prefetch must never surface.
+  // Dropping keys on error lets a later intent try warming again.
+  const promise = routeImporters[key]()
+    .then(() => {
+      warmed.add(key);
+    })
+    .catch(() => {
+      warmed.delete(key);
+    })
+    .finally(() => {
+      inflight.delete(key);
+    });
+  inflight.set(key, promise);
+  return promise;
+}
+
+function keyForPath(pathname: string): RouteKey | undefined {
+  if (pathname === "/about") return "about";
+  if (pathname === "/projects") return "projects";
+  if (pathname.startsWith("/projects/")) return "projectCaseStudy";
+  if (pathname === "/contact") return "contact";
+  if (pathname === "/auth") return "auth";
+  if (pathname.startsWith("/admin")) return "admin";
+  if (pathname === "/403") return "forbidden";
+  if (pathname === "/500") return "serverError";
+  if (pathname === "/502") return "badGateway";
+  if (pathname === "/503") return "serviceUnavailable";
+  if (pathname === "/429") return "tooManyRequests";
+  return undefined;
 }
 
 /** Warm the chunk for one pathname (intent prefetch on links). */
 export function prefetchRoute(pathname: string) {
-  if (pathname === "/about") warm("about");
-  else if (pathname === "/projects") warm("projects");
-  else if (pathname.startsWith("/projects/")) warm("projectCaseStudy");
-  else if (pathname === "/contact") warm("contact");
-  else if (pathname === "/auth") warm("auth");
-  else if (pathname.startsWith("/admin")) warm("admin");
-  else if (pathname === "/403") warm("forbidden");
-  else if (pathname === "/500") warm("serverError");
-  else if (pathname === "/502") warm("badGateway");
-  else if (pathname === "/503") warm("serviceUnavailable");
-  else if (pathname === "/429") warm("tooManyRequests");
+  const key = keyForPath(pathname);
+  if (key) void warm(key);
+}
+
+/** Resolve the lazy route chunk before committing a view transition. */
+export function warmRoute(pathname: string): Promise<void> {
+  const key = keyForPath(pathname);
+  return key ? warm(key) : Promise.resolve();
 }
 
 /**

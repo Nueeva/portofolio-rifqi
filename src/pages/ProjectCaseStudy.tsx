@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Link, Navigate, useParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { ProjectActions, ProjectArtwork } from "@/components/public/ProjectArtwork";
@@ -10,10 +10,12 @@ import { TelemetryStatsGrid } from "@/components/public/case-study/TelemetryStat
 import { AuditLedger } from "@/components/public/case-study/AuditLedger";
 import { RemediationDiffViewer } from "@/components/public/case-study/RemediationDiffViewer";
 import { ArchitecturalTradeoffs } from "@/components/public/case-study/ArchitecturalTradeoffs";
+import { navigateWithViewTransition } from "@/lib/viewNavigate";
 import "@/components/public/case-study/case-study.css";
 
 export default function ProjectCaseStudy() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const { projects, loading, isError } = usePortfolioContent();
   const project = projects.find((p) => p.id === id);
   const study = project?.caseStudy;
@@ -66,11 +68,21 @@ export default function ProjectCaseStudy() {
     <Layout>
       <div className="public-container public-page">
         <header className="study-header">
-          <Link to="/projects" className="public-text-link">
+          <Link
+            to="/projects"
+            className="public-text-link"
+            data-cursor="KEMBALI"
+            onClick={(e) =>
+              navigateWithViewTransition(e, navigate, "/projects", {
+                projectId: project.id,
+                direction: "backward",
+              })
+            }
+          >
             <ArrowLeft />
             Semua karya
           </Link>
-          <h1>{project.title}</h1>
+          <h1 data-vt-title={project.id}>{project.title}</h1>
           <p className="public-lede">{project.solution}</p>
           <dl className="study-meta">
             <div>
@@ -90,7 +102,7 @@ export default function ProjectCaseStudy() {
           <ProjectActions project={project} showStudy={false} />
         </header>
 
-        <Aperture>
+        <Aperture data-vt-visual={project.id}>
           <ProjectArtwork project={project} />
         </Aperture>
 
@@ -150,7 +162,16 @@ export default function ProjectCaseStudy() {
 
         <nav className="study-navigation" aria-label="Studi kasus lainnya">
           {prev && (
-            <Link className="public-text-link" to={`/projects/${prev.id}`}>
+            <Link
+              className="public-text-link"
+              to={`/projects/${prev.id}`}
+              data-cursor="SEBELUMNYA"
+              onClick={(e) =>
+                navigateWithViewTransition(e, navigate, `/projects/${prev.id}`, {
+                  direction: "backward",
+                })
+              }
+            >
               <ArrowLeft />
               <span>
                 Sebelumnya
@@ -160,7 +181,16 @@ export default function ProjectCaseStudy() {
             </Link>
           )}
           {next && (
-            <Link className="public-text-link" to={`/projects/${next.id}`}>
+            <Link
+              className="public-text-link"
+              to={`/projects/${next.id}`}
+              data-cursor="BERIKUTNYA"
+              onClick={(e) =>
+                navigateWithViewTransition(e, navigate, `/projects/${next.id}`, {
+                  direction: "forward",
+                })
+              }
+            >
               <span>
                 Berikutnya
                 <br />
